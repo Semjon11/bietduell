@@ -107,11 +107,11 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
     <div class="row" style="margin-top:12px">
       <div style="flex:2"><label>Bild-KI-Status</label><div class="chip" id="quota" style="display:inline-block;margin-top:4px">⏳ Verbinde…</div></div>
       <div><label for="model">Bild-KI</label><select id="model">
-        <option value="black-forest-labs/flux.1-kontext-pro">FLUX Kontext Pro (Standard – sichtbare Upgrades)</option>
-        <option value="black-forest-labs/flux.2-klein-4b">FLUX.2 Klein (günstiger, kaum sichtbare Änderungen)</option>
+        <option value="cf/flux-2-klein-4b">FLUX.2 Klein 4B – gratis, schnell (Standard)</option>
+        <option value="cf/flux-2-klein-9b">FLUX.2 Klein 9B – gratis, noch genauer</option>
       </select></div>
     </div>
-    <details style="margin-top:10px"><summary class="nr" style="cursor:pointer">Eigenen Pollinations-Key verwenden (optional)</summary>
+    <details class="hidden" style="margin-top:10px"><summary class="nr" style="cursor:pointer">Eigenen Pollinations-Key verwenden (optional)</summary>
       <div style="margin-top:8px"><label for="apikey">Pollinations-Key (sk_…) – wird nur in diesem Browser gespeichert</label><input id="apikey" type="password" placeholder="sk_… (gratis auf enter.pollinations.ai)" autocomplete="off"></div>
     </details>
     <div class="warn" id="nokey">Ohne Verbindung zum Server läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf.</div>
@@ -260,13 +260,13 @@ const $=id=>document.getElementById(id);
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const key=()=>($("apikey").value||"").trim();
+const key=()=>""; // alles läuft gratis über den eigenen Server
 /* App-Token: steht absichtlich in der App (kein echtes Geheimnis). Schutz kommt vom Tageslimit am Server. */
 const APP_TOKEN="5eVy6tDqE1BjMTOfriTKebvf";
 const pw=()=>APP_TOKEN;
 const useServer=()=>!!SERVER&&!key(); // eigener Key hat Vorrang
 const ai=()=>useServer()||!!key();
-try{ $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model2")||$("model").value; }catch(e){}
+try{ $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model3")||$("model").value; }catch(e){}
 function syncKeyHint(){ $("nokey").classList.toggle("hidden",ai()); }
 $("apikey").oninput=()=>{syncKeyHint();loadQuota()}; syncKeyHint();
 /* Wie viele Runden gehen heute noch? */
@@ -307,7 +307,7 @@ async function genBase(){
   if(!ai()){ // Demo-Modus: anonymer Gratis-Endpunkt
     return {url:`https://image.pollinations.ai/prompt/${encodeURIComponent(basePrompt())}?width=1024&height=768&seed=${S.seed}&nologo=true`};
   }
-  const r=useServer()? await fetch(`${SERVER}/base?prompt=${encodeURIComponent(basePrompt())}&seed=${S.seed}`,{headers:{"X-Spiel-Passwort":pw()}})
+  const r=useServer()? await fetch(`${SERVER}/base?prompt=${encodeURIComponent(basePrompt())}&seed=${S.seed}&free=1`,{headers:{"X-Spiel-Passwort":pw()}})
     : await fetch(`${API}/image/${encodeURIComponent(basePrompt())}?model=${encodeURIComponent("black-forest-labs/flux.2-klein-4b")}&width=1024&height=768&seed=${S.seed}`,{headers:{Authorization:"Bearer "+key()}});
   const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
 }
@@ -356,7 +356,7 @@ function pregen(){
 /* ========= SPIEL ========= */
 function newGame(catId){
   const cat = catId==="random"||!catId ? rnd(CATS) : CATS.find(c=>c.id===catId);
-  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_model2",$("model").value)}catch(e){}
+  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_model3",$("model").value)}catch(e){}
   const budget=Math.max(1,parseInt($("budget").value)||20);
   let raw;
   if(cat.slots){ // Fußball: pro Position doppelt so viele wie ein Team braucht (2 TW, 2 V, 4 MF, 2 ST)

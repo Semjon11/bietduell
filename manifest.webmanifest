@@ -1,0 +1,18 @@
+{
+  "name": "Bietduell",
+  "short_name": "Bietduell",
+  "description": "Versteigerungsspiel für zwei: ersteigere Dinge und baue das beste KI-Bild.",
+  "id": "/bietduell/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#12101f",
+  "theme_color": "#12101f",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

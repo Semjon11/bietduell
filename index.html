@@ -2,8 +2,17 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bietduell</title>
+<!-- Als App installierbar (Startbildschirm-Icon, eigenes Fenster ohne Browserleiste) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#12101f">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bietduell">
 <style>
 :root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--p1:#ff5d8f;--p2:#38c6ff;--gold:#ffd23f;--ok:#4ade80;--bad:#f87171;--rad:16px}
 *{box-sizing:border-box}
@@ -12,7 +21,9 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px
 button:hover:not(:disabled){filter:brightness(1.2)}button:active:not(:disabled){transform:scale(.96)}
 button:disabled{opacity:.35;cursor:not-allowed}
 input,select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
-.wrap{max-width:1200px;margin:0 auto;padding:16px}
+.wrap{max-width:1200px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.install{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;border:2px solid var(--gold)}
+.install img{width:52px;height:52px;border-radius:12px}
 h1{font-size:clamp(28px,5vw,46px);margin:8px 0 4px;letter-spacing:-.5px}
 h1 span{color:var(--gold)}
 .sub{color:var(--mut);margin:0 0 20px}
@@ -81,6 +92,11 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
 <!-- SETUP -->
 <section id="setup">
   <h1>💰 Bietduell <span>– wer baut's besser?</span></h1>
+  <div class="box install hidden" id="installBox">
+    <img src="icon-192.png" alt="">
+    <div style="flex:1;min-width:180px"><b>Bietduell als App</b><div class="nr" id="installTxt">Mit eigenem Icon am Startbildschirm, ohne Browserleiste.</div></div>
+    <button class="big" id="installBtn">📲 Installieren</button>
+  </div>
   <p class="sub">Beide starten mit demselben Bild. 10 Dinge werden versteigert, jede:r darf max. 5 ersteigern. Was du kaufst, wird in dein Bild eingebaut – das Grundgerüst bleibt gleich.</p>
   <div class="box">
     <div class="row">
@@ -560,6 +576,24 @@ $("speak").onclick=speak;
 $("quit").onclick=()=>{if(confirm("Spiel wirklich abbrechen?")){speechSynthesis.cancel();show("setup")}};
 $("again").onclick=()=>newGame(S.cat.id);
 $("menu").onclick=()=>show("setup");
+
+/* ========= ALS APP INSTALLIEREN ========= */
+(function(){
+  const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+  if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+  if(standalone) return; // läuft schon als App
+  const box=$("installBox"),btn=$("installBtn"),txt=$("installTxt");
+  let deferred=null;
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;box.classList.remove("hidden");btn.classList.remove("hidden")});
+  btn.onclick=async()=>{ if(!deferred)return; deferred.prompt(); const r=await deferred.userChoice; deferred=null;
+    if(r.outcome==="accepted"){txt.textContent="Installiert! Du findest Bietduell jetzt am Startbildschirm.";btn.classList.add("hidden")} };
+  window.addEventListener("appinstalled",()=>{txt.textContent="Installiert! Du findest Bietduell jetzt am Startbildschirm.";btn.classList.add("hidden")});
+  // iPhone/iPad: Safari hat keinen Installieren-Knopf, daher Anleitung zeigen
+  if(/iphone|ipad|ipod/i.test(navigator.userAgent)){
+    box.classList.remove("hidden");btn.classList.add("hidden");
+    txt.innerHTML="In Safari unten auf <b>Teilen</b> (□↑) tippen, dann <b>„Zum Home-Bildschirm“</b>.";
+  }
+})();
 </script>
 </body>
 </html>

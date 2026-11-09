@@ -1,0 +1,23 @@
+name = "bietduell"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+# Zähler für das Tageslimit
+[[kv_namespaces]]
+binding = "LIMITS"
+id = "8dda02d1fb2b4676b405343fc13b4daa"
+
+# Cloudflare Workers AI (Gratis-Kontingent)
+[ai]
+binding = "AI"
+
+[vars]
+# Steht auch in der App – nur eine zusätzliche Hürde, kein echtes Geheimnis.
+APP_TOKEN = "5eVy6tDqE1BjMTOfriTKebvf"
+# Tageslimit: Cloudflare schenkt 10.000 Neuronen/Tag, ein Bild (640x480, Klein 4B) braucht grob 80.
+# 1 Runde ≈ 16 Bilder → 110 Bilder ≈ 6–7 Runden pro Tag (alle Geräte zusammen).
+MAX_IMAGES_PER_DAY = "110"
+MAX_JUDGE_PER_DAY = "30"
+
+# Geheim (im Cloudflare-Dashboard gesetzt, nicht hier!):
+#   POLLINATIONS_KEY

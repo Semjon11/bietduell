@@ -22,7 +22,7 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px
 button:hover:not(:disabled){filter:brightness(1.2)}button:active:not(:disabled){transform:scale(.96)}
 button:disabled{opacity:.35;cursor:not-allowed}
 button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-input{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
+input,select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
 .wrap{max-width:1200px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 .install{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;border:2px solid var(--gold)}
 .install img{width:52px;height:52px;border-radius:12px}
@@ -125,7 +125,9 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
       <div><label for="n1">Spieler:in 1</label><input id="n1" value="Spieler 1" maxlength="18"></div>
       <div><label for="n2">Spieler:in 2</label><input id="n2" value="Spieler 2" maxlength="18"></div>
       <div><label for="budget">Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20" inputmode="numeric"></div>
+      <div><label for="timer">Bietzeit pro Zug</label><select id="timer"><option value="0">ohne Zeitlimit</option><option value="10">10 Sekunden</option><option value="20">20 Sekunden</option></select></div>
     </div>
+    <div class="nr" id="bilanzSetup" style="margin-top:10px"></div>
     <div style="margin-top:12px"><span class="chip" id="quota">⏳ Verbinde mit Bild-KI…</span></div>
     <label style="margin-top:16px">Kategorie wählen</label>
     <div class="cats" id="cats"></div>
@@ -278,7 +280,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const isLineup=()=>!!(S&&S.cat.lineup);
 const maxWins=()=>S.cat.slots?Object.values(S.cat.slots).reduce((a,b)=>a+b,0):5;
 function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
-try{ ["n1","n2","budget"].forEach(id=>{const v=localStorage.getItem("bd_"+id); if(v)$(id).value=v}); }catch(e){}
+try{ ["n1","n2","budget","timer"].forEach(id=>{const v=localStorage.getItem("bd_"+id); if(v)$(id).value=v}); }catch(e){}
 
 function renderCats(){
   $("cats").innerHTML=`<button class="cat ${catSel==='random'?'sel':''}" data-id="random"><span class="e">🎲</span>Zufall</button>`+
@@ -301,7 +303,7 @@ async function api(path,opt={}){
 function aiLimit(){ if(aiOff)return; aiOff=true; $("aiBanner").classList.remove("hidden"); loadQuota(); }
 async function loadStart(){
   const i=S.startIdx;
-  try{ const r=await fetch(`start/${S.cat.id}-${i}.jpg`); if(r.ok){const blob=await r.blob(); return {blob,url:URL.createObjectURL(blob)}} }catch(e){}
+  try{ const r=await fetch(`start/${S.cat.id}-${i}.png`); if(r.ok){const blob=await r.blob(); return {blob,url:URL.createObjectURL(blob)}} }catch(e){}
   const prompt=S.cat.scene+", "+S.cat.start[i]+", on a bright sunny day, highly detailed, no text";
   // Ersatz 1: vom eigenen Server erzeugen lassen
   if(!aiOff){ try{ const blob=await (await api(`/base?seed=${S.seed}&free=1&prompt=${encodeURIComponent(prompt)}`)).blob(); return {blob,url:URL.createObjectURL(blob)}; }catch(e){} }
@@ -344,7 +346,7 @@ loadQuota();
 /* ========= SPIEL ========= */
 function newGame(catId){
   const cat=catId==="random"||!catId?rnd(CATS):CATS.find(c=>c.id===catId);
-  try{["n1","n2","budget"].forEach(id=>localStorage.setItem("bd_"+id,$(id).value))}catch(e){}
+  try{["n1","n2","budget","timer"].forEach(id=>localStorage.setItem("bd_"+id,$(id).value))}catch(e){}
   const budget=Math.max(1,parseInt($("budget").value)||20);
   let raw;
   if(cat.slots){ raw=[]; for(const [pos,c] of Object.entries(cat.slots)) raw.push(...shuffle(cat.items.filter(x=>x[3]===pos)).slice(0,c*2)); raw=shuffle(raw); }
@@ -428,11 +430,22 @@ function renderItem(){
   const left=S.items.length-S.idx-1;
   $("log").textContent=left?`Danach noch ${left}.`:"Das ist das letzte!";
 }
+/* Optionaler Timer: Wer die Bietzeit verstreichen lässt, passt automatisch. */
+let tick=null;
+function stopTimer(){clearInterval(tick);tick=null}
+function startTimer(i){
+  stopTimer(); const sec=parseInt($("timer").value)||0; if(!sec)return;
+  const end=Date.now()+sec*1000, key=S.idx+"-"+S.hist.length;
+  const upd=()=>{ const el=$("tLeft"); const left=Math.max(0,Math.ceil((end-Date.now())/1000));
+    if(el){el.textContent=`⏱️ ${left} s`;el.style.color=left<=3?"var(--bad)":""}
+    if(left<=0){ stopTimer(); if(S&&!S.busy&&S.turn===i&&S.idx+"-"+S.hist.length===key) pass(i); } };
+  upd(); tick=setInterval(upd,250);
+}
 function renderBid(){
   const box=$("bidBox"); const i=S.turn, p=S.pl[i];
-  if(S.busy||!eligible(i)){ box.innerHTML=""; return; }
+  if(S.busy||!eligible(i)){ box.innerHTML=""; stopTimer(); return; }
   const min=S.high+1, maxB=p.money;
-  box.innerHTML=`<div class="bid t${i+1}"><div class="who">🫵 <b>${esc(p.name)}</b> ist dran · ${maxB} € übrig</div>
+  box.innerHTML=`<div class="bid t${i+1}"><div class="who">🫵 <b>${esc(p.name)}</b> ist dran · ${maxB} € übrig <span id="tLeft" style="font-weight:800"></span></div>
     <div class="quick">${[1,2,5].map(d=>`<button data-v="${S.high+d}" ${S.high+d>maxB?"disabled":""}>${S.high+d} €</button>`).join("")}</div>
     <div class="bidrow"><input id="bidIn" type="number" min="${min}" max="${maxB}" placeholder="eigener Betrag" inputmode="numeric" aria-label="Eigenes Gebot"><button id="bidGo">Bieten</button></div>
     <button class="pass" id="passBtn">🙅 Passen</button><div class="err" id="bidErr"></div></div>`;
@@ -440,6 +453,7 @@ function renderBid(){
   $("bidGo").onclick=()=>bid(i,$("bidIn").value);
   $("bidIn").onkeydown=e=>{if(e.key==="Enter")bid(i,$("bidIn").value)};
   $("passBtn").onclick=()=>pass(i);
+  startTimer(i);
 }
 
 function bid(i,raw){
@@ -511,9 +525,18 @@ function finish(){
      <div class="crown hidden">👑</div>
      <h2><span class="nm">${esc(p.name)}</span><span class="money">${p.money} € übrig</span></h2>
      ${isLineup()?lineupHTML(p):`<div class="imgbox">${p.state.url?`<img src="${p.state.url}" alt="Endbild von ${esc(p.name)}">`:""}<div class="stickers">${p.won.slice(p.inImage).map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
-     <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ⭐":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul>`}</div>`).join("");
-  S.votes=[];voteStep(0);loadQuota();
+     <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ⭐":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul>
+     ${p.state.url&&p.state.url.startsWith("blob:")?`<a class="chip" style="margin-top:10px;text-decoration:none" href="${p.state.url}" download="bietduell-${S.cat.id}-${esc(p.name)}.png">📥 Bild speichern</a>`:""}`}</div>`).join("");
+  stopTimer(); S.votes=[];voteStep(0);loadQuota();
 }
+/* Siegesbilanz: wird pro Namenspaar auf diesem Gerät gemerkt */
+function pairKey(){const n=[$("n1").value.trim()||"Spieler 1",$("n2").value.trim()||"Spieler 2"];return "bd_bilanz_"+[...n].sort().join("|")}
+function getBilanz(){try{return JSON.parse(localStorage.getItem(pairKey()))||{}}catch(e){return {}}}
+function addWin(name){const b=getBilanz();b[name]=(b[name]||0)+1;try{localStorage.setItem(pairKey(),JSON.stringify(b))}catch(e){}return b}
+function bilanzText(b){const n=[$("n1").value.trim()||"Spieler 1",$("n2").value.trim()||"Spieler 2"];
+  return (b[n[0]]||0)+(b[n[1]]||0)?`🏆 Bilanz: ${esc(n[0])} ${b[n[0]]||0} : ${b[n[1]]||0} ${esc(n[1])}`:""}
+function showBilanz(){$("bilanzSetup").innerHTML=bilanzText(getBilanz())}
+["n1","n2"].forEach(id=>$(id).addEventListener("input",showBilanz)); showBilanz();
 function voteStep(i){
   const p=S.pl[i],o=S.pl[1-i];
   $("vote").innerHTML=`<h2>🗳️ ${esc(p.name)} stimmt ab</h2>
@@ -534,7 +557,8 @@ function resolveVotes(){
 }
 function crown(i){
   [0,1].forEach(j=>{$("f"+j).classList.toggle("win",j===i);$("f"+j).querySelector(".crown").classList.toggle("hidden",j!==i)});
-  confetti();
+  const b=addWin(S.pl[i].name); const t=bilanzText(b); if(t)$("vote").insertAdjacentHTML("beforeend",`<div class="verdict" style="font-size:16px">${t}</div>`);
+  showBilanz(); confetti();
 }
 function confetti(){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
@@ -549,7 +573,7 @@ function confetti(){
 $("start").onclick=()=>newGame(catSel);
 $("quit").onclick=()=>$("confirmBox").classList.remove("hidden");
 $("cNo").onclick=()=>$("confirmBox").classList.add("hidden");
-$("cYes").onclick=()=>{$("confirmBox").classList.add("hidden");show("setup");loadQuota()};
+$("cYes").onclick=()=>{stopTimer();$("confirmBox").classList.add("hidden");show("setup");loadQuota()};
 $("again").onclick=()=>newGame(S.cat.id);
 $("menu").onclick=()=>{show("setup");loadQuota()};
 

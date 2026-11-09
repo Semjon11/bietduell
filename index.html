@@ -105,13 +105,16 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
       <div><label>Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20"></div>
     </div>
     <div class="row" style="margin-top:12px">
-      <div style="flex:2"><label>Pollinations-Key (sk_…) – nötig, damit die KI dein Bild bearbeiten kann</label><input id="apikey" type="password" placeholder="sk_… (gratis auf enter.pollinations.ai)" autocomplete="off"></div>
-      <div><label>Bild-KI</label><select id="model">
+      <div style="flex:2"><label for="spielpw">Spiel-Passwort – einmal eingeben, dann malt die KI</label><input id="spielpw" type="password" placeholder="Passwort vom Spiel-Besitzer" autocomplete="off"></div>
+      <div><label for="model">Bild-KI</label><select id="model">
         <option value="black-forest-labs/flux.1-kontext-pro">FLUX Kontext Pro (Standard – sichtbare Upgrades)</option>
         <option value="black-forest-labs/flux.2-klein-4b">FLUX.2 Klein (günstiger, kaum sichtbare Änderungen)</option>
       </select></div>
     </div>
-    <div class="warn" id="nokey">Ohne Key läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf. Die echte KI-Bearbeitung braucht den Key.</div>
+    <details style="margin-top:10px"><summary class="nr" style="cursor:pointer">Eigenen Pollinations-Key verwenden (optional)</summary>
+      <div style="margin-top:8px"><label for="apikey">Pollinations-Key (sk_…) – wird nur in diesem Browser gespeichert</label><input id="apikey" type="password" placeholder="sk_… (gratis auf enter.pollinations.ai)" autocomplete="off"></div>
+    </details>
+    <div class="warn" id="nokey">Ohne Spiel-Passwort läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf.</div>
     <label style="margin-top:16px">Kategorie wählen</label>
     <div class="cats" id="cats"></div>
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
@@ -248,6 +251,8 @@ const VAL={"Mülldeponie":1,"Wellblechhütte":1,"Kläranlage nebenan":1,"Rost-Lo
  "Luxusvilla mit Infinity-Pool":9,"Palmenstrand":9,"Pool mit Rutsche":9,"Hubschrauber an Deck":9,"Goldene Lackierung":9,"Torwart mit 2,10 m":9,"Stürmer mit 40 km/h":9,"2,30 m Center":9,"Fliegen":9,"Drache auf dem Turm":9,"Looping-Achterbahn":9,"Curved-Monitor":9,"Drachenflügel":9,"Hyperantrieb":9,"Wagyu-Patty":9,"Raketenantrieb":8,"Raketentriebwerke":8};
 const TWISTS=[["🌅 Sonnenuntergang","at golden hour sunset"],["🌙 Nacht","at night with glowing lights"],["❄️ Winter","in winter with snow"],["🌈 Cartoon","in colorful cartoon style"],["📸 Fotorealistisch","photorealistic"],["🧱 Spielzeugwelt","as a toy miniature diorama"],["🎨 Ölgemälde","as an oil painting"],["🕹️ Pixel-Art","in pixel art style"]];
 const API="https://gen.pollinations.ai";
+/* Vermittler-Server: hält den Pollinations-Key geheim. Spieler:innen brauchen nur das Spiel-Passwort. */
+const SERVER="https://bietduell.bietduell-server.workers.dev";
 
 /* ========= HILFSFUNKTIONEN ========= */
 let catSel="random", S=null;
@@ -256,9 +261,12 @@ const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=()=>($("apikey").value||"").trim();
-try{ $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model2")||$("model").value; }catch(e){}
-function syncKeyHint(){ $("nokey").classList.toggle("hidden",!!key()); }
-$("apikey").oninput=syncKeyHint; syncKeyHint();
+const pw=()=>($("spielpw").value||"").trim();
+const useServer=()=>!!(SERVER&&pw());
+const ai=()=>useServer()||!!key();
+try{ $("spielpw").value=localStorage.getItem("bd_pw")||""; $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model2")||$("model").value; }catch(e){}
+function syncKeyHint(){ $("nokey").classList.toggle("hidden",ai()); }
+$("apikey").oninput=syncKeyHint; $("spielpw").oninput=syncKeyHint; syncKeyHint();
 
 function renderCats(){
   $("cats").innerHTML=`<button class="cat ${catSel==='random'?'sel':''}" data-id="random"><span class="e">🎲</span>Zufall</button>`+
@@ -285,10 +293,11 @@ async function toBlobFromResponse(r){
 }
 function basePrompt(){return `${S.cat.scene}, ${S.ugly}, ${S.twist[1]}, highly detailed, no text, no watermark`}
 async function genBase(){
-  if(!key()){ // Demo-Modus: anonymer Gratis-Endpunkt
+  if(!ai()){ // Demo-Modus: anonymer Gratis-Endpunkt
     return {url:`https://image.pollinations.ai/prompt/${encodeURIComponent(basePrompt())}?width=1024&height=768&seed=${S.seed}&nologo=true`};
   }
-  const r=await fetch(`${API}/image/${encodeURIComponent(basePrompt())}?model=${encodeURIComponent("black-forest-labs/flux.2-klein-4b")}&width=1024&height=768&seed=${S.seed}`,{headers:{Authorization:"Bearer "+key()}});
+  const r=useServer()? await fetch(`${SERVER}/base?prompt=${encodeURIComponent(basePrompt())}&seed=${S.seed}`,{headers:{"X-Spiel-Passwort":pw()}})
+    : await fetch(`${API}/image/${encodeURIComponent(basePrompt())}?model=${encodeURIComponent("black-forest-labs/flux.2-klein-4b")}&width=1024&height=768&seed=${S.seed}`,{headers:{Authorization:"Bearer "+key()}});
   const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
 }
 /* Positionen (Fußball): Wo steht wer im Teamfoto? */
@@ -314,7 +323,8 @@ async function genEdit(src,it,i){
   fd.append("response_format","b64_json");
   fd.append("seed",String(S.seed));
   fd.append("size","1024x768"); // sonst liefert die KI ab der 2. Bearbeitung falsche Formate
-  const r=await fetch(`${API}/v1/images/edits`,{method:"POST",headers:{Authorization:"Bearer "+key()},body:fd});
+  const r=useServer()? await fetch(`${SERVER}/edit`,{method:"POST",headers:{"X-Spiel-Passwort":pw()},body:fd})
+    : await fetch(`${API}/v1/images/edits`,{method:"POST",headers:{Authorization:"Bearer "+key()},body:fd});
   const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
 }
 /* Bild für Zustand "Bild X + Ding" holen (mit Cache – teilen sich beide denselben Zustand, wird nur 1x gerechnet) */
@@ -327,7 +337,7 @@ function variant(i,it){
   return {key:k,img:cache.get(k)};
 }
 function pregen(){
-  if(!key())return;
+  if(!ai())return;
   const it=S.items[S.idx]; if(!it)return;
   S.pl.forEach((p,i)=>{ if(needs(i)) variant(i,it); });
 }
@@ -335,7 +345,7 @@ function pregen(){
 /* ========= SPIEL ========= */
 function newGame(catId){
   const cat = catId==="random"||!catId ? rnd(CATS) : CATS.find(c=>c.id===catId);
-  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_model2",$("model").value)}catch(e){}
+  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_pw",pw());localStorage.setItem("bd_model2",$("model").value)}catch(e){}
   const budget=Math.max(1,parseInt($("budget").value)||20);
   let raw;
   if(cat.slots){ // Fußball: pro Position doppelt so viele wie ein Team braucht (2 TW, 2 V, 4 MF, 2 ST)
@@ -359,12 +369,12 @@ function newGame(catId){
     ["pl0","pl1"].forEach(id=>{$(id).dataset.built="";$(id).innerHTML=""});
     show("game");$("gTitle").textContent=cat.e+" "+cat.n;
     $("twistChip").textContent="Stil: "+S.twist[0];
-    $("modeChip").textContent=key()?"🤖 KI-Bearbeitung":"🧪 Demo-Modus";
+    $("modeChip").textContent=ai()?"🤖 KI-Bearbeitung":"🧪 Demo-Modus";
     S.turn=0; startItem();
   };
   base.then(b=>{
     S.pl.forEach(p=>p.state.url=b.url);
-    if(!key()){ const im=new Image(); im.onload=im.onerror=()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)}; im.src=b.url; return; }
+    if(!ai()){ const im=new Image(); im.onload=im.onerror=()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)}; im.src=b.url; return; }
     $("prepBar").style.width="55%";$("prepTxt").textContent="Erstes Upgrade wird schon vorbereitet…";
     const v=variant(0,items[0]);
     Promise.race([v.img,new Promise(r=>setTimeout(r,25000))]).finally(()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)});
@@ -411,7 +421,7 @@ function renderPlayers(){
     el.querySelector(".items").innerHTML=p.won.length?p.won.map(w=>`<li>${w.e} ${w.pos?`<b>${w.pos}</b> `:""}${esc(w.n)}${w.double?" ×2":""}</li>`).join(""):`<li style="opacity:.6">noch nix 😬</li>`;
     el.querySelector(".posrow").innerHTML=S.cat.slots?Object.entries(S.cat.slots).map(([k,c])=>{const n=p.won.filter(w=>w.pos===k).length;return `<span style="color:${n>=c?'var(--ok)':'inherit'}">${POSN[k]} ${n}/${c}</span>`}).join(" · "):"";
     const img=el.querySelector("img"); if(p.state.url&&img.getAttribute("src")!==p.state.url)img.src=p.state.url;
-    el.querySelector(".stickers").innerHTML=key()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("");
+    el.querySelector(".stickers").innerHTML=ai()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("");
     el.classList.toggle("turn",S.turn===i&&!S.busy);
     const ba=el.querySelector(".bidarea");
     if(S.busy){ba.innerHTML="";return}
@@ -479,7 +489,7 @@ async function sold(){
   if(it.ev==="mystery")S.revealed=true;
   renderAll();
   say((S.forced?`Keiner hat geboten. ${p.name} braucht noch einen ${POSN[it.pos]} und bekommt ihn gratis!`:`Zum Ersten, zum Zweiten, verkauft an ${p.name} für ${price} Euro!`)+(it.ev==="mystery"?` Es war: ${it.n}!`:""));
-  if(key()){
+  if(ai()){
     const v=variant(w,it), el=$("pl"+w), ld=el.querySelector(".loader");
     let ready=false; v.img.then(()=>ready=true,()=>{});
     await Promise.resolve();
@@ -509,7 +519,7 @@ function finish(){
   $("final").innerHTML=S.pl.map((p,i)=>`<div class="box pl ${i?'p2':''}" id="f${i}">
      <div class="crown hidden">👑</div>
      <h2><span>${esc(p.name)}</span><span class="money">${p.money} € übrig</span></h2>
-     <div class="imgbox"><img src="${p.state.url||""}" alt="KI-Bild"><div class="stickers">${key()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
+     <div class="imgbox"><img src="${p.state.url||""}" alt="KI-Bild"><div class="stickers">${ai()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
      <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ×2":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul></div>`).join("");
   S.votes=[];say(`Alle Dinge sind versteigert! Jetzt wird abgestimmt.`);voteStep(0);
 }
@@ -526,7 +536,7 @@ async function resolveVotes(){
   if(a===b){ $("vote").innerHTML=html+`<div class="verdict">Ihr seid euch einig: <b>${n[a]}</b> gewinnt! 🎉</div>`; return crown(a); }
   $("vote").innerHTML=html+`<div class="verdict"><div class="spin"></div>Ihr seid euch nicht einig – die App entscheidet…</div>`;
   let w=null, reason="";
-  if(key()){ try{ const r=await aiJudge(); w=r.winner; reason=r.reason; }catch(e){ console.warn(e); } }
+  if(ai()){ try{ const r=await aiJudge(); w=r.winner; reason=r.reason; }catch(e){ console.warn(e); } }
   if(w===null){ const r=pointsJudge(); w=r.winner; reason=r.reason; }
   $("vote").innerHTML=html+`<div class="verdict">⚖️ Die App entscheidet: <b>${n[w]}</b> gewinnt!<br><span class="nr">${esc(reason)}</span></div>`;
   crown(w);
@@ -544,7 +554,8 @@ async function aiJudge(){
   const body={model:"openai",messages:[{role:"user",content:[
     {type:"text",text:`Zwei Spieler haben in einem Versteigerungsspiel ${S.cat.art} gebaut. Bild 1 gehört ${S.pl[0].name}, Bild 2 gehört ${S.pl[1].name}. Welches Bild zeigt ${S.cat.art}? Bewerte nur die Bilder: wie beeindruckend, schön und gelungen sie sind. Antworte NUR mit JSON: {"winner":1 oder 2,"reason":"ein kurzer lustiger Satz auf Deutsch"}`},
     {type:"image_url",image_url:{url:imgs[0]}},{type:"image_url",image_url:{url:imgs[1]}}]}]};
-  const r=await fetch(`${API}/v1/chat/completions`,{method:"POST",headers:{Authorization:"Bearer "+key(),"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const r=useServer()? await fetch(`${SERVER}/judge`,{method:"POST",headers:{"X-Spiel-Passwort":pw(),"Content-Type":"application/json"},body:JSON.stringify(body)})
+    : await fetch(`${API}/v1/chat/completions`,{method:"POST",headers:{Authorization:"Bearer "+key(),"Content-Type":"application/json"},body:JSON.stringify(body)});
   if(!r.ok)throw new Error("Judge HTTP "+r.status);
   const t=(await r.json()).choices[0].message.content; const m=t.match(/\{[\s\S]*\}/); const j=JSON.parse(m?m[0]:t);
   if(j.winner!==1&&j.winner!==2)throw new Error("Ungültige Antwort");

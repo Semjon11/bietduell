@@ -294,7 +294,7 @@ function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle
    (falls Spieler:in 1 gewinnt / falls Spieler:in 2 gewinnt). Beim Zuschlag ist das Bild sofort da. */
 const cache=new Map(); // stateKey -> Promise<{url,blob}>
 async function toBlobFromResponse(r){
-  if(!r.ok){let t="";try{t=(await r.text()).slice(0,300)}catch(e){} let m="";try{m=JSON.parse(t).error}catch(e){} if(typeof m==="object"&&m)m=m.message; throw new Error(r.status===429?"Tageslimit erreicht – morgen geht's weiter!":(m||("HTTP "+r.status+" "+t)))}
+  if(!r.ok){let t="";try{t=(await r.text()).slice(0,300)}catch(e){} let m="";try{m=JSON.parse(t).error}catch(e){} if(typeof m==="object"&&m)m=m.message; throw new Error(r.status===402?"Das Pollen-Guthaben ist leer – bitte auf enter.pollinations.ai aufladen.":r.status===429?"Tageslimit erreicht – morgen geht's weiter!":(m||("HTTP "+r.status+" "+t)))}
   const ct=r.headers.get("content-type")||"";
   if(ct.startsWith("image/")) return await r.blob();
   const j=await r.json(); const d=(j.data||[])[0]||{};

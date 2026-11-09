@@ -1,5 +1,5 @@
 // Offline-Speicher: Die App selbst startet auch ohne Internet. Bild-KI-Anfragen gehen immer direkt ins Netz.
-const CACHE = "bietduell-v2";
+const CACHE = "bietduell-v3";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

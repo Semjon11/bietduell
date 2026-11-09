@@ -105,7 +105,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
       <div><label>Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20"></div>
     </div>
     <div class="row" style="margin-top:12px">
-      <div style="flex:2"><label for="spielpw">Spiel-Passwort – einmal eingeben, dann malt die KI</label><input id="spielpw" type="password" placeholder="Passwort vom Spiel-Besitzer" autocomplete="off"></div>
+      <div style="flex:2"><label>Bild-KI-Status</label><div class="chip" id="quota" style="display:inline-block;margin-top:4px">⏳ Verbinde…</div></div>
       <div><label for="model">Bild-KI</label><select id="model">
         <option value="black-forest-labs/flux.1-kontext-pro">FLUX Kontext Pro (Standard – sichtbare Upgrades)</option>
         <option value="black-forest-labs/flux.2-klein-4b">FLUX.2 Klein (günstiger, kaum sichtbare Änderungen)</option>
@@ -114,7 +114,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
     <details style="margin-top:10px"><summary class="nr" style="cursor:pointer">Eigenen Pollinations-Key verwenden (optional)</summary>
       <div style="margin-top:8px"><label for="apikey">Pollinations-Key (sk_…) – wird nur in diesem Browser gespeichert</label><input id="apikey" type="password" placeholder="sk_… (gratis auf enter.pollinations.ai)" autocomplete="off"></div>
     </details>
-    <div class="warn" id="nokey">Ohne Spiel-Passwort läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf.</div>
+    <div class="warn" id="nokey">Ohne Verbindung zum Server läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf.</div>
     <label style="margin-top:16px">Kategorie wählen</label>
     <div class="cats" id="cats"></div>
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
@@ -261,12 +261,23 @@ const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=()=>($("apikey").value||"").trim();
-const pw=()=>($("spielpw").value||"").trim();
-const useServer=()=>!!(SERVER&&pw());
+/* App-Token: steht absichtlich in der App (kein echtes Geheimnis). Schutz kommt vom Tageslimit am Server. */
+const APP_TOKEN="5eVy6tDqE1BjMTOfriTKebvf";
+const pw=()=>APP_TOKEN;
+const useServer=()=>!!SERVER&&!key(); // eigener Key hat Vorrang
 const ai=()=>useServer()||!!key();
-try{ $("spielpw").value=localStorage.getItem("bd_pw")||""; $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model2")||$("model").value; }catch(e){}
+try{ $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model2")||$("model").value; }catch(e){}
 function syncKeyHint(){ $("nokey").classList.toggle("hidden",ai()); }
-$("apikey").oninput=syncKeyHint; $("spielpw").oninput=syncKeyHint; syncKeyHint();
+$("apikey").oninput=()=>{syncKeyHint();loadQuota()}; syncKeyHint();
+/* Wie viele Runden gehen heute noch? */
+async function loadQuota(){ const q=$("quota"); if(!q)return;
+  if(key()){q.textContent="🔑 Eigener Key aktiv";return}
+  if(!SERVER){q.textContent="🧪 Demo-Modus";return}
+  try{ const r=await fetch(SERVER+"/status",{headers:{"X-Spiel-Passwort":pw()}}); const j=await r.json();
+    if(!r.ok) throw new Error(j.error||r.status);
+    q.textContent=j.rundenUebrig>0?`✅ Bereit – heute noch ca. ${j.rundenUebrig} von ${j.maxRunden} Runden`:"⛔ Tageslimit erreicht – morgen geht's weiter";
+  }catch(e){ q.textContent="⚠️ Server nicht erreichbar – Internet prüfen"; } }
+loadQuota();
 
 function renderCats(){
   $("cats").innerHTML=`<button class="cat ${catSel==='random'?'sel':''}" data-id="random"><span class="e">🎲</span>Zufall</button>`+
@@ -283,7 +294,7 @@ function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle
    (falls Spieler:in 1 gewinnt / falls Spieler:in 2 gewinnt). Beim Zuschlag ist das Bild sofort da. */
 const cache=new Map(); // stateKey -> Promise<{url,blob}>
 async function toBlobFromResponse(r){
-  if(!r.ok){let t="";try{t=(await r.text()).slice(0,200)}catch(e){} throw new Error("HTTP "+r.status+" "+t)}
+  if(!r.ok){let t="";try{t=(await r.text()).slice(0,300)}catch(e){} let m="";try{m=JSON.parse(t).error}catch(e){} if(typeof m==="object"&&m)m=m.message; throw new Error(r.status===429?"Tageslimit erreicht – morgen geht's weiter!":(m||("HTTP "+r.status+" "+t)))}
   const ct=r.headers.get("content-type")||"";
   if(ct.startsWith("image/")) return await r.blob();
   const j=await r.json(); const d=(j.data||[])[0]||{};
@@ -345,7 +356,7 @@ function pregen(){
 /* ========= SPIEL ========= */
 function newGame(catId){
   const cat = catId==="random"||!catId ? rnd(CATS) : CATS.find(c=>c.id===catId);
-  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_pw",pw());localStorage.setItem("bd_model2",$("model").value)}catch(e){}
+  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_model2",$("model").value)}catch(e){}
   const budget=Math.max(1,parseInt($("budget").value)||20);
   let raw;
   if(cat.slots){ // Fußball: pro Position doppelt so viele wie ein Team braucht (2 TW, 2 V, 4 MF, 2 ST)
@@ -379,8 +390,8 @@ function newGame(catId){
     const v=variant(0,items[0]);
     Promise.race([v.img,new Promise(r=>setTimeout(r,25000))]).finally(()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)});
   }).catch(e=>{
-    $("prepErr").innerHTML=`Startbild fehlgeschlagen: ${esc(e.message)}<br>Key richtig? <button id="back">Zurück</button>`;
-    $("back").onclick=()=>show("setup");
+    $("prepErr").innerHTML=`Startbild fehlgeschlagen: ${esc(e.message)}<br><button id="back">Zurück</button>`;
+    $("back").onclick=()=>{show("setup");loadQuota()};
   });
 }
 
@@ -586,7 +597,7 @@ $("start").onclick=()=>newGame(catSel);
 $("speak").onclick=speak;
 $("quit").onclick=()=>{if(confirm("Spiel wirklich abbrechen?")){speechSynthesis.cancel();show("setup")}};
 $("again").onclick=()=>newGame(S.cat.id);
-$("menu").onclick=()=>show("setup");
+$("menu").onclick=()=>{show("setup");loadQuota()};
 
 /* ========= ALS APP INSTALLIEREN ========= */
 (function(){

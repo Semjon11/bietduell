@@ -14,82 +14,104 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bietduell">
 <style>
-:root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--p1:#ff5d8f;--p2:#38c6ff;--gold:#ffd23f;--ok:#4ade80;--bad:#f87171;--rad:16px}
+:root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--p1:#ff5d8f;--p2:#38c6ff;--gold:#ffd23f;--ok:#4ade80;--bad:#f87171;--pitch:#1f7a3f;--pitch2:#23864a;--rad:16px;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 20% 0%,#2a1f55,var(--bg) 60%);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh}
+html,body{background:var(--bg)}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#2a1f55,var(--bg) 60%);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
 button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--card2);color:var(--txt);font-weight:600;transition:transform .08s,filter .15s}
 button:hover:not(:disabled){filter:brightness(1.2)}button:active:not(:disabled){transform:scale(.96)}
 button:disabled{opacity:.35;cursor:not-allowed}
-input,select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
 .wrap{max-width:1200px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 .install{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;border:2px solid var(--gold)}
 .install img{width:52px;height:52px;border-radius:12px}
-h1{font-size:clamp(28px,5vw,46px);margin:8px 0 4px;letter-spacing:-.5px}
+h1{font-size:clamp(28px,5vw,46px);margin:8px 0 4px;letter-spacing:-.5px;text-wrap:balance}
 h1 span{color:var(--gold)}
-.sub{color:var(--mut);margin:0 0 20px}
+.sub{color:var(--mut);margin:0 0 20px;line-height:1.5}
 .hidden{display:none!important}
 .box{background:var(--card);border-radius:var(--rad);padding:18px;box-shadow:0 8px 30px #0005}
 .row{display:flex;gap:12px;flex-wrap:wrap}
-.row>*{flex:1;min-width:160px}
+.row>*{flex:1;min-width:140px}
 label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
-.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:14px}
-.cat{padding:14px 10px;background:var(--card2);border-radius:14px;text-align:center;border:2px solid transparent}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:8px}
+.cat{padding:14px 8px;background:var(--card2);border-radius:14px;text-align:center;border:2px solid transparent;font-size:14px}
 .cat .e{font-size:34px;display:block}.cat.sel{border-color:var(--gold);background:#3a3263}
+.cat small{display:block;color:var(--mut);font-weight:500;font-size:11px;margin-top:2px}
 .big{font-size:20px;padding:14px 26px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
-.game{display:grid;grid-template-columns:1fr minmax(260px,340px) 1fr;gap:14px;align-items:start}
-@media(max-width:900px){.game{grid-template-columns:1fr}.center{order:-1}}
-.pl{border-top:5px solid var(--p1);transition:box-shadow .2s}.pl.p2{border-top-color:var(--p2)}
+.chip{display:inline-block;background:var(--card2);padding:6px 12px;border-radius:999px;font-size:13px;color:var(--mut)}
+.chip.ok{color:var(--ok)}.chip.warn{color:#ffd58a}
+.banner{background:#3a2a10;color:#ffd58a;padding:10px 12px;border-radius:10px;font-size:14px;margin-bottom:12px}
+/* Spielansicht: Karte oben, darunter beide Teams nebeneinander (auch am Handy) */
+.game{display:grid;grid-template-columns:1fr minmax(280px,360px) 1fr;gap:14px;align-items:start}
+@media(max-width:900px){.game{grid-template-columns:1fr 1fr;gap:10px}.center{order:-1;grid-column:1/-1}}
+.pl{border-top:5px solid var(--p1);transition:box-shadow .2s;min-width:0}.pl.p2{border-top-color:var(--p2)}
 .pl.turn{box-shadow:0 0 0 3px var(--gold),0 8px 30px #0005}
-.pl h2{margin:0 0 6px;font-size:22px;display:flex;justify-content:space-between;align-items:center}
-.money{font-size:26px;font-weight:800;color:var(--gold)}
-.slots{display:flex;gap:4px;margin:6px 0 10px}.slot{flex:1;height:8px;border-radius:4px;background:#3c3766}.slot.f{background:var(--ok)}
-.imgbox{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#0d0b1a;display:grid;place-items:center}
+.pl.lead .nm::after{content:" 🏷️"}
+.pl h2{margin:0 0 6px;font-size:20px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+.pl .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.money{font-size:24px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.slots{display:flex;gap:4px;margin:4px 0 10px}.slot{flex:1;height:7px;border-radius:4px;background:#3c3766}.slot.f{background:var(--ok)}
+.imgbox{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:12px;overflow:hidden;background:#0d0b1a}
 .imgbox img{width:100%;height:100%;object-fit:cover;display:block}
 .stickers{position:absolute;left:6px;right:6px;bottom:6px;display:flex;flex-wrap:wrap;gap:4px}
-.stickers span{background:#000a;border-radius:999px;padding:2px 8px;font-size:13px}
-.loader{position:absolute;inset:0;display:grid;place-items:center;background:#0d0b1acc;color:var(--mut);font-size:14px;text-align:center;padding:10px}
-.spin{width:34px;height:34px;border:4px solid #3c3766;border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
+.stickers span{background:#000b;border-radius:999px;padding:2px 8px;font-size:12px}
+.loader{position:absolute;inset:0;display:grid;place-items:center;background:#0d0b1acc;color:var(--mut);font-size:13px;text-align:center;padding:10px}
+.spin{width:30px;height:30px;border:4px solid #3c3766;border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
 @keyframes s{to{transform:rotate(360deg)}}
 .items{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px}
-.items li{background:var(--card2);padding:4px 9px;border-radius:999px;font-size:13px}
-.bidarea{margin-top:12px;min-height:96px}
-.bidarea .who{font-size:14px;color:var(--mut);margin-bottom:6px}
-.bidrow{display:grid;grid-template-columns:1fr auto;gap:8px}
-.bidrow input{font-size:22px;font-weight:800;text-align:center}
-.bidbtn{background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
-.pass{width:100%;margin-top:8px;background:#3a2030}
-.wait{padding:14px;text-align:center;color:var(--mut);background:#151229;border-radius:12px}
-.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:4px}
+.items li{background:var(--card2);padding:4px 9px;border-radius:999px;font-size:12px}
+/* Fußball-Aufstellung */
+.pitch{position:relative;border-radius:12px;padding:12px 8px;background:repeating-linear-gradient(0deg,var(--pitch) 0 28px,var(--pitch2) 28px 56px);border:2px solid #ffffff55;display:grid;gap:10px}
+.pitch::before{content:"";position:absolute;left:8%;right:8%;top:50%;border-top:2px solid #ffffff44}
+.line{display:flex;justify-content:center;gap:8px;position:relative}
+.spot{background:#0d2b18dd;border:2px solid #ffffff66;border-radius:10px;padding:5px 6px;min-width:0;flex:0 1 46%;text-align:center;font-size:12px;line-height:1.25}
+.spot b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spot.empty{border-style:dashed;color:#ffffffaa;background:#0d2b1866}
+.spot .pos{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#ffffffbb}
+.strength{margin-top:8px;font-size:13px;color:var(--mut)}
+/* Mitte: aktuelles Upgrade + Bieten */
 .center .item{text-align:center}
 .nr{color:var(--mut);font-size:14px}
-.item .e{font-size:70px;line-height:1.1;margin:8px 0}
-.item .n{font-size:26px;font-weight:800}
+.item .e{font-size:64px;line-height:1.1;margin:6px 0}
+.item .n{font-size:24px;font-weight:800;text-wrap:balance}
 .ev{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;background:var(--gold);color:#241a00;font-weight:700;font-size:13px}
-.high{margin:16px 0;padding:14px;border-radius:12px;background:#151229;text-align:center}
-.high .v{font-size:40px;font-weight:900}
+.ev.pos{background:var(--card2);color:var(--txt)}
+.high{margin:14px 0 8px;padding:12px;border-radius:12px;background:#151229;text-align:center}
+.high .v{font-size:38px;font-weight:900;font-variant-numeric:tabular-nums}
 .high.l1{box-shadow:inset 0 0 0 3px var(--p1)}.high.l2{box-shadow:inset 0 0 0 3px var(--p2)}
-.hist{font-size:13px;color:var(--mut);text-align:center;min-height:20px}
-.log{font-size:13px;color:var(--mut);margin-top:10px;min-height:20px;text-align:center}
+.hist{font-size:13px;color:var(--mut);text-align:center;min-height:18px}
+.bid{margin-top:10px;padding:12px;border-radius:12px;background:#151229}
+.bid .who{font-size:15px;margin-bottom:8px;text-align:center}
+.bid.t1{box-shadow:inset 0 0 0 3px var(--p1)}.bid.t2{box-shadow:inset 0 0 0 3px var(--p2)}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.quick button{font-size:17px;padding:12px 6px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.bidrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.bidrow input{font-size:20px;font-weight:800;text-align:center}
+.pass{width:100%;margin-top:8px;background:#3a2030}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:4px;text-align:center}
+.log{font-size:13px;color:var(--mut);margin-top:8px;text-align:center}
 .flash{animation:f .6s}@keyframes f{0%{transform:scale(1)}40%{transform:scale(1.04);box-shadow:0 0 0 4px var(--gold)}100%{transform:scale(1)}}
-.final{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.final{grid-template-columns:1fr}}
+.final{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.final{grid-template-columns:1fr}}
 .win{outline:4px solid var(--gold)}
 .crown{font-size:40px;text-align:center}
-.rules{color:var(--mut);font-size:14px;line-height:1.5}
-.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.chip{background:var(--card2);padding:6px 12px;border-radius:999px;font-size:13px;color:var(--mut)}
+.rules{color:var(--mut);font-size:14px;line-height:1.55}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .prep{max-width:520px;margin:60px auto;text-align:center}
 .bar{height:10px;background:#3c3766;border-radius:6px;overflow:hidden;margin:14px 0}.bar div{height:100%;background:var(--gold);width:0;transition:width .4s}
 .votebox{max-width:640px;margin:20px auto;text-align:center}
 .votebtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .votebtns button{font-size:18px;padding:16px}
 .verdict{margin-top:14px;font-size:18px;line-height:1.5}
-.warn{background:#3a2a10;color:#ffd58a;padding:10px 12px;border-radius:10px;font-size:13px;margin-top:10px}
+.confirm{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:20;padding:16px}
+.confirm .box{max-width:360px;text-align:center}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- SETUP -->
+<!-- START -->
 <section id="setup">
   <h1>💰 Bietduell <span>– wer baut's besser?</span></h1>
   <div class="box install hidden" id="installBox">
@@ -97,32 +119,25 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
     <div style="flex:1;min-width:180px"><b>Bietduell als App</b><div class="nr" id="installTxt">Mit eigenem Icon am Startbildschirm, ohne Browserleiste.</div></div>
     <button class="big" id="installBtn">📲 Installieren</button>
   </div>
-  <p class="sub">Beide starten mit demselben Bild – zum Beispiel einer Luxusjacht. 10 Upgrades werden versteigert, jede:r darf max. 5 ersteigern. Was du kaufst, kommt sofort in dein Bild – das Grundbild bleibt gleich.</p>
+  <p class="sub">Beide starten mit demselben Bild – zum Beispiel einer Luxusjacht. Upgrades werden einzeln versteigert. Was du kaufst, kommt in dein Bild. Am Ende wird abgestimmt, wer das Bessere gebaut hat.</p>
   <div class="box">
     <div class="row">
-      <div><label>Spieler:in 1</label><input id="n1" value="Spieler 1"></div>
-      <div><label>Spieler:in 2</label><input id="n2" value="Spieler 2"></div>
-      <div><label>Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20"></div>
+      <div><label for="n1">Spieler:in 1</label><input id="n1" value="Spieler 1" maxlength="18"></div>
+      <div><label for="n2">Spieler:in 2</label><input id="n2" value="Spieler 2" maxlength="18"></div>
+      <div><label for="budget">Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20" inputmode="numeric"></div>
     </div>
-    <div class="row" style="margin-top:12px">
-      <div style="flex:2"><label>Bild-KI-Status</label><div class="chip" id="quota" style="display:inline-block;margin-top:4px">⏳ Verbinde…</div></div>
-      <div><label for="model">Bild-KI</label><select id="model">
-        <option value="cf/flux-2-klein-4b">FLUX.2 Klein – gratis</option>
-      </select></div>
-    </div>
-    <details class="hidden" style="margin-top:10px"><summary class="nr" style="cursor:pointer">Eigenen Pollinations-Key verwenden (optional)</summary>
-      <div style="margin-top:8px"><label for="apikey">Pollinations-Key (sk_…) – wird nur in diesem Browser gespeichert</label><input id="apikey" type="password" placeholder="sk_… (gratis auf enter.pollinations.ai)" autocomplete="off"></div>
-    </details>
-    <div class="warn" id="nokey">Ohne Verbindung zum Server läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf.</div>
+    <div style="margin-top:12px"><span class="chip" id="quota">⏳ Verbinde mit Bild-KI…</span></div>
     <label style="margin-top:16px">Kategorie wählen</label>
     <div class="cats" id="cats"></div>
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <button class="big" id="start">Los geht's! 🔨</button>
-      <span class="rules">Jede Runde kommen andere Dinge, eine andere Reihenfolge, ein anderer Startzustand und Spezial-Events.</span>
+      <span class="rules">Jede Runde: andere Upgrades, andere Reihenfolge, anderes Startbild und Spezial-Events.</span>
     </div>
   </div>
   <div class="box rules" style="margin-top:14px">
-    <b>Regeln:</b> Alle starten mit demselben schönen Grundbild. Ein Upgrade nach dem anderen kommt dran. Ihr bietet abwechselnd: Wer dran ist, sieht das aktuelle Gebot, tippt einen höheren Betrag ein und drückt <b>Enter</b> – oder <b>passt</b>. Wer passt, überlässt das Ding der anderen Person. Max. 5 Dinge pro Person. Am Ende stimmt jede:r geheim ab, wer gewonnen hat. Seid ihr euch nicht einig, entscheidet die App.
+    <b>So geht's:</b> Ihr bietet abwechselnd. Wer dran ist, tippt auf <b>+1 / +2 / +5 €</b> oder gibt einen Betrag ein – oder <b>passt</b>. Wer passt, überlässt das Upgrade der anderen Person. Jede:r darf höchstens 5 Upgrades ersteigern.<br>
+    <b>Fußball:</b> Keine Bilder, sondern eine Aufstellung mit 6 Plätzen (1 Tor, 2 Abwehr, 2 Mittelfeld, 1 Sturm). Es werden 12 echte Stars versteigert. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat.<br>
+    <b>Ende:</b> Beide stimmen geheim ab. Seid ihr euch nicht einig, entscheidet die App nach Punkten.
   </div>
 </section>
 
@@ -132,31 +147,31 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
     <div class="spin"></div>
     <h2 id="prepTitle">Spiel wird vorbereitet…</h2>
     <div class="bar"><div id="prepBar"></div></div>
-    <div class="nr" id="prepTxt">Startbild wird gemalt</div>
-    <div class="err" id="prepErr"></div>
+    <div class="nr" id="prepTxt">Startbild wird geladen</div>
   </div>
 </section>
 
-<!-- GAME -->
+<!-- SPIEL -->
 <section id="game" class="hidden">
-  <div class="top" style="margin-bottom:12px">
-    <h1 style="font-size:28px;margin:0" id="gTitle"></h1>
-    <div class="row" style="flex:0 0 auto;gap:8px"><span class="chip" id="twistChip"></span><span class="chip" id="modeChip"></span><button id="quit">✖ Abbrechen</button></div>
+  <div class="top">
+    <h1 style="font-size:26px;margin:0" id="gTitle"></h1>
+    <button id="quit">✖ Abbrechen</button>
   </div>
+  <div class="banner hidden" id="aiBanner">Die Gratis-Bilder für heute sind aufgebraucht. Ihr könnt weiterspielen – neue Upgrades erscheinen als Sticker auf dem Bild.</div>
   <div class="game">
     <div class="box pl p1" id="pl0"></div>
     <div class="box center">
       <div class="item" id="itemCard"></div>
       <div class="high" id="high"></div>
       <div class="hist" id="hist"></div>
-      
+      <div id="bidBox"></div>
       <div class="log" id="log"></div>
     </div>
     <div class="box pl p2" id="pl1"></div>
   </div>
 </section>
 
-<!-- END -->
+<!-- ENDE -->
 <section id="end" class="hidden">
   <h1 style="text-align:center">🏁 Wer hat <span id="eCat"></span>?</h1>
   <div class="box votebox" id="vote"></div>
@@ -167,6 +182,8 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
   </div>
 </section>
 </div>
+
+<div class="confirm hidden" id="confirmBox"><div class="box"><p style="font-size:18px;margin-top:0">Spiel wirklich abbrechen?</p><div class="row"><button id="cNo">Weiterspielen</button><button id="cYes" style="background:#5a2240">Abbrechen</button></div></div></div>
 
 <script>
 /* ========= KATEGORIEN =========
@@ -189,7 +206,7 @@ const CATS = [
  {id:"auto",e:"🏎️",n:"Sportwagen",art:"das beste Auto",subj:"sports car",scene:"professional photo of a sports car, three quarter view, the whole car visible",
   start:["a sleek modern silver sports car on a mountain road","a shiny black sports car in front of a modern building","a white modern sports car on a coastal road"],
   items:[["🦋","Flügeltüren","gullwing doors open","",8],["🪞","Chrom-Lack","mirror chrome paint","",8],["🛫","Heckflügel","a big carbon rear wing","",7],["💜","Neon-Unterboden","neon underglow","",7],["⚫","Carbon-Look","carbon fiber body parts","",7],["🚀","Raketenantrieb","rocket boosters with flames at the back","",9],["🥇","Goldfelgen","gold rims","",7],["🔥","Flammen-Lack","flame paint job","",7],["🏁","Rennstreifen","racing stripes","",6],["🛸","Schwebe-Modus","hovering above the road with blue glow instead of wheels","",9],["☀️","Cabrio","convertible with the roof open","",6],["🔊","V12-Motor","a massive exposed chrome engine on the hood","",8],["🏆","Pokal auf dem Dach","a big golden trophy on the roof","",6],["🌈","Regenbogen-Lack","iridescent rainbow paint","",7],["🛞","Rennreifen","wide racing slick tires","",6]]},
- {id:"fussball",e:"⚽",n:"Fußballteam (5)",art:"das beste Fußballteam",subj:"football team",slots:{TW:1,V:1,MF:2,ST:1},
+ {id:"fussball",e:"⚽",n:"Fußballteam (5)",art:"das beste Fußballteam",subj:"football team",lineup:true,slots:{TW:1,V:2,MF:2,ST:1},
   scene:"team photo of exactly five football players standing side by side in one row on a pitch, from left to right: a goalkeeper wearing gloves, a defender, two midfielders, a striker, full bodies visible",
   start:["all five are regular players in plain white kits on a well-kept grass pitch in a big stadium","all five are regular players in plain blue kits in a big stadium","all five are regular players in plain red kits in a big stadium"],
   // Echte Stars: Name steht auf der Karte, im Bild wird nur Statur/Stil beschrieben (keine Gesichter echter Personen nachgebaut)
@@ -243,248 +260,222 @@ const CATS = [
   start:["a tasty classic cheeseburger","a juicy classic beef burger with lettuce and tomato","a classic burger with a sesame bun"],
   items:[["🥩","Wagyu-Patty","an extra thick juicy wagyu beef patty","",9],["🧀","Doppelt Käse","melted double cheese dripping","",7],["🥓","Knuspriger Speck","crispy bacon","",7],["🥑","Avocado","avocado slices","",6],["🍞","Brioche-Bun","a glossy brioche bun","",6],["🧅","Zwiebelringe","crispy onion rings","",6],["🥇","Blattgold","edible gold leaf on top","",9],["🍟","Trüffel-Pommes","truffle fries on the side","",7],["🌶️","Jalapeños","jalapeños","",5],["🍳","Spiegelei","a fried egg on top","",6],["🥤","Milchshake","a big milkshake next to it","",6],["🏗️","Turmhoch","stacked into a tall tower with many layers","",8],["🔥","Flambiert","flames around it","",7],["🍄","Pilze","grilled mushrooms","",5],["🧁","Dessert-Teller","a dessert plate with brownies next to it","",6]]},
 ];
-const TWISTS=[["🌅 Sonnenuntergang","at golden hour sunset light"],["☀️ Sonnentag","on a bright sunny day"],["🌙 Abendlicht","at blue hour with glowing lights"],["⛅ Dramatischer Himmel","with dramatic clouds"]];
-const API="https://gen.pollinations.ai";
-/* Vermittler-Server: hält den Pollinations-Key geheim. Spieler:innen brauchen nur das Spiel-Passwort. */
-const SERVER="https://bietduell.bietduell-server.workers.dev";
+
+/* ========= EINSTELLUNGEN ========= */
+const SERVER="https://bietduell.bietduell-server.workers.dev";   // eigener Gratis-Server (Cloudflare)
+const APP_TOKEN="5eVy6tDqE1BjMTOfriTKebvf";                      // steht absichtlich hier; Schutz = Tageslimit am Server
+const AI_MODEL="cf/flux-2-klein-4b";                             // sparsamstes Gratis-Modell
+const POSN={TW:"Tor",V:"Abwehr",MF:"Mittelfeld",ST:"Sturm"};
+const POS_ORDER=["ST","MF","V","TW"];                            // Aufstellung von oben (Sturm) nach unten (Tor)
 
 /* ========= HILFSFUNKTIONEN ========= */
-let catSel="random", S=null;
+let catSel="random", S=null, aiOff=false;
 const $=id=>document.getElementById(id);
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const key=()=>""; // alles läuft gratis über den eigenen Server
-/* App-Token: steht absichtlich in der App (kein echtes Geheimnis). Schutz kommt vom Tageslimit am Server. */
-const APP_TOKEN="5eVy6tDqE1BjMTOfriTKebvf";
-const pw=()=>APP_TOKEN;
-const useServer=()=>!!SERVER&&!key(); // eigener Key hat Vorrang
-const ai=()=>useServer()||!!key();
-try{ $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model3")||$("model").value; }catch(e){}
-function syncKeyHint(){ $("nokey").classList.toggle("hidden",ai()); }
-$("apikey").oninput=()=>{syncKeyHint();loadQuota()}; syncKeyHint();
-/* Wie viele Runden gehen heute noch? */
-async function loadQuota(){ const q=$("quota"); if(!q)return;
-  if(key()){q.textContent="🔑 Eigener Key aktiv";return}
-  if(!SERVER){q.textContent="🧪 Demo-Modus";return}
-  try{ const r=await fetch(SERVER+"/status",{headers:{"X-Spiel-Passwort":pw()}}); const j=await r.json();
-    if(!r.ok) throw new Error(j.error||r.status);
-    q.textContent=j.rundenUebrig>0?`✅ Bereit – heute noch ca. ${j.rundenUebrig} von ${j.maxRunden} Runden`:"⛔ Tageslimit erreicht – morgen geht's weiter";
-  }catch(e){ q.textContent="⚠️ Server nicht erreichbar – Internet prüfen"; } }
-loadQuota();
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const isLineup=()=>!!(S&&S.cat.lineup);
+const maxWins=()=>S.cat.slots?Object.values(S.cat.slots).reduce((a,b)=>a+b,0):5;
+function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
+try{ ["n1","n2","budget"].forEach(id=>{const v=localStorage.getItem("bd_"+id); if(v)$(id).value=v}); }catch(e){}
 
 function renderCats(){
   $("cats").innerHTML=`<button class="cat ${catSel==='random'?'sel':''}" data-id="random"><span class="e">🎲</span>Zufall</button>`+
-   CATS.map(c=>`<button class="cat ${catSel===c.id?'sel':''}" data-id="${c.id}"><span class="e">${c.e}</span>${c.n}</button>`).join("");
+   CATS.map(c=>`<button class="cat ${catSel===c.id?'sel':''}" data-id="${c.id}"><span class="e">${c.e}</span>${c.n}${c.lineup?'<small>ohne Bilder</small>':''}</button>`).join("");
   $("cats").querySelectorAll(".cat").forEach(b=>b.onclick=()=>{catSel=b.dataset.id;renderCats()});
 }
 renderCats();
-function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id))}
 
-/* ========= BILD-KI =========
-   Startbild: einmal generiert, beide bekommen genau dasselbe.
-   Upgrade: Das aktuelle Bild wird BEARBEITET (Image-Edit), nicht neu gemalt -> Grundgerüst bleibt.
-   Vorab-Generierung: Sobald ein Ding aufgerufen wird, rechnet die App schon beide möglichen Upgrades
-   (falls Spieler:in 1 gewinnt / falls Spieler:in 2 gewinnt). Beim Zuschlag ist das Bild sofort da. */
-const cache=new Map(); // stateKey -> Promise<{url,blob}>
-async function toBlobFromResponse(r){
-  if(!r.ok){let t="";try{t=(await r.text()).slice(0,300)}catch(e){} let m="";try{m=JSON.parse(t).error}catch(e){} if(typeof m==="object"&&m)m=m.message; throw new Error(r.status===402?"Das Pollen-Guthaben ist leer – bitte auf enter.pollinations.ai aufladen.":r.status===429?"Tageslimit erreicht – morgen geht's weiter!":(m||("HTTP "+r.status+" "+t)))}
-  const ct=r.headers.get("content-type")||"";
-  if(ct.startsWith("image/")) return await r.blob();
-  const j=await r.json(); const d=(j.data||[])[0]||{};
-  if(d.b64_json){const bin=atob(d.b64_json),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:"image/png"})}
-  if(d.url){return await (await fetch(d.url)).blob()}
-  throw new Error("Keine Bilddaten in der Antwort");
+/* ========= BILD-KI (gratis über den eigenen Server) =========
+   Startbilder liegen fertig in der App (Ordner start/) – kosten nichts.
+   Upgrades: Das aktuelle Bild wird bearbeitet, das Grundbild bleibt gleich.
+   Vorbereitung: Für die Person, die gerade vorne liegt, wird das Upgrade schon während des Bietens gerechnet. */
+const cache=new Map();
+async function api(path,opt={}){
+  const r=await fetch(SERVER+path,{...opt,headers:{...(opt.headers||{}),"X-Spiel-Passwort":APP_TOKEN}});
+  if(!r.ok){let m="";try{const j=await r.json();m=j.error||"";if(j.limit)aiLimit()}catch(e){}
+    if(r.status===429)aiLimit(); throw new Error(m||("Fehler "+r.status))}
+  return r;
 }
-function basePrompt(){return `${S.cat.scene}, ${S.ugly}, ${S.twist[1]}, highly detailed, no text, no watermark`}
-async function genBase(){
-  if(!ai()){ // Demo-Modus: anonymer Gratis-Endpunkt
-    return {url:`https://image.pollinations.ai/prompt/${encodeURIComponent(basePrompt())}?width=1024&height=768&seed=${S.seed}&nologo=true`};
-  }
-  const r=useServer()? await fetch(`${SERVER}/base?prompt=${encodeURIComponent(basePrompt())}&seed=${S.seed}&free=1`,{headers:{"X-Spiel-Passwort":pw()}})
-    : await fetch(`${API}/image/${encodeURIComponent(basePrompt())}?model=${encodeURIComponent("black-forest-labs/flux.2-klein-4b")}&width=1024&height=768&seed=${S.seed}`,{headers:{Authorization:"Bearer "+key()}});
-  const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
+function aiLimit(){ if(aiOff)return; aiOff=true; $("aiBanner").classList.remove("hidden"); loadQuota(); }
+async function loadStart(){
+  const i=S.startIdx;
+  try{ const r=await fetch(`start/${S.cat.id}-${i}.jpg`); if(r.ok){const blob=await r.blob(); return {blob,url:URL.createObjectURL(blob)}} }catch(e){}
+  const prompt=S.cat.scene+", "+S.cat.start[i]+", on a bright sunny day, highly detailed, no text";
+  // Ersatz 1: vom eigenen Server erzeugen lassen
+  if(!aiOff){ try{ const blob=await (await api(`/base?seed=${S.seed}&free=1&prompt=${encodeURIComponent(prompt)}`)).blob(); return {blob,url:URL.createObjectURL(blob)}; }catch(e){} }
+  // Ersatz 2: kostenloser Bilddienst ohne Konto (nur Anzeige, Upgrades dann als Sticker)
+  aiLimit();
+  return {url:`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=640&height=480&seed=${S.seed}&nologo=true`};
 }
-/* Positionen (Fußball): Wo steht wer im Teamfoto? */
-const POSN={TW:"Torwart",V:"Verteidiger",MF:"Mittelfeld",ST:"Stürmer"};
-function slotFree(i,it){ if(!S.cat.slots||!it||!it.pos)return true; return S.pl[i].won.filter(w=>w.pos===it.pos).length<S.cat.slots[it.pos]; }
-function slotDesc(i,it){
-  const n=S.pl[i].won.filter(w=>w.pos===it.pos).length;
-  return {TW:"the goalkeeper standing on the far left",V:"the defender standing second from the left",
-          MF:n===0?"the midfielder standing exactly in the middle":"the midfielder standing second from the right",
-          ST:"the striker standing on the far right"}[it.pos];
-}
-function editPrompt(it,i){
-  if(it.pos) return `Edit this image. Replace only ${slotDesc(i,it)} with ${it.p}${it.ev==="double"?" (make him look extra impressive and heroic)":""}, standing at exactly the same spot. `+
-   `Keep the other four players, the background, framing, camera angle, lighting and art style exactly the same. Do not crop or zoom. No text.`;
+function editPrompt(it){
   return `Edit this image. Apply this change to the ${S.cat.subj} so that it is clearly and prominently visible: ${it.p}${it.ev==="double"?" (make it very large and eye-catching)":""}. `+
    `Keep everything else exactly the same: the same ${S.cat.subj} with the same shape and structure, same framing and zoom, same camera angle, same lighting and art style, and keep every detail that is already in the image. Do not crop or zoom. No text.`;
 }
-async function genEdit(src,it,i){
+async function genEdit(src,it){
   const fd=new FormData();
-  fd.append("image",src.blob,"bild.png");
-  fd.append("prompt",editPrompt(it,i));
-  fd.append("model",$("model").value);
-  fd.append("response_format","b64_json");
-  fd.append("seed",String(S.seed));
-  fd.append("size","1024x768"); // sonst liefert die KI ab der 2. Bearbeitung falsche Formate
-  const r=useServer()? await fetch(`${SERVER}/edit`,{method:"POST",headers:{"X-Spiel-Passwort":pw()},body:fd})
-    : await fetch(`${API}/v1/images/edits`,{method:"POST",headers:{Authorization:"Bearer "+key()},body:fd});
-  const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
+  fd.append("image",src.blob,"bild.png"); fd.append("prompt",editPrompt(it));
+  fd.append("model",AI_MODEL); fd.append("seed",String(S.seed));
+  const blob=await (await api("/edit",{method:"POST",body:fd})).blob();
+  return {blob,url:URL.createObjectURL(blob)};
 }
-/* Bild für Zustand "Bild X + Ding" holen (mit Cache – teilen sich beide denselben Zustand, wird nur 1x gerechnet) */
 function variant(i,it){
   const st=S.pl[i].state, k=st.key+"|"+it.n;
-  if(!cache.has(k)){
-    const p=(async()=>{const src=await st.img; return await genEdit(src,it,i)})();
-    p.catch(()=>{}); cache.set(k,p);
-  }
+  if(!cache.has(k)){ const p=(async()=>genEdit(await st.img,it))(); p.catch(()=>{}); cache.set(k,p); }
   return {key:k,img:cache.get(k)};
 }
-/* Spart Gratis-Kontingent: nur für die Person vorbereiten, die gerade vorne liegt.
-   Wechselt die Führung, wird das zweite Bild nachbereitet (bereits fertige bleiben im Cache). */
 function pregen(){
-  if(!ai())return;
+  if(isLineup()||aiOff)return;
   const it=S.items[S.idx]; if(!it||S.leader<0)return;
   if(needs(S.leader)) variant(S.leader,it);
 }
 
+/* ========= TAGES-KONTINGENT ========= */
+async function loadQuota(){
+  const q=$("quota");
+  try{ const j=await (await api("/status")).json();
+    if(j.rundenUebrig>0&&!j.kiLeer){ q.className="chip ok"; q.textContent=`✅ Gratis-KI-Bilder: heute noch ca. ${j.rundenUebrig} Runden`; if(!S||$("setup").offsetParent)aiOff=false; }
+    else { q.className="chip warn"; q.textContent="⚠️ KI-Bilder für heute aufgebraucht – Spielen geht trotzdem (Sticker statt neuer Bilder, Fußball ganz normal)"; aiOff=true; }
+  }catch(e){ q.className="chip warn"; q.textContent="⚠️ Bild-KI nicht erreichbar – Spielen geht trotzdem (Sticker statt neuer Bilder)"; }
+}
+loadQuota();
+
 /* ========= SPIEL ========= */
 function newGame(catId){
-  const cat = catId==="random"||!catId ? rnd(CATS) : CATS.find(c=>c.id===catId);
-  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_model3",$("model").value)}catch(e){}
+  const cat=catId==="random"||!catId?rnd(CATS):CATS.find(c=>c.id===catId);
+  try{["n1","n2","budget"].forEach(id=>localStorage.setItem("bd_"+id,$(id).value))}catch(e){}
   const budget=Math.max(1,parseInt($("budget").value)||20);
   let raw;
-  if(cat.slots){ // Fußball: pro Position doppelt so viele wie ein Team braucht (2 TW, 2 V, 4 MF, 2 ST)
-    raw=[]; for(const [pos,c] of Object.entries(cat.slots)) raw.push(...shuffle(cat.items.filter(x=>x[3]===pos)).slice(0,c*2));
-    raw=shuffle(raw);
-  } else raw=shuffle(cat.items).slice(0,10);
-  const items=raw.map(i=>({e:i[0],n:i[1],p:i[2],pos:i[3]||null,v:i[4],ev:null}));
+  if(cat.slots){ raw=[]; for(const [pos,c] of Object.entries(cat.slots)) raw.push(...shuffle(cat.items.filter(x=>x[3]===pos)).slice(0,c*2)); raw=shuffle(raw); }
+  else raw=shuffle(cat.items).slice(0,10);
+  const items=raw.map(i=>({e:i[0],n:i[1],p:i[2],pos:i[3]||null,v:i[4]||6,ev:null}));
   const evs=shuffle(["sale","mystery","double"]).slice(0,2);
-  shuffle([...Array(9).keys()].map(x=>x+1)).slice(0,2).forEach((ix,k)=>items[ix].ev=evs[k]);
+  shuffle([...Array(items.length-1).keys()].map(x=>x+1)).slice(0,2).forEach((ix,k)=>items[ix].ev=evs[k]);
   cache.clear();
-  S={cat,items,idx:0,ugly:rnd(cat.start),twist:rnd(TWISTS),seed:Math.floor(Math.random()*1e6),
-     high:0,leader:-1,turn:0,hist:[],revealed:false,busy:false,
-     pl:[0,1].map(i=>({name:$("n"+(i+1)).value.trim()||("Spieler "+(i+1)),money:budget,won:[]}))};
-  const base=genBase(); base.catch(()=>{});
-  S.pl.forEach(p=>p.state={key:"base",img:base,url:null});
-  // Vorbereitung: Startbild + erstes Upgrade vorab rechnen
-  show("prep");$("prepErr").textContent="";$("prepBar").style.width="10%";
-  $("prepTitle").textContent=`${cat.e} ${cat.n} wird vorbereitet…`;
-  $("prepTxt").textContent="Startbild wird gemalt (beide bekommen dasselbe)";
-  const startGame=()=>{
-    ["pl0","pl1"].forEach(id=>{$(id).dataset.built="";$(id).innerHTML=""});
-    show("game");$("gTitle").textContent=cat.e+" "+cat.n;
-    $("twistChip").textContent="Stil: "+S.twist[0];
-    $("modeChip").textContent=ai()?"🤖 KI-Bearbeitung":"🧪 Demo-Modus";
-    S.turn=0; startItem();
-  };
-  base.then(b=>{
-    S.pl.forEach(p=>p.state.url=b.url);
-    if(!ai()){ const im=new Image(); im.onload=im.onerror=()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)}; im.src=b.url; return; }
-    $("prepBar").style.width="100%";setTimeout(startGame,300);
-  }).catch(e=>{
-    $("prepErr").innerHTML=`Startbild fehlgeschlagen: ${esc(e.message)}<br><button id="back">Zurück</button>`;
-    $("back").onclick=()=>{show("setup");loadQuota()};
-  });
+  S={cat,items,idx:0,startIdx:Math.floor(Math.random()*cat.start.length),seed:Math.floor(Math.random()*1e6),
+     high:0,leader:-1,turn:0,hist:[],revealed:false,busy:false,passedOnce:false,forced:false,
+     pl:[0,1].map(i=>({name:$("n"+(i+1)).value.trim()||("Spieler "+(i+1)),money:budget,won:[],inImage:0}))};
+  $("aiBanner").classList.toggle("hidden",!aiOff||isLineup());
+  ["pl0","pl1"].forEach(id=>{$(id).dataset.built="";$(id).innerHTML=""});
+  const startGame=()=>{ show("game"); $("gTitle").textContent=cat.e+" "+cat.n; startItem(); };
+  if(isLineup()) return startGame();
+  show("prep"); $("prepBar").style.width="30%"; $("prepTitle").textContent=`${cat.e} ${cat.n} wird vorbereitet…`;
+  const base=loadStart(); base.catch(()=>{});
+  S.pl.forEach(p=>p.state={key:"start",img:base,url:null});
+  base.then(b=>{ S.pl.forEach(p=>p.state.url=b.url); $("prepBar").style.width="100%"; setTimeout(startGame,250); })
+      .catch(()=>{ aiLimit(); S.pl.forEach(p=>p.state.url=""); startGame(); });
 }
 
-function needs(i){return S.pl[i].won.length<5&&slotFree(i,S.items[S.idx])}
+function needs(i){const p=S.pl[i],it=S.items[S.idx];if(p.won.length>=maxWins())return false;
+  if(S.cat.slots&&it&&it.pos)return p.won.filter(w=>w.pos===it.pos).length<S.cat.slots[it.pos];return true}
 function eligible(i){const p=S.pl[i];return needs(i)&&p.money>S.high&&p.money>0}
 
 function startItem(){
-  S.high=0;S.leader=-1;S.hist=[];S.revealed=false;S.busy=false;S.passedOnce=false;S.forced=false;
-  // Startreihenfolge wechselt pro Ding
+  Object.assign(S,{high:0,leader:-1,hist:[],revealed:false,busy:false,passedOnce:false,forced:false});
   S.turn=S.idx%2; if(!eligible(S.turn))S.turn=1-S.turn;
-  pregen(); renderAll(); speak();
-  if(!eligible(0)&&!eligible(1)) setTimeout(nobody,1500); // keiner kann bieten
+  renderAll();
+  if(!eligible(0)&&!eligible(1)) setTimeout(nobody,1200);
 }
-/* Fußball: Jede Position muss besetzt werden. Bietet keiner, bekommt es gratis, wer die Position noch braucht. */
-function forced(){
-  const nd=[0,1].filter(needs); if(!nd.length)return false;
-  let w=nd[0];
-  if(nd.length===2){const a=S.pl[0].won.length,b=S.pl[1].won.length; w=a<b?0:b<a?1:Math.round(Math.random());}
-  S.leader=w;S.high=0;S.forced=true;S.hist.push(`${esc(S.pl[w].name)} bekommt ihn gratis`);
-  sold(); return true;
+function renderAll(){renderItem();renderPlayers();renderBid()}
+
+function lineupHTML(p){
+  const sl=S.cat.slots;
+  return `<div class="pitch">${POS_ORDER.map(pos=>{const got=p.won.filter(w=>w.pos===pos);
+    return `<div class="line">${Array.from({length:sl[pos]},(_,k)=>{const w=got[k];
+      return w?`<div class="spot"><span class="pos">${POSN[pos]}</span><b>${esc(w.n)}</b>${w.double?"⭐":""}</div>`:`<div class="spot empty"><span class="pos">${POSN[pos]}</span><b>?</b></div>`}).join("")}</div>`}).join("")}</div>
+   <div class="strength">Teamstärke: <b>${score(p)}</b> Punkte</div>`;
 }
-
-function renderAll(){renderItem();renderPlayers()}
-
 function renderPlayers(){
   S.pl.forEach((p,i)=>{
     const el=$("pl"+i);
     if(!el.dataset.built){
-      el.innerHTML=`<h2><span class="nm"></span><span class="money"></span></h2>
-        <div class="slots">${'<div class="slot"></div>'.repeat(5)}</div>
-        <div class="imgbox"><img alt="KI-Bild"><div class="stickers"></div><div class="loader hidden"></div></div>
-        <div class="posrow nr" style="margin-top:8px"></div><ul class="items"></ul><div class="bidarea"></div>`;
+      el.innerHTML=`<h2><span class="nm"></span><span class="money"></span></h2><div class="slots"></div><div class="vis"></div><ul class="items"></ul>`;
       el.dataset.built=1;
     }
     el.querySelector(".nm").textContent=p.name;
     el.querySelector(".money").textContent=p.money+" €";
-    el.querySelectorAll(".slot").forEach((s,j)=>s.classList.toggle("f",j<p.won.length));
-    el.querySelector(".items").innerHTML=p.won.length?p.won.map(w=>`<li>${w.e} ${w.pos?`<b>${w.pos}</b> `:""}${esc(w.n)}${w.double?" ×2":""}</li>`).join(""):`<li style="opacity:.6">noch nix 😬</li>`;
-    el.querySelector(".posrow").innerHTML=S.cat.slots?Object.entries(S.cat.slots).map(([k,c])=>{const n=p.won.filter(w=>w.pos===k).length;return `<span style="color:${n>=c?'var(--ok)':'inherit'}">${POSN[k]} ${n}/${c}</span>`}).join(" · "):"";
-    const img=el.querySelector("img"); if(p.state.url&&img.getAttribute("src")!==p.state.url)img.src=p.state.url;
-    el.querySelector(".stickers").innerHTML=ai()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("");
-    el.classList.toggle("turn",S.turn===i&&!S.busy);
-    const ba=el.querySelector(".bidarea");
-    if(S.busy){ba.innerHTML="";return}
-    if(S.turn===i&&eligible(i)){
-      const min=S.high+1;
-      ba.innerHTML=`<div class="who">🫵 <b>${esc(p.name)}</b> ist dran – ${S.leader<0?"Startgebot":"mehr als "+S.high+" €"} (max. ${p.money} €)</div>
-        <div class="bidrow"><input type="number" min="${min}" max="${p.money}" placeholder="${min} €" inputmode="numeric"><button class="bidbtn">Bieten</button></div>
-        <button class="pass">🙅 Passen</button><div class="err"></div>`;
-      const inp=ba.querySelector("input");
-      ba.querySelector(".bidbtn").onclick=()=>bid(i,inp.value);
-      inp.onkeydown=e=>{if(e.key==="Enter")bid(i,inp.value)};
-      ba.querySelector(".pass").onclick=()=>pass(i);
-      setTimeout(()=>inp.focus(),30);
-    } else {
-      const it=S.items[S.idx];
-      const why=p.won.length>=5?"hat schon 5 Dinge":!slotFree(i,it)?`hat schon genug ${it.pos==="MF"?"Mittelfeldspieler":POSN[it.pos]}`:p.money<=S.high?"kann nicht mehr mithalten":"wartet…";
-      ba.innerHTML=`<div class="wait">${S.leader===i?"🏷️ Höchstbietend: <b>"+S.high+" €</b>":esc(p.name)+" "+why}</div>`;
+    el.querySelector(".slots").innerHTML=Array.from({length:maxWins()},(_,j)=>`<div class="slot ${j<p.won.length?'f':''}"></div>`).join("");
+    const vis=el.querySelector(".vis");
+    if(isLineup()){ vis.innerHTML=lineupHTML(p); el.querySelector(".items").innerHTML=""; }
+    else{
+      if(!vis.querySelector(".imgbox")) vis.innerHTML=`<div class="imgbox"><img alt="Bild von ${esc(p.name)}"><div class="stickers"></div><div class="loader hidden"></div></div>`;
+      const img=vis.querySelector("img"); if(p.state.url&&img.getAttribute("src")!==p.state.url)img.src=p.state.url;
+      vis.querySelector(".stickers").innerHTML=p.won.slice(p.inImage).map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("");
+      el.querySelector(".items").innerHTML=p.won.length?p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ⭐":""}</li>`).join(""):`<li style="opacity:.6">noch nix</li>`;
     }
+    el.classList.toggle("turn",S.turn===i&&!S.busy);
+    el.classList.toggle("lead",S.leader===i&&!S.busy);
   });
 }
 
-function evLabel(ev){return ev==="sale"?"💸 SALE: Wer's gewinnt, zahlt nur die Hälfte!":ev==="mystery"?"❓ MYSTERY: Was es ist, siehst du erst nach dem Kauf!":ev==="double"?"⭐ DOPPELT: Wird im Bild extra groß!":""}
+function evLabel(ev){
+  if(ev==="sale")return "💸 SALE: Wer's gewinnt, zahlt nur die Hälfte!";
+  if(ev==="mystery")return "❓ MYSTERY: Was es ist, siehst du erst nach dem Kauf!";
+  if(ev==="double")return isLineup()?"⭐ DOPPELTE PUNKTE für die Teamstärke!":"⭐ EXTRA GROSS im Bild!";
+  return "";
+}
 function renderItem(){
-  const it=S.items[S.idx]; const hide=it.ev==="mystery"&&!S.revealed;
-  $("itemCard").innerHTML=`<div class="nr">Ding ${S.idx+1} von ${S.items.length}</div>
-    ${it.pos?`<div class="ev" style="background:var(--card2);color:var(--txt)">Position: ${POSN[it.pos]}</div>`:""}
+  const it=S.items[S.idx], hide=it.ev==="mystery"&&!S.revealed;
+  $("itemCard").innerHTML=`<div class="nr">${isLineup()?"Spieler":"Upgrade"} ${S.idx+1} von ${S.items.length}</div>
+    ${it.pos?`<div class="ev pos">Position: ${POSN[it.pos]}</div>`:""}
     <div class="e">${hide?"🎁":it.e}</div><div class="n">${hide?"???":esc(it.n)}</div>
     ${it.ev?`<div class="ev">${evLabel(it.ev)}</div>`:""}`;
-  const h=$("high");h.className="high"+(S.leader>=0?" l"+(S.leader+1):"");
+  const h=$("high"); h.className="high"+(S.leader>=0?" l"+(S.leader+1):"");
   h.innerHTML=S.leader<0?`<div class="nr">Noch kein Gebot</div><div class="v">0 €</div>`:
-    `<div class="nr">Aktuelles Gebot</div><div class="v">${S.high} €</div><div>von <b>${esc(S.pl[S.leader].name)}</b></div>`;
+    `<div class="nr">Höchstes Gebot</div><div class="v">${S.high} €</div><div>von <b>${esc(S.pl[S.leader].name)}</b></div>`;
   $("hist").innerHTML=S.hist.slice(-4).join(" → ");
   const left=S.items.length-S.idx-1;
-  $("log").textContent=`Noch ${left} Ding${left===1?"":"e"} danach.`;
+  $("log").textContent=left?`Danach noch ${left}.`:"Das ist das letzte!";
+}
+function renderBid(){
+  const box=$("bidBox"); const i=S.turn, p=S.pl[i];
+  if(S.busy||!eligible(i)){ box.innerHTML=""; return; }
+  const min=S.high+1, maxB=p.money;
+  box.innerHTML=`<div class="bid t${i+1}"><div class="who">🫵 <b>${esc(p.name)}</b> ist dran · ${maxB} € übrig</div>
+    <div class="quick">${[1,2,5].map(d=>`<button data-v="${S.high+d}" ${S.high+d>maxB?"disabled":""}>${S.high+d} €</button>`).join("")}</div>
+    <div class="bidrow"><input id="bidIn" type="number" min="${min}" max="${maxB}" placeholder="eigener Betrag" inputmode="numeric" aria-label="Eigenes Gebot"><button id="bidGo">Bieten</button></div>
+    <button class="pass" id="passBtn">🙅 Passen</button><div class="err" id="bidErr"></div></div>`;
+  box.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>bid(i,b.dataset.v));
+  $("bidGo").onclick=()=>bid(i,$("bidIn").value);
+  $("bidIn").onkeydown=e=>{if(e.key==="Enter")bid(i,$("bidIn").value)};
+  $("passBtn").onclick=()=>pass(i);
 }
 
 function bid(i,raw){
   if(S.busy||S.turn!==i)return;
-  const p=S.pl[i],v=Math.floor(Number(raw)),err=$("pl"+i).querySelector(".err");
-  if(!raw||!Number.isFinite(v)){err.textContent="Bitte einen Betrag eintippen.";return}
-  if(v<=S.high){err.textContent=`Du musst mehr als ${S.high} € bieten.`;return}
+  const p=S.pl[i],v=Math.floor(Number(raw)),err=$("bidErr");
+  if(!raw||!Number.isFinite(v)){err.textContent="Bitte einen Betrag wählen.";return}
+  if(v<=S.high){err.textContent=`Mehr als ${S.high} € bieten.`;return}
   if(v>p.money){err.textContent=`Du hast nur ${p.money} €.`;return}
   S.high=v;S.leader=i;S.hist.push(`${esc(p.name)}: ${v} €`);pregen();
-  say(`${p.name} bietet ${v} Euro.`);
   const o=1-i;
   if(eligible(o)){S.turn=o;renderAll();flash();}
-  else {renderAll();sold();} // andere Person kann nicht mehr mitbieten
+  else{renderAll();sold();}
 }
 function pass(i){
   if(S.busy||S.turn!==i)return;
   S.hist.push(`${esc(S.pl[i].name)}: passt`);
-  const o=1-i;
   if(S.leader>=0) return sold();
-  // noch kein Gebot: andere Person darf ein Startgebot abgeben, sonst geht's weiter
-  if(eligible(o)&&!S.passedOnce){S.passedOnce=true;S.turn=o;renderAll();say(`${S.pl[i].name} passt.`);return}
-  S.passedOnce=false; nobody();
+  const o=1-i;
+  if(eligible(o)&&!S.passedOnce){S.passedOnce=true;S.turn=o;renderAll();return}
+  nobody();
 }
 function flash(){$("high").classList.remove("flash");void $("high").offsetWidth;$("high").classList.add("flash")}
+
+/* Fußball: Jede Position muss besetzt werden. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat. */
+function forced(){
+  const nd=[0,1].filter(needs); if(!nd.length)return false;
+  let w=nd[0];
+  if(nd.length===2){const a=S.pl[0].won.length,b=S.pl[1].won.length;w=a<b?0:b<a?1:Math.round(Math.random())}
+  S.leader=w;S.high=0;S.forced=true;S.hist.push(`${esc(S.pl[w].name)} bekommt ihn gratis`);
+  sold();return true;
+}
+function nobody(){
+  if(S.busy)return;
+  if(S.cat.slots&&forced())return;
+  S.busy=true;S.hist.push("Keiner will's");renderAll();setTimeout(next,900);
+}
 
 async function sold(){
   S.busy=true;S.passedOnce=false;
@@ -492,91 +483,61 @@ async function sold(){
   const price=it.ev==="sale"?Math.ceil(S.high/2):S.high;
   p.money-=price; p.won.push({...it,double:it.ev==="double"});
   if(it.ev==="mystery")S.revealed=true;
-  renderAll();
-  say((S.forced?`Keiner hat geboten. ${p.name} braucht noch einen ${POSN[it.pos]} und bekommt ihn gratis!`:`Zum Ersten, zum Zweiten, verkauft an ${p.name} für ${price} Euro!`)+(it.ev==="mystery"?` Es war: ${it.n}!`:""));
-  if(ai()){
-    const v=variant(w,it), el=$("pl"+w), ld=el.querySelector(".loader");
-    let ready=false; v.img.then(()=>ready=true,()=>{});
-    await Promise.resolve();
-    if(!ready){ld.classList.remove("hidden");ld.innerHTML='<div><div class="spin"></div>Fast fertig…</div>'}
-    try{
-      const r=await v.img; p.state={key:v.key,img:v.img,url:r.url};
-    }catch(e){
-      ld.classList.remove("hidden");ld.innerHTML=`⚠️ Bild-Upgrade fehlgeschlagen<br><small>${esc(e.message)}</small>`;
-      setTimeout(()=>ld.classList.add("hidden"),4000);
-    }
-    if(!ld.innerHTML.startsWith("⚠️"))ld.classList.add("hidden");
+  $("log").textContent=S.forced?`${p.name} bekommt ${it.n} gratis.`:`Verkauft an ${p.name} für ${price} €!`;
+  renderItem();renderPlayers();renderBid();
+  if(!isLineup()&&!aiOff){
+    const v=variant(w,it), ld=$("pl"+w).querySelector(".loader");
+    let ready=false; v.img.then(()=>ready=true,()=>{}); await sleep(0);
+    if(!ready){ld.classList.remove("hidden");ld.innerHTML='<div><div class="spin"></div>Upgrade wird eingebaut…</div>'}
+    try{ const r=await v.img; p.state={key:v.key,img:v.img,url:r.url}; p.inImage=p.won.length; }
+    catch(e){ /* Kontingent leer oder Fehler: als Sticker weiterspielen */ }
+    ld.classList.add("hidden");
   }
   renderPlayers();
-  setTimeout(next,1400);
+  setTimeout(next,S.forced?1300:1000);
 }
-function nobody(){if(S.busy)return; if(S.cat.slots&&forced())return; S.busy=true;renderAll();say("Keiner will's. Weiter!");setTimeout(next,900)}
 function next(){
   S.idx++;
-  const canBid=S.pl.some(p=>p.won.length<5&&p.money>0);
-  if(S.idx>=S.items.length||(!canBid&&!S.cat.slots)) return finish();
+  const anyNeeds=S.pl.some(p=>p.won.length<maxWins()&&(p.money>0||S.cat.slots));
+  if(S.idx>=S.items.length||!anyNeeds) return finish();
   startItem();
 }
 
 /* ========= ENDE & ABSTIMMUNG ========= */
+function score(p){return p.won.reduce((s,w)=>s+(w.v||6)*(w.double?2:1),0)}
 function finish(){
   show("end");$("eCat").textContent=S.cat.art;
   $("final").innerHTML=S.pl.map((p,i)=>`<div class="box pl ${i?'p2':''}" id="f${i}">
      <div class="crown hidden">👑</div>
-     <h2><span>${esc(p.name)}</span><span class="money">${p.money} € übrig</span></h2>
-     <div class="imgbox"><img src="${p.state.url||""}" alt="KI-Bild"><div class="stickers">${ai()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
-     <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ×2":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul></div>`).join("");
-  S.votes=[];say(`Alle Dinge sind versteigert! Jetzt wird abgestimmt.`);voteStep(0);
+     <h2><span class="nm">${esc(p.name)}</span><span class="money">${p.money} € übrig</span></h2>
+     ${isLineup()?lineupHTML(p):`<div class="imgbox">${p.state.url?`<img src="${p.state.url}" alt="Endbild von ${esc(p.name)}">`:""}<div class="stickers">${p.won.slice(p.inImage).map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
+     <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ⭐":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul>`}</div>`).join("");
+  S.votes=[];voteStep(0);loadQuota();
 }
 function voteStep(i){
   const p=S.pl[i],o=S.pl[1-i];
   $("vote").innerHTML=`<h2>🗳️ ${esc(p.name)} stimmt ab</h2>
     <div class="nr">${esc(o.name)}, bitte kurz wegschauen 🙈 – die Stimme bleibt geheim, bis beide abgestimmt haben.</div>
     <div class="votebtns"><button style="background:#5a2240" data-v="0">${esc(S.pl[0].name)}</button><button style="background:#1d4a63" data-v="1">${esc(S.pl[1].name)}</button></div>`;
-  $("vote").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.votes[i]=+b.dataset.v; i===0?voteStep(1):resolveVotes()});
+  $("vote").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.votes[i]=+b.dataset.v;i===0?voteStep(1):resolveVotes()});
 }
-async function resolveVotes(){
-  const [a,b]=S.votes, n=S.pl.map(p=>esc(p.name));
-  let html=`<h2>Ergebnis der Abstimmung</h2><div class="nr">${n[0]} → ${n[a]} · ${n[1]} → ${n[b]}</div>`;
+function resolveVotes(){
+  const [a,b]=S.votes,n=S.pl.map(p=>esc(p.name)),s=S.pl.map(score);
+  let html=`<h2>Ergebnis</h2><div class="nr">${n[0]} → ${n[a]} · ${n[1]} → ${n[b]}</div>`;
   if(a===b){ $("vote").innerHTML=html+`<div class="verdict">Ihr seid euch einig: <b>${n[a]}</b> gewinnt! 🎉</div>`; return crown(a); }
-  $("vote").innerHTML=html+`<div class="verdict"><div class="spin"></div>Ihr seid euch nicht einig – die App entscheidet…</div>`;
-  let w=null, reason="";
-  if(ai()){ try{ const r=await aiJudge(); w=r.winner; reason=r.reason; }catch(e){ console.warn(e); } }
-  if(w===null){ const r=pointsJudge(); w=r.winner; reason=r.reason; }
-  $("vote").innerHTML=html+`<div class="verdict">⚖️ Die App entscheidet: <b>${n[w]}</b> gewinnt!<br><span class="nr">${esc(reason)}</span></div>`;
+  let w,why;
+  if(s[0]!==s[1]){w=s[0]>s[1]?0:1;why=`${isLineup()?"Teamstärke":"Punkte der Upgrades"}: ${n[0]} ${s[0]} – ${n[1]} ${s[1]}`}
+  else if(S.pl[0].money!==S.pl[1].money){w=S.pl[0].money>S.pl[1].money?0:1;why=`Gleich viele Punkte (${s[0]}) – ${n[w]} hat mehr Geld übrig.`}
+  else{w=Math.round(Math.random());why="Komplett gleich – das Los hat entschieden."}
+  $("vote").innerHTML=html+`<div class="verdict">Ihr seid euch nicht einig – ⚖️ die App entscheidet: <b>${n[w]}</b> gewinnt!<br><span class="nr">${why}</span></div>`;
   crown(w);
-}
-function score(p){return p.won.reduce((s,w)=>s+(w.v||6)*(w.double?2:1),0)}
-function pointsJudge(){
-  const s=S.pl.map(score);
-  if(s[0]!==s[1]){const w=s[0]>s[1]?0:1;return {winner:w,reason:`Punktewertung der ersteigerten Dinge: ${s[0]} zu ${s[1]}.`}}
-  const w=S.pl[0].money>=S.pl[1].money?0:1;
-  return {winner:w,reason:`Gleich viele Punkte (${s[0]}) – mehr Geld übrig hat ${S.pl[w].name}.`};
-}
-const blobToDataURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)});
-async function aiJudge(){
-  const imgs=await Promise.all(S.pl.map(async p=>blobToDataURL((await p.state.img).blob)));
-  const body={model:"openai",messages:[{role:"user",content:[
-    {type:"text",text:`Zwei Spieler haben in einem Versteigerungsspiel ${S.cat.art} gebaut. Bild 1 gehört ${S.pl[0].name}, Bild 2 gehört ${S.pl[1].name}. Welches Bild zeigt ${S.cat.art}? Bewerte nur die Bilder: wie beeindruckend, schön und gelungen sie sind. Antworte NUR mit JSON: {"winner":1 oder 2,"reason":"ein kurzer lustiger Satz auf Deutsch"}`},
-    {type:"image_url",image_url:{url:imgs[0]}},{type:"image_url",image_url:{url:imgs[1]}}]}]};
-  const r=useServer()? await fetch(`${SERVER}/judge`,{method:"POST",headers:{"X-Spiel-Passwort":pw(),"Content-Type":"application/json"},body:JSON.stringify(body)})
-    : await fetch(`${API}/v1/chat/completions`,{method:"POST",headers:{Authorization:"Bearer "+key(),"Content-Type":"application/json"},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error("Judge HTTP "+r.status);
-  const t=(await r.json()).choices[0].message.content; const m=t.match(/\{[\s\S]*\}/); const j=JSON.parse(m?m[0]:t);
-  if(j.winner!==1&&j.winner!==2)throw new Error("Ungültige Antwort");
-  return {winner:j.winner-1,reason:"KI-Schiedsrichter: "+(j.reason||"")};
 }
 function crown(i){
   [0,1].forEach(j=>{$("f"+j).classList.toggle("win",j===i);$("f"+j).querySelector(".crown").classList.toggle("hidden",j!==i)});
-  say(`${S.pl[i].name} gewinnt!`);confetti();
+  confetti();
 }
-
-/* Sprachausgabe entfernt (war störend) – Aufrufe bleiben als leere Funktionen */
-function say(){}
-function speak(){}
-
-/* ========= KONFETTI ========= */
 function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   const c=document.createElement("canvas");Object.assign(c.style,{position:"fixed",inset:0,pointerEvents:"none",zIndex:9});
   c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);const x=c.getContext("2d");
   const P=Array.from({length:160},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height/2,v:2+Math.random()*4,r:Math.random()*6.28,c:rnd(["#ffd23f","#ff5d8f","#38c6ff","#4ade80","#fff"])}));
@@ -586,8 +547,9 @@ function confetti(){
 
 /* ========= BUTTONS ========= */
 $("start").onclick=()=>newGame(catSel);
-
-$("quit").onclick=()=>{if(confirm("Spiel wirklich abbrechen?")){show("setup");loadQuota()}};
+$("quit").onclick=()=>$("confirmBox").classList.remove("hidden");
+$("cNo").onclick=()=>$("confirmBox").classList.add("hidden");
+$("cYes").onclick=()=>{$("confirmBox").classList.add("hidden");show("setup");loadQuota()};
 $("again").onclick=()=>newGame(S.cat.id);
 $("menu").onclick=()=>{show("setup");loadQuota()};
 
@@ -595,14 +557,13 @@ $("menu").onclick=()=>{show("setup");loadQuota()};
 (function(){
   const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
   if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
-  if(standalone) return; // läuft schon als App
+  if(standalone) return;
   const box=$("installBox"),btn=$("installBtn"),txt=$("installTxt");
   let deferred=null;
   window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;box.classList.remove("hidden");btn.classList.remove("hidden")});
   btn.onclick=async()=>{ if(!deferred)return; deferred.prompt(); const r=await deferred.userChoice; deferred=null;
     if(r.outcome==="accepted"){txt.textContent="Installiert! Du findest Bietduell jetzt am Startbildschirm.";btn.classList.add("hidden")} };
   window.addEventListener("appinstalled",()=>{txt.textContent="Installiert! Du findest Bietduell jetzt am Startbildschirm.";btn.classList.add("hidden")});
-  // iPhone/iPad: Safari hat keinen Installieren-Knopf, daher Anleitung zeigen
   if(/iphone|ipad|ipod/i.test(navigator.userAgent)){
     box.classList.remove("hidden");btn.classList.add("hidden");
     txt.innerHTML="In Safari unten auf <b>Teilen</b> (□↑) tippen, dann <b>„Zum Home-Bildschirm“</b>.";

@@ -107,8 +107,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
     <div class="row" style="margin-top:12px">
       <div style="flex:2"><label>Bild-KI-Status</label><div class="chip" id="quota" style="display:inline-block;margin-top:4px">⏳ Verbinde…</div></div>
       <div><label for="model">Bild-KI</label><select id="model">
-        <option value="cf/flux-2-klein-4b">FLUX.2 Klein 4B – gratis, schnell (Standard)</option>
-        <option value="cf/flux-2-klein-9b">FLUX.2 Klein 9B – gratis, noch genauer</option>
+        <option value="cf/flux-2-klein-4b">FLUX.2 Klein – gratis</option>
       </select></div>
     </div>
     <details class="hidden" style="margin-top:10px"><summary class="nr" style="cursor:pointer">Eigenen Pollinations-Key verwenden (optional)</summary>
@@ -192,11 +191,33 @@ const CATS = [
   items:[["🦋","Flügeltüren","gullwing doors open","",8],["🪞","Chrom-Lack","mirror chrome paint","",8],["🛫","Heckflügel","a big carbon rear wing","",7],["💜","Neon-Unterboden","neon underglow","",7],["⚫","Carbon-Look","carbon fiber body parts","",7],["🚀","Raketenantrieb","rocket boosters with flames at the back","",9],["🥇","Goldfelgen","gold rims","",7],["🔥","Flammen-Lack","flame paint job","",7],["🏁","Rennstreifen","racing stripes","",6],["🛸","Schwebe-Modus","hovering above the road with blue glow instead of wheels","",9],["☀️","Cabrio","convertible with the roof open","",6],["🔊","V12-Motor","a massive exposed chrome engine on the hood","",8],["🏆","Pokal auf dem Dach","a big golden trophy on the roof","",6],["🌈","Regenbogen-Lack","iridescent rainbow paint","",7],["🛞","Rennreifen","wide racing slick tires","",6]]},
  {id:"fussball",e:"⚽",n:"Fußballteam (5)",art:"das beste Fußballteam",subj:"football team",slots:{TW:1,V:1,MF:2,ST:1},
   scene:"team photo of exactly five football players standing side by side in one row on a pitch, from left to right: a goalkeeper wearing gloves, a defender, two midfielders, a striker, full bodies visible",
-  start:["all five are regular players in plain white kits on a well-kept grass pitch","all five are regular players in plain blue kits in a small stadium","all five are regular players in plain red kits on a green training pitch"],
-  items:[["🧤","Riesen-Torwart (2,10 m)","a very tall confident professional goalkeeper with giant gloves","TW",9],["🐙","Reflex-Monster","an athletic professional goalkeeper in a bright green kit, ready to dive","TW",8],["🧱","Mauer-Torwart","a broad muscular goalkeeper in a black and gold kit","TW",7],["🎯","Elfmeter-Killer","a focused goalkeeper with a headband and gold gloves","TW",8],
-   ["🛡️","Abwehr-Fels","a huge rock solid professional defender with a serious look","V",9],["🗿","Kopfball-Riese","a giant muscular professional defender","V",8],["🎖️","Libero mit Binde","a calm elegant defender wearing a captain armband","V",7],["🤖","Roboter-Verteidiger","a shiny chrome robot defender","V",7],
-   ["🧠","Spielmacher-Genie","a genius professional playmaker in a number 10 shirt","MF",9],["🪄","Dribbelkünstler","a skillful midfielder juggling a ball on his foot","MF",9],["🎯","Freistoß-Spezialist","a focused professional midfielder with perfect posture","MF",8],["🦁","Kapitän mit Löwenmähne","a strong midfielder with a lion mane hairstyle and captain armband","MF",8],["⚙️","Laufwunder","a super fit athletic midfielder with a sweatband","MF",7],["🤖","Roboter-Mittelfeld","a robot midfielder","MF",7],
-   ["⚡","Blitz-Stürmer","a lightning fast athletic professional striker with lightning bolts around him","ST",9],["🥇","Torjäger-Legende","a legendary striker holding a golden boot trophy","ST",9],["🤸","Fallrückzieher-Akrobat","an acrobatic professional striker in a dynamic pose","ST",8],["🦅","Kopfball-Ungeheuer","a tall powerful striker","ST",7]]},
+  start:["all five are regular players in plain white kits on a well-kept grass pitch in a big stadium","all five are regular players in plain blue kits in a big stadium","all five are regular players in plain red kits in a big stadium"],
+  // Echte Stars: Name steht auf der Karte, im Bild wird nur Statur/Stil beschrieben (keine Gesichter echter Personen nachgebaut)
+  items:[
+   ["🧤","Thibaut Courtois","a very tall goalkeeper with short dark hair and giant gloves","TW",9],
+   ["🧤","Alisson Becker","a tall bearded goalkeeper with dark hair in a bright green goalkeeper kit","TW",9],
+   ["🧤","Manuel Neuer","a tall experienced goalkeeper with short blond hair in a neon goalkeeper kit","TW",8],
+   ["🧤","Gianluigi Donnarumma","a giant goalkeeper with dark hair and a beard, arms spread wide","TW",8],
+   ["🧤","Emiliano Martínez","a confident goalkeeper with dark hair celebrating with fists clenched","TW",8],
+   ["🛡️","Virgil van Dijk","a very tall muscular defender with a short beard and captain armband","V",9],
+   ["🛡️","William Saliba","a tall athletic young defender with short dark hair","V",8],
+   ["🛡️","Rúben Dias","a strong defender with a beard and a serious look","V",8],
+   ["🛡️","Achraf Hakimi","a fast athletic full-back with short curly hair","V",8],
+   ["🛡️","David Alaba","an elegant defender with a short beard and a headband","V",8],
+   ["🎩","Jude Bellingham","a confident young midfielder celebrating with arms spread wide","MF",9],
+   ["🎩","Kevin De Bruyne","a blond midfielder with a calm confident look","MF",9],
+   ["🎩","Florian Wirtz","a young skillful midfielder with short brown hair dribbling a ball","MF",9],
+   ["🎩","Jamal Musiala","a slim young dribbler with short curly hair juggling a ball","MF",9],
+   ["🎩","Pedri","a slim young playmaker with dark hair","MF",8],
+   ["🎩","Rodri","a tall calm defensive midfielder with dark hair","MF",9],
+   ["🎩","Luka Modrić","an experienced slim playmaker with long blond hair","MF",8],
+   ["🎩","Marcel Sabitzer","a strong midfielder with short hair shooting a ball","MF",7],
+   ["⚡","Erling Haaland","a very tall muscular striker with long blond hair tied back","ST",10],
+   ["⚡","Kylian Mbappé","a very fast athletic striker with a shaved head celebrating with arms crossed","ST",10],
+   ["⚡","Harry Kane","a strong striker with short brown hair pointing to the sky","ST",9],
+   ["⚡","Lamine Yamal","a very young skillful winger with curly hair dribbling","ST",9],
+   ["⚡","Vinícius Júnior","a fast skillful winger with dark hair dancing in celebration","ST",9],
+   ["⚡","Marko Arnautović","a tall powerful striker with a beard and tattoos","ST",8]]},
  {id:"basket",e:"🏀",n:"Basketballteam (5)",art:"das beste Basketballteam",subj:"basketball team",scene:"team photo of five basketball players standing side by side on an indoor court, full bodies visible",
   start:["five regular players in plain grey kits on a clean indoor court","five regular players in plain white kits in a school sports hall","five regular players in plain black kits on an indoor court"],
   items:[["🦒","2,30 m Center","one player becomes an extremely tall center","",9],["🎯","Dreier-Maschine","one player becomes a confident sharpshooter spinning a ball on his finger","",8],["🦘","Dunk-König","one player becomes an athletic dunker jumping high","",9],["🧠","Spielmacher","one player becomes a genius point guard with a headband","",8],["🛡️","Verteidigungs-Monster","one player becomes a huge muscular defender","",8],["🤖","Cyborg-Forward","one player becomes a cyborg","",7],["👟","Leuchtende Schuhe","everyone wears glowing sneakers","",6],["👕","Gold-Trikots","everyone wears shiny gold jerseys","",7],["🏟️","Volle Arena","the background becomes a packed arena with lights","",8],["🐻","Bär-Maskottchen","a bear mascot stands next to them","",5],["🎉","Cheerleader","cheerleaders and confetti around them","",6],["🧑‍🏫","Trainer-Legende","a legendary coach in a suit stands next to them","",6],["🏆","Meisterpokal","a huge championship trophy in front of them","",8],["🔥","Feuerball","one player holds a basketball on fire","",7]]},
@@ -320,10 +341,12 @@ function variant(i,it){
   }
   return {key:k,img:cache.get(k)};
 }
+/* Spart Gratis-Kontingent: nur für die Person vorbereiten, die gerade vorne liegt.
+   Wechselt die Führung, wird das zweite Bild nachbereitet (bereits fertige bleiben im Cache). */
 function pregen(){
   if(!ai())return;
-  const it=S.items[S.idx]; if(!it)return;
-  S.pl.forEach((p,i)=>{ if(needs(i)) variant(i,it); });
+  const it=S.items[S.idx]; if(!it||S.leader<0)return;
+  if(needs(S.leader)) variant(S.leader,it);
 }
 
 /* ========= SPIEL ========= */
@@ -359,9 +382,7 @@ function newGame(catId){
   base.then(b=>{
     S.pl.forEach(p=>p.state.url=b.url);
     if(!ai()){ const im=new Image(); im.onload=im.onerror=()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)}; im.src=b.url; return; }
-    $("prepBar").style.width="55%";$("prepTxt").textContent="Erstes Upgrade wird schon vorbereitet…";
-    const v=variant(0,items[0]);
-    Promise.race([v.img,new Promise(r=>setTimeout(r,25000))]).finally(()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)});
+    $("prepBar").style.width="100%";setTimeout(startGame,300);
   }).catch(e=>{
     $("prepErr").innerHTML=`Startbild fehlgeschlagen: ${esc(e.message)}<br><button id="back">Zurück</button>`;
     $("back").onclick=()=>{show("setup");loadQuota()};
@@ -448,7 +469,7 @@ function bid(i,raw){
   if(!raw||!Number.isFinite(v)){err.textContent="Bitte einen Betrag eintippen.";return}
   if(v<=S.high){err.textContent=`Du musst mehr als ${S.high} € bieten.`;return}
   if(v>p.money){err.textContent=`Du hast nur ${p.money} €.`;return}
-  S.high=v;S.leader=i;S.hist.push(`${esc(p.name)}: ${v} €`);
+  S.high=v;S.leader=i;S.hist.push(`${esc(p.name)}: ${v} €`);pregen();
   say(`${p.name} bietet ${v} Euro.`);
   const o=1-i;
   if(eligible(o)){S.turn=o;renderAll();flash();}

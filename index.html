@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bietduell</title>
+<style>
+:root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--p1:#ff5d8f;--p2:#38c6ff;--gold:#ffd23f;--ok:#4ade80;--bad:#f87171;--rad:16px}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#2a1f55,var(--bg) 60%);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--card2);color:var(--txt);font-weight:600;transition:transform .08s,filter .15s}
+button:hover:not(:disabled){filter:brightness(1.2)}button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.35;cursor:not-allowed}
+input,select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}
+h1{font-size:clamp(28px,5vw,46px);margin:8px 0 4px;letter-spacing:-.5px}
+h1 span{color:var(--gold)}
+.sub{color:var(--mut);margin:0 0 20px}
+.hidden{display:none!important}
+.box{background:var(--card);border-radius:var(--rad);padding:18px;box-shadow:0 8px 30px #0005}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>*{flex:1;min-width:160px}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:14px}
+.cat{padding:14px 10px;background:var(--card2);border-radius:14px;text-align:center;border:2px solid transparent}
+.cat .e{font-size:34px;display:block}.cat.sel{border-color:var(--gold);background:#3a3263}
+.big{font-size:20px;padding:14px 26px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.game{display:grid;grid-template-columns:1fr minmax(260px,340px) 1fr;gap:14px;align-items:start}
+@media(max-width:900px){.game{grid-template-columns:1fr}.center{order:-1}}
+.pl{border-top:5px solid var(--p1);transition:box-shadow .2s}.pl.p2{border-top-color:var(--p2)}
+.pl.turn{box-shadow:0 0 0 3px var(--gold),0 8px 30px #0005}
+.pl h2{margin:0 0 6px;font-size:22px;display:flex;justify-content:space-between;align-items:center}
+.money{font-size:26px;font-weight:800;color:var(--gold)}
+.slots{display:flex;gap:4px;margin:6px 0 10px}.slot{flex:1;height:8px;border-radius:4px;background:#3c3766}.slot.f{background:var(--ok)}
+.imgbox{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#0d0b1a;display:grid;place-items:center}
+.imgbox img{width:100%;height:100%;object-fit:cover;display:block}
+.stickers{position:absolute;left:6px;right:6px;bottom:6px;display:flex;flex-wrap:wrap;gap:4px}
+.stickers span{background:#000a;border-radius:999px;padding:2px 8px;font-size:13px}
+.loader{position:absolute;inset:0;display:grid;place-items:center;background:#0d0b1acc;color:var(--mut);font-size:14px;text-align:center;padding:10px}
+.spin{width:34px;height:34px;border:4px solid #3c3766;border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.items{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.items li{background:var(--card2);padding:4px 9px;border-radius:999px;font-size:13px}
+.bidarea{margin-top:12px;min-height:96px}
+.bidarea .who{font-size:14px;color:var(--mut);margin-bottom:6px}
+.bidrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.bidrow input{font-size:22px;font-weight:800;text-align:center}
+.bidbtn{background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.pass{width:100%;margin-top:8px;background:#3a2030}
+.wait{padding:14px;text-align:center;color:var(--mut);background:#151229;border-radius:12px}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:4px}
+.center .item{text-align:center}
+.nr{color:var(--mut);font-size:14px}
+.item .e{font-size:70px;line-height:1.1;margin:8px 0}
+.item .n{font-size:26px;font-weight:800}
+.ev{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;background:var(--gold);color:#241a00;font-weight:700;font-size:13px}
+.high{margin:16px 0;padding:14px;border-radius:12px;background:#151229;text-align:center}
+.high .v{font-size:40px;font-weight:900}
+.high.l1{box-shadow:inset 0 0 0 3px var(--p1)}.high.l2{box-shadow:inset 0 0 0 3px var(--p2)}
+.hist{font-size:13px;color:var(--mut);text-align:center;min-height:20px}
+.log{font-size:13px;color:var(--mut);margin-top:10px;min-height:20px;text-align:center}
+.flash{animation:f .6s}@keyframes f{0%{transform:scale(1)}40%{transform:scale(1.04);box-shadow:0 0 0 4px var(--gold)}100%{transform:scale(1)}}
+.final{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.final{grid-template-columns:1fr}}
+.win{outline:4px solid var(--gold)}
+.crown{font-size:40px;text-align:center}
+.rules{color:var(--mut);font-size:14px;line-height:1.5}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{background:var(--card2);padding:6px 12px;border-radius:999px;font-size:13px;color:var(--mut)}
+.prep{max-width:520px;margin:60px auto;text-align:center}
+.bar{height:10px;background:#3c3766;border-radius:6px;overflow:hidden;margin:14px 0}.bar div{height:100%;background:var(--gold);width:0;transition:width .4s}
+.votebox{max-width:640px;margin:20px auto;text-align:center}
+.votebtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.votebtns button{font-size:18px;padding:16px}
+.verdict{margin-top:14px;font-size:18px;line-height:1.5}
+.warn{background:#3a2a10;color:#ffd58a;padding:10px 12px;border-radius:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- SETUP -->
+<section id="setup">
+  <h1>💰 Bietduell <span>– wer baut's besser?</span></h1>
+  <p class="sub">Beide starten mit demselben Bild. 10 Dinge werden versteigert, jede:r darf max. 5 ersteigern. Was du kaufst, wird in dein Bild eingebaut – das Grundgerüst bleibt gleich.</p>
+  <div class="box">
+    <div class="row">
+      <div><label>Spieler:in 1</label><input id="n1" value="Spieler 1"></div>
+      <div><label>Spieler:in 2</label><input id="n2" value="Spieler 2"></div>
+      <div><label>Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20"></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div style="flex:2"><label>Pollinations-Key (sk_…) – nötig, damit die KI dein Bild bearbeiten kann</label><input id="apikey" type="password" placeholder="sk_… (gratis auf enter.pollinations.ai)" autocomplete="off"></div>
+      <div><label>Bild-KI</label><select id="model">
+        <option value="black-forest-labs/flux.1-kontext-pro">FLUX Kontext Pro (Standard – sichtbare Upgrades)</option>
+        <option value="black-forest-labs/flux.2-klein-4b">FLUX.2 Klein (günstiger, kaum sichtbare Änderungen)</option>
+      </select></div>
+    </div>
+    <div class="warn" id="nokey">Ohne Key läuft der <b>Demo-Modus</b>: Beide bekommen dasselbe Startbild, gekaufte Dinge erscheinen als Sticker darauf. Die echte KI-Bearbeitung braucht den Key.</div>
+    <label style="margin-top:16px">Kategorie wählen</label>
+    <div class="cats" id="cats"></div>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="big" id="start">Los geht's! 🔨</button>
+      <span class="rules">Jede Runde kommen andere Dinge, eine andere Reihenfolge, ein anderer Startzustand und Spezial-Events.</span>
+    </div>
+  </div>
+  <div class="box rules" style="margin-top:14px">
+    <b>Regeln:</b> Ein Ding nach dem anderen wird vorgelesen. Ihr bietet abwechselnd: Wer dran ist, sieht das aktuelle Gebot, tippt einen höheren Betrag ein und drückt <b>Enter</b> – oder <b>passt</b>. Wer passt, überlässt das Ding der anderen Person. Max. 5 Dinge pro Person. Am Ende stimmt jede:r geheim ab, wer gewonnen hat. Seid ihr euch nicht einig, entscheidet die App.
+  </div>
+</section>
+
+<!-- VORBEREITUNG -->
+<section id="prep" class="hidden">
+  <div class="box prep">
+    <div class="spin"></div>
+    <h2 id="prepTitle">Spiel wird vorbereitet…</h2>
+    <div class="bar"><div id="prepBar"></div></div>
+    <div class="nr" id="prepTxt">Startbild wird gemalt</div>
+    <div class="err" id="prepErr"></div>
+  </div>
+</section>
+
+<!-- GAME -->
+<section id="game" class="hidden">
+  <div class="top" style="margin-bottom:12px">
+    <h1 style="font-size:28px;margin:0" id="gTitle"></h1>
+    <div class="row" style="flex:0 0 auto;gap:8px"><span class="chip" id="twistChip"></span><span class="chip" id="modeChip"></span><button id="quit">✖ Abbrechen</button></div>
+  </div>
+  <div class="game">
+    <div class="box pl p1" id="pl0"></div>
+    <div class="box center">
+      <div class="item" id="itemCard"></div>
+      <div class="high" id="high"></div>
+      <div class="hist" id="hist"></div>
+      <div style="text-align:center;margin-top:10px"><button id="speak">🔊 Nochmal vorlesen</button></div>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="box pl p2" id="pl1"></div>
+  </div>
+</section>
+
+<!-- END -->
+<section id="end" class="hidden">
+  <h1 style="text-align:center">🏁 Wer hat <span id="eCat"></span>?</h1>
+  <div class="box votebox" id="vote"></div>
+  <div class="final" id="final"></div>
+  <div style="text-align:center;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button class="big" id="again">🔁 Nochmal (gleiche Kategorie)</button>
+    <button id="menu">📋 Andere Kategorie</button>
+  </div>
+</section>
+</div>
+
+<script>
+/* ========= KATEGORIEN =========
+   Pro Kategorie: Emoji, Name, Bildbeschreibung (scene), englisches Hauptmotiv (subj), schirche Startzustände (ugly)
+   und ein Pool von Dingen [Emoji, Name, englische Bildanweisung]. Pro Spiel werden 10 zufällig gezogen. */
+const CATS = [
+ {id:"insel",e:"🏝️",n:"Insel",art:"die schönste Insel",subj:"island",scene:"aerial photo of a small private island in the ocean",
+  ugly:["a tiny ugly muddy island with one dead tree and some trash","a small grey rocky island in a stormy sea with seagulls","a sad flat sandbank with a broken plastic chair"],
+  items:[["🏖️","Palmenstrand","white sand beach with palm trees"],["🏊","Luxusvilla mit Infinity-Pool","modern luxury villa with infinity pool"],["💦","Riesiger Wasserfall","huge waterfall"],["🌋","Vulkan (aktiv!)","active volcano with lava"],["🗼","Leuchtturm","tall striped lighthouse"],["🚁","Hubschrauberlandeplatz","helipad with helicopter"],["🐠","Korallenriff","colorful coral reef in turquoise water"],["🌳","Baumhaus-Dorf","treehouse village connected by rope bridges"],["🏴‍☠️","Piratenschiff-Wrack","old pirate shipwreck on the shore"],["🛝","Riesen-Wasserrutsche","giant water slide into the sea"],["🦩","Flamingo-Kolonie","flock of pink flamingos"],["💰","Höhle voller Gold","cave full of gold treasure"],["🗑️","Mülldeponie","big garbage dump"],["🍹","Strandbar","beach bar with lights"],["🛥️","Steg mit Jacht","wooden pier with a luxury yacht"],["🎡","Riesenrad","ferris wheel"],["🦖","Dino-Statue","giant dinosaur statue"],["⛳","Golfplatz","green golf course"],["🏚️","Wellblechhütte","rusty corrugated metal shack"],["🦍","Gorilla als Hausmeister","gorilla working as a caretaker"]]},
+ {id:"haus",e:"🏡",n:"Haus & Grundstück",art:"das beste Grundstück",subj:"house",scene:"photo of a house on a large property",
+  ugly:["a run-down tiny shack on an empty muddy lot","an ugly grey concrete box house with broken windows","an old caravan on a weedy plot of land"],
+  items:[["🏊","Pool mit Rutsche","swimming pool with slide"],["🏎️","Garage mit Sportwagen","garage with supercars"],["🎾","Tennisplatz","tennis court"],["🪟","Glasfassade","modern glass facade on the house"],["🌇","Dachterrasse","rooftop terrace with lounge"],["🎬","Heimkino","home cinema visible through a window"],["🏔️","Bergblick","dramatic mountains in the background"],["⛲","Garten mit Springbrunnen","landscaped garden with fountain"],["🚁","Helikopter-Landeplatz","helipad with helicopter"],["🧙","Gartenzwerg-Armee","army of garden gnomes"],["🌳","Baumhaus","big treehouse"],["⚽","Fußballplatz","private football pitch"],["🌱","Gewächshaus","glass greenhouse"],["🤸","Riesen-Trampolin","giant trampoline"],["🏰","Burggraben","castle moat around the property"],["🐟","Koi-Teich","koi pond with bridge"],["🏭","Kläranlage nebenan","sewage plant next door"],["🔥","Feuerstelle mit Lounge","outdoor fire pit lounge"],["🐎","Pferdestall","horse stable with horses"]]},
+ {id:"jacht",e:"🛥️",n:"Jacht",art:"die schönste Jacht",subj:"boat",scene:"photo of a boat on the sea",
+  ugly:["a small rusty old rowing boat","a leaking tiny fishing boat with patches","an inflatable rubber dinghy with a hole"],
+  items:[["🚁","Hubschrauber an Deck","helicopter on the deck"],["🏊","Pool an Deck","pool on the deck"],["🌊","Jetskis","jet skis next to it"],["🛝","Wasserrutsche","water slide from the boat into the sea"],["🔍","Glasboden","glass bottom"],["🟡","U-Boot im Rumpf","small yellow submarine next to it"],["✨","Goldene Verkleidung","gold plated hull"],["🎧","DJ-Pult & Party","DJ booth and party lights"],["🛁","Whirlpool","jacuzzi"],["🌈","Regenbogen-Segel","rainbow colored sails"],["💡","Unterwasser-Lichter","blue underwater lights"],["🎬","Kino unter Sternen","outdoor cinema screen"],["💣","Piraten-Kanonen","pirate cannons"],["☀️","Sonnendeck","sun deck with loungers"],["🦆","Gummienten-Rettungsringe","rubber duck life rings"],["🐬","Delfin-Begleitung","dolphins jumping next to it"],["🏢","Drittes Deck","an additional third deck on top"],["🧱","Rost-Look","covered in rust"]]},
+ {id:"jet",e:"✈️",n:"Privatjet",art:"den besten Privatjet",subj:"airplane",scene:"photo of a small airplane on a runway",
+  ugly:["a tiny old rusty propeller plane with duct tape on a dirt runway","an old crop duster with peeling paint","a dented old small plane with a flat tire"],
+  items:[["✨","Goldene Lackierung","shiny gold paint job on the airplane"],["🛏️","Schlafzimmer an Bord","luxury bedroom visible through the windows"],["🍸","Bar mit Barkeeper","onboard bar visible through the windows"],["🛁","Whirlpool an Bord","jacuzzi visible through a window"],["🪟","Panorama-Fenster","huge panoramic windows"],["🚀","Raketentriebwerke","rocket engines with flames"],["🏢","Eigener Hangar","private hangar behind it"],["🐉","Drachen-Bemalung","dragon paint design"],["🎮","Gaming-Lounge","gaming screens visible inside"],["🪂","Fallschirm-Rampe","open rear parachute ramp"],["🐕","Bordhunde","dogs on board"],["🌀","Holzpropeller","wooden propeller"],["💜","Neon-Licht","neon lights"],["🥇","Roter Teppich","red carpet at the stairs"],["🦅","Adlerflügel-Design","eagle feather wing design"],["🏁","Rennstreifen","racing stripes"],["🍾","Champagner-Empfang","champagne table at the stairs"]]},
+ {id:"fussball",e:"⚽",n:"Fußballteam (5)",art:"das beste Fußballteam",subj:"football team",
+  slots:{TW:1,V:1,MF:2,ST:1},
+  scene:"team photo of exactly five football players standing side by side in one row on a pitch, from left to right: a goalkeeper wearing gloves, a defender, two midfielders, a striker, full bodies visible",
+  ugly:["all five are out-of-shape amateurs in mismatched clothes on a muddy village pitch","all five are tired old men in socks on a bumpy field","all five are confused people with oversized shirts on a gravel pitch"],
+  items:[
+   ["🧤","Riesen-Torwart (2,10 m)","a very tall confident professional goalkeeper with giant gloves","TW",9],
+   ["🐙","Reflex-Monster im Tor","an athletic professional goalkeeper in a bright green kit, ready to dive","TW",8],
+   ["🧱","Mauer-Torwart","a broad muscular goalkeeper in a black and gold kit","TW",7],
+   ["🦍","Gorilla im Tor","a gorilla wearing goalkeeper gloves","TW",4],
+   ["👴","Opa-Torwart (70)","a 70 year old grandpa goalkeeper in a cardigan","TW",2],
+   ["😱","Torwart mit Ballangst","a scared goalkeeper covering his face with his hands","TW",1],
+   ["🛡️","Abwehr-Fels","a huge rock solid professional defender with a serious look","V",9],
+   ["🗿","Kopfball-Riese","a giant muscular professional defender","V",8],
+   ["🎖️","Libero mit Kapitänsbinde","a calm elegant professional defender wearing a captain armband","V",7],
+   ["🤖","Roboter-Verteidiger","a shiny chrome robot defender","V",6],
+   ["🐢","Schildkröten-Verteidiger","a very slow overweight defender out of breath","V",2],
+   ["🩴","Verteidiger in Flip-Flops","a defender wearing flip flops with white socks","V",1],
+   ["🧠","Spielmacher-Genie","a genius professional playmaker in a number 10 shirt","MF",9],
+   ["🪄","Dribbelkünstler","a skillful professional midfielder juggling a ball on his foot","MF",9],
+   ["🎯","Freistoß-Spezialist","a focused professional midfielder with perfect posture","MF",8],
+   ["🦁","Kapitän mit Löwenmähne","a strong midfielder with a lion mane hairstyle","MF",8],
+   ["⚙️","Laufwunder","a super fit athletic midfielder with sweatband","MF",7],
+   ["🎩","Gentleman-Kicker","a midfielder with a top hat and a curly mustache","MF",4],
+   ["🍔","Burger-Fan","an out of shape midfielder eating a burger","MF",2],
+   ["😴","Müder Mittelfeldspieler","a sleepy midfielder yawning in pajamas","MF",1],
+   ["⚡","Blitz-Stürmer (40 km/h)","a lightning fast athletic professional striker","ST",9],
+   ["🥇","Torjäger-Legende","a legendary striker holding a golden boot trophy","ST",9],
+   ["🤸","Fallrückzieher-Akrobat","an acrobatic professional striker in a dynamic pose","ST",8],
+   ["🦅","Kopfball-Ungeheuer","a tall powerful striker","ST",7],
+   ["🩰","Stürmer im Tutu","a striker wearing a pink tutu","ST",2],
+   ["🐌","Schnecken-Stürmer","a very slow old striker with a walking stick","ST",1]]},
+ {id:"basket",e:"🏀",n:"Basketballteam (5)",art:"das beste Basketballteam",subj:"team of five basketball players",scene:"team photo of five basketball players standing on a court",
+  ugly:["five short unathletic players in pajamas on a broken outdoor court","five sleepy players on a cracked parking lot with a bent hoop","five players in bathrobes in a tiny school gym"],
+  items:[["🦒","2,30 m Center","one player becomes an extremely tall center"],["🎯","Dreier-Maschine","one player becomes a confident sharpshooter holding a ball"],["🦘","Dunk-König","one player becomes an athletic dunker jumping"],["🧠","Spielmacher-Genie","one player becomes a genius point guard"],["🛡️","Verteidigungs-Monster","one player becomes a huge muscular defender"],["🤖","Cyborg-Forward","one player becomes a cyborg"],["🐢","Sehr langsamer Spieler","one player becomes a very slow tired old man"],["👟","Leuchtende Schuhe","everyone wears glowing sneakers"],["👕","Neon-Trikots","everyone wears neon jerseys"],["🏟️","Volle Arena","the background becomes a packed arena with lights"],["🐻","Bär als Maskottchen","a bear mascot stands next to them"],["🧓","Oma mit Wurfgefühl","one player becomes a grandma"],["🔥","Brennender Ball","a basketball on fire"],["🧑‍🏫","Trainer-Legende","a legendary coach stands next to them"],["🏆","Meisterschaftsringe","shining championship rings on their hands"],["🍿","Cheerleader & Show","cheerleaders and fireworks"],["🪀","Spieler mit Jojo","one player is distracted playing with a yo-yo"]]},
+ {id:"held",e:"🦸",n:"Superheld:in",art:"die stärkste Heldenfigur",subj:"person",scene:"cinematic full body portrait of a superhero",
+  ugly:["an awkward ordinary person in a cheap homemade costume made of cardboard","a sleepy person in a bathrobe with a towel as a cape","a nervous person in a costume made of trash bags"],
+  items:[["🕊️","Fliegen","the person is flying in the air"],["👻","Unsichtbarkeit","the body is partly invisible and shimmering"],["💪","Superstärke","the person is lifting a car"],["🔥","Feuerhände","hands made of fire"],["🌀","Teleportation","a glowing teleport portal next to them"],["❄️","Eis-Kräfte","ice powers"],["✨","Umhang aus Licht","a cape made of light"],["🛡️","Goldrüstung","golden armor"],["🐉","Drache als Reittier","a dragon next to them"],["⏱️","Zeitreise-Uhr","glowing time travel watch"],["⚡","Blitzschnell","lightning speed trail"],["🧠","Gedankenlesen","glowing psychic eyes"],["👁️","Laserblick","laser eyes"],["🐹","Hamster als Sidekick","hamster sidekick on the shoulder"],["🐦","Spricht mit Tauben","surrounded by pigeons"],["🦶","Super-Riechfüße","stinky green smell cloud from the feet"],["🤖","Roboter-Arm","robotic arm"]]},
+ {id:"auto",e:"🏎️",n:"Sportwagen",art:"das beste Auto",subj:"car",scene:"photo of a car on a road",
+  ugly:["an old rusty broken small car with a flat tire","a dented old minivan with a missing door","a tiny rusty three wheeler"],
+  items:[["🔊","V12-Motor","massive exposed chrome engine on the hood"],["🦋","Flügeltüren","gullwing doors open"],["🪞","Chrom-Lack","mirror chrome paint"],["🛫","Riesenspoiler","huge rear spoiler"],["💜","Neon-Unterboden","neon underglow"],["⚫","Carbon-Look","carbon fiber body"],["🚀","Raketenantrieb","rocket booster with flames at the back"],["🛞","Offroad-Reifen","huge off-road tires"],["☀️","Cabrio","convertible open top"],["🥇","Goldfelgen","gold rims"],["🔥","Flammen-Lack","flame paint job"],["🏁","Rennstreifen","racing stripes"],["🛸","Schwebe-Modus","hovering above the road with blue glow"],["🏕️","Wohnwagen-Anhänger","old caravan trailer attached"],["🐄","Kuh-Muster","cow pattern paint"],["🛡️","Panzerung","armored plating"]]},
+ {id:"burg",e:"🏰",n:"Burg",art:"die mächtigste Burg",subj:"castle",scene:"epic photo of a castle on a hill",
+  ugly:["a small crumbling pile of stones","a tiny wooden fort falling apart","a ruined wall with one broken tower"],
+  items:[["🐉","Drache auf dem Turm","dragon sitting on the tower"],["🐊","Graben mit Krokodilen","moat with crocodiles"],["🌉","Zugbrücke","drawbridge"],["🗼","Hohe Türme","tall towers"],["👑","Thronsaal","glowing golden windows"],["⚔️","Ritter-Armee","army of knights in front"],["💦","Wasserfall","waterfall next to it"],["💎","Schatzkammer","treasure glowing at the gate"],["🚩","Fahnen","banners and flags"],["💣","Kanonen","cannons on walls"],["🔮","Zaubererturm","wizard tower with magic glow"],["🌿","Labyrinth-Garten","hedge maze garden"],["🦄","Einhorn-Stall","unicorns and a stable"],["👻","Geister","ghosts floating"],["🚽","Dixi-Klo","portable toilet in front"],["🌕","Vollmond","full moon behind"]]},
+ {id:"park",e:"🎢",n:"Freizeitpark",art:"den besten Freizeitpark",subj:"amusement park area",scene:"aerial photo of a small amusement park area",
+  ugly:["an empty abandoned parking lot with one broken swing","a sad tiny fairground with one rusty carousel","a muddy field with a deflated bouncy castle"],
+  items:[["🎢","Looping-Achterbahn","roller coaster with loops"],["🎡","Riesenrad","giant ferris wheel"],["🛶","Wildwasserbahn","log flume water ride"],["🗼","Freifallturm","drop tower"],["👻","Geisterbahn","haunted house ride"],["🎠","Karussell","carousel"],["🍭","Zuckerwatte-Stand","cotton candy stands"],["🏰","Märchenschloss","fairytale castle"],["🌊","Wasserpark","water park with slides"],["🏎️","Kartbahn","go kart track"],["🎆","Feuerwerk","fireworks in the sky"],["🦖","Dino-Abenteuer","dinosaur figures"],["🐙","Riesenkrake-Fahrgeschäft","giant octopus ride"],["🚗","Autoscooter","bumper cars"],["🐌","2 h Warteschlange","huge long queue of people"],["🌧️","Dauerregen","heavy rain"]]},
+ {id:"zimmer",e:"🎮",n:"Gaming-Zimmer",art:"das beste Zimmer",subj:"room",scene:"photo of a bedroom interior",
+  ugly:["an empty messy small bedroom with an old box TV and a plastic chair","a dark basement room with one flickering bulb","a tiny room with a mattress on the floor and an old laptop"],
+  items:[["🖥️","Curved-Monitor","huge curved monitor setup on a desk"],["🌈","RGB-Beleuchtung","rgb lighting everywhere"],["💺","Gaming-Stuhl","racing gaming chair"],["🧃","Getränke-Kühlschrank","glass drink fridge"],["🛋️","Riesen-Sitzsack","giant bean bag"],["📽️","Beamer-Wand","projector image on a full wall"],["🥽","VR-Station","virtual reality headset station"],["🕹️","Arcade-Automat","retro arcade machine"],["🏁","Rennsimulator","racing simulator cockpit"],["🐠","Aquarium-Wand","aquarium wall"],["💡","Neon-Schild","neon sign on the wall"],["🔵","Bällebad","ball pit"],["🛝","Rutsche ins Zimmer","slide into the room"],["🍫","Snack-Automat","snack vending machine"],["🧦","Socken-Berg","pile of dirty socks"],["🐱","Katze auf der Tastatur","cat sitting on the keyboard"]]},
+ {id:"tier",e:"🐉",n:"Fabelwesen-Haustier",art:"das coolste Haustier",subj:"creature",scene:"fantasy portrait of a pet creature",
+  ugly:["a small grumpy scruffy grey rat","a wet sad pigeon with messy feathers","a tiny confused bald hamster"],
+  items:[["🐲","Drachenflügel","dragon wings"],["🦄","Einhorn-Horn","unicorn horn"],["🦁","Löwenmähne","lion mane"],["🌈","Regenbogenfell","rainbow fur"],["🔥","Feueratem","breathing fire"],["🐢","Schildkrötenpanzer","turtle shell armor"],["🦚","Pfauenschwanz","peacock tail"],["💎","Kristallaugen","glowing crystal eyes"],["👑","Krone","tiny crown"],["🌟","Leuchtet im Dunkeln","glowing aura"],["🐰","Hasenohren","bunny ears"],["🐙","Tentakel","octopus tentacles"],["🛡️","Goldrüstung","golden armor"],["🎩","Zylinder","top hat"],["🐾","Riesenpfoten","oversized fluffy paws"],["⚡","Blitz-Kräfte","lightning sparks around it"]]},
+ {id:"raum",e:"🚀",n:"Raumschiff",art:"das beste Raumschiff",subj:"spaceship",scene:"sci-fi photo of a spaceship in space",
+  ugly:["a dented trash can with cardboard fins as a spaceship","a rusty old satellite with duct tape","a tiny capsule made of scrap metal"],
+  items:[["🔥","Hyperantrieb","glowing hyperdrive engines"],["🛡️","Energieschild","blue energy shield bubble"],["🔫","Laserkanonen","laser cannons"],["🌌","Panorama-Kuppel","glass dome cockpit"],["🛸","Begleit-Drohnen","escort drones"],["🌍","Eigener Planet","a beautiful planet in the background"],["🤖","Roboter-Crew","robots visible in the windows"],["🪐","Ringe wie Saturn","rotating rings around it"],["✨","Tarnmodus","shimmering cloak effect"],["🐉","Weltraum-Drache","space dragon escort"],["🌈","Regenbogen-Abgas","rainbow exhaust trail"],["🧲","Traktorstrahl","tractor beam"],["🧼","Frisch poliert","shiny polished hull"],["🚽","Klo-Modul","toilet shaped module attached"],["☄️","Asteroiden-Hagel","asteroids hitting it"]]},
+ {id:"burger",e:"🍔",n:"Burger",art:"den besten Burger",subj:"burger",scene:"food photography of a burger on a plate",
+  ugly:["a sad flat burger with a dry grey patty","a squashed fast food burger in wet paper","a burnt burger on a paper plate"],
+  items:[["🥩","Wagyu-Patty","thick juicy wagyu beef patty"],["🧀","Doppelt Käse","melted double cheese"],["🥓","Knuspriger Speck","crispy bacon"],["🥑","Avocado","avocado slices"],["🍞","Brioche-Bun","glossy brioche bun"],["🧅","Röstzwiebeln","crispy onion rings"],["🥇","Blattgold","edible gold leaf"],["🍟","Trüffel-Pommes","truffle fries on the side"],["🌶️","Jalapeños","jalapeños"],["🍳","Spiegelei","fried egg"],["🥬","Frischer Salat","fresh lettuce and tomato"],["🍍","Ananas","pineapple slice"],["🐟","Fischstäbchen","fish fingers"],["🍫","Schokosoße","chocolate sauce"],["🔥","Flambiert","flames around it"]]},
+];
+/* Versteckter Punktewert (nur für die App-Entscheidung). Standard 6. */
+const VAL={"Mülldeponie":1,"Wellblechhütte":1,"Kläranlage nebenan":1,"Rost-Look":1,"Torwart mit Ballangst":1,"Spieler in Flip-Flops":1,"Sehr langsamer Spieler":1,"Spieler mit Jojo":1,"Super-Riechfüße":1,"Wohnwagen-Anhänger":1,"Dixi-Klo":1,"2 h Warteschlange":1,"Dauerregen":1,"Socken-Berg":1,"Klo-Modul":1,"Asteroiden-Hagel":1,"Fischstäbchen":1,"Schokosoße":1,"Holzpropeller":2,
+ "Gorilla als Hausmeister":3,"Gartenzwerg-Armee":3,"Gummienten-Rettungsringe":3,"Bordhunde":4,"Opa (70) mit Erfahrung":3,"Oma mit Wurfgefühl":3,"Hamster als Sidekick":3,"Spricht mit Tauben":2,"Kuh-Muster":3,"Katze auf der Tastatur":3,"Hasenohren":4,"Zylinder":4,"Ananas":4,"Gorilla im Tor":4,"Geister":5,
+ "Luxusvilla mit Infinity-Pool":9,"Palmenstrand":9,"Pool mit Rutsche":9,"Hubschrauber an Deck":9,"Goldene Lackierung":9,"Torwart mit 2,10 m":9,"Stürmer mit 40 km/h":9,"2,30 m Center":9,"Fliegen":9,"Drache auf dem Turm":9,"Looping-Achterbahn":9,"Curved-Monitor":9,"Drachenflügel":9,"Hyperantrieb":9,"Wagyu-Patty":9,"Raketenantrieb":8,"Raketentriebwerke":8};
+const TWISTS=[["🌅 Sonnenuntergang","at golden hour sunset"],["🌙 Nacht","at night with glowing lights"],["❄️ Winter","in winter with snow"],["🌈 Cartoon","in colorful cartoon style"],["📸 Fotorealistisch","photorealistic"],["🧱 Spielzeugwelt","as a toy miniature diorama"],["🎨 Ölgemälde","as an oil painting"],["🕹️ Pixel-Art","in pixel art style"]];
+const API="https://gen.pollinations.ai";
+
+/* ========= HILFSFUNKTIONEN ========= */
+let catSel="random", S=null;
+const $=id=>document.getElementById(id);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const key=()=>($("apikey").value||"").trim();
+try{ $("apikey").value=localStorage.getItem("bd_key")||""; $("model").value=localStorage.getItem("bd_model2")||$("model").value; }catch(e){}
+function syncKeyHint(){ $("nokey").classList.toggle("hidden",!!key()); }
+$("apikey").oninput=syncKeyHint; syncKeyHint();
+
+function renderCats(){
+  $("cats").innerHTML=`<button class="cat ${catSel==='random'?'sel':''}" data-id="random"><span class="e">🎲</span>Zufall</button>`+
+   CATS.map(c=>`<button class="cat ${catSel===c.id?'sel':''}" data-id="${c.id}"><span class="e">${c.e}</span>${c.n}</button>`).join("");
+  $("cats").querySelectorAll(".cat").forEach(b=>b.onclick=()=>{catSel=b.dataset.id;renderCats()});
+}
+renderCats();
+function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id))}
+
+/* ========= BILD-KI =========
+   Startbild: einmal generiert, beide bekommen genau dasselbe.
+   Upgrade: Das aktuelle Bild wird BEARBEITET (Image-Edit), nicht neu gemalt -> Grundgerüst bleibt.
+   Vorab-Generierung: Sobald ein Ding aufgerufen wird, rechnet die App schon beide möglichen Upgrades
+   (falls Spieler:in 1 gewinnt / falls Spieler:in 2 gewinnt). Beim Zuschlag ist das Bild sofort da. */
+const cache=new Map(); // stateKey -> Promise<{url,blob}>
+async function toBlobFromResponse(r){
+  if(!r.ok){let t="";try{t=(await r.text()).slice(0,200)}catch(e){} throw new Error("HTTP "+r.status+" "+t)}
+  const ct=r.headers.get("content-type")||"";
+  if(ct.startsWith("image/")) return await r.blob();
+  const j=await r.json(); const d=(j.data||[])[0]||{};
+  if(d.b64_json){const bin=atob(d.b64_json),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:"image/png"})}
+  if(d.url){return await (await fetch(d.url)).blob()}
+  throw new Error("Keine Bilddaten in der Antwort");
+}
+function basePrompt(){return `${S.cat.scene}, ${S.ugly}, ${S.twist[1]}, highly detailed, no text, no watermark`}
+async function genBase(){
+  if(!key()){ // Demo-Modus: anonymer Gratis-Endpunkt
+    return {url:`https://image.pollinations.ai/prompt/${encodeURIComponent(basePrompt())}?width=1024&height=768&seed=${S.seed}&nologo=true`};
+  }
+  const r=await fetch(`${API}/image/${encodeURIComponent(basePrompt())}?model=${encodeURIComponent("black-forest-labs/flux.2-klein-4b")}&width=1024&height=768&seed=${S.seed}`,{headers:{Authorization:"Bearer "+key()}});
+  const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
+}
+/* Positionen (Fußball): Wo steht wer im Teamfoto? */
+const POSN={TW:"Torwart",V:"Verteidiger",MF:"Mittelfeld",ST:"Stürmer"};
+function slotFree(i,it){ if(!S.cat.slots||!it||!it.pos)return true; return S.pl[i].won.filter(w=>w.pos===it.pos).length<S.cat.slots[it.pos]; }
+function slotDesc(i,it){
+  const n=S.pl[i].won.filter(w=>w.pos===it.pos).length;
+  return {TW:"the goalkeeper standing on the far left",V:"the defender standing second from the left",
+          MF:n===0?"the midfielder standing exactly in the middle":"the midfielder standing second from the right",
+          ST:"the striker standing on the far right"}[it.pos];
+}
+function editPrompt(it,i){
+  if(it.pos) return `Edit this image. Replace only ${slotDesc(i,it)} with ${it.p}${it.ev==="double"?" (make him look extra impressive and heroic)":""}, standing at exactly the same spot. `+
+   `Keep the other four players, the background, framing, camera angle, lighting and art style exactly the same. Do not crop or zoom. No text.`;
+  return `Edit this image. Apply this change to the ${S.cat.subj} so that it is clearly and prominently visible: ${it.p}${it.ev==="double"?" (make it very large and eye-catching)":""}. `+
+   `Keep everything else exactly the same: the same ${S.cat.subj} with the same shape and structure, same framing and zoom, same camera angle, same lighting and art style, and keep every detail that is already in the image. Do not crop or zoom. No text.`;
+}
+async function genEdit(src,it,i){
+  const fd=new FormData();
+  fd.append("image",src.blob,"bild.png");
+  fd.append("prompt",editPrompt(it,i));
+  fd.append("model",$("model").value);
+  fd.append("response_format","b64_json");
+  fd.append("seed",String(S.seed));
+  fd.append("size","1024x768"); // sonst liefert die KI ab der 2. Bearbeitung falsche Formate
+  const r=await fetch(`${API}/v1/images/edits`,{method:"POST",headers:{Authorization:"Bearer "+key()},body:fd});
+  const blob=await toBlobFromResponse(r); return {blob,url:URL.createObjectURL(blob)};
+}
+/* Bild für Zustand "Bild X + Ding" holen (mit Cache – teilen sich beide denselben Zustand, wird nur 1x gerechnet) */
+function variant(i,it){
+  const st=S.pl[i].state, k=st.key+"|"+it.n;
+  if(!cache.has(k)){
+    const p=(async()=>{const src=await st.img; return await genEdit(src,it,i)})();
+    p.catch(()=>{}); cache.set(k,p);
+  }
+  return {key:k,img:cache.get(k)};
+}
+function pregen(){
+  if(!key())return;
+  const it=S.items[S.idx]; if(!it)return;
+  S.pl.forEach((p,i)=>{ if(needs(i)) variant(i,it); });
+}
+
+/* ========= SPIEL ========= */
+function newGame(catId){
+  const cat = catId==="random"||!catId ? rnd(CATS) : CATS.find(c=>c.id===catId);
+  try{localStorage.setItem("bd_key",key());localStorage.setItem("bd_model2",$("model").value)}catch(e){}
+  const budget=Math.max(1,parseInt($("budget").value)||20);
+  let raw;
+  if(cat.slots){ // Fußball: pro Position doppelt so viele wie ein Team braucht (2 TW, 2 V, 4 MF, 2 ST)
+    raw=[]; for(const [pos,c] of Object.entries(cat.slots)) raw.push(...shuffle(cat.items.filter(x=>x[3]===pos)).slice(0,c*2));
+    raw=shuffle(raw);
+  } else raw=shuffle(cat.items).slice(0,10);
+  const items=raw.map(i=>({e:i[0],n:i[1],p:i[2],pos:i[3]||null,v:i[4],ev:null}));
+  const evs=shuffle(["sale","mystery","double"]).slice(0,2);
+  shuffle([...Array(9).keys()].map(x=>x+1)).slice(0,2).forEach((ix,k)=>items[ix].ev=evs[k]);
+  cache.clear();
+  S={cat,items,idx:0,ugly:rnd(cat.ugly),twist:rnd(TWISTS),seed:Math.floor(Math.random()*1e6),
+     high:0,leader:-1,turn:0,hist:[],revealed:false,busy:false,
+     pl:[0,1].map(i=>({name:$("n"+(i+1)).value.trim()||("Spieler "+(i+1)),money:budget,won:[]}))};
+  const base=genBase(); base.catch(()=>{});
+  S.pl.forEach(p=>p.state={key:"base",img:base,url:null});
+  // Vorbereitung: Startbild + erstes Upgrade vorab rechnen
+  show("prep");$("prepErr").textContent="";$("prepBar").style.width="10%";
+  $("prepTitle").textContent=`${cat.e} ${cat.n} wird vorbereitet…`;
+  $("prepTxt").textContent="Startbild wird gemalt (beide bekommen dasselbe)";
+  const startGame=()=>{
+    ["pl0","pl1"].forEach(id=>{$(id).dataset.built="";$(id).innerHTML=""});
+    show("game");$("gTitle").textContent=cat.e+" "+cat.n;
+    $("twistChip").textContent="Stil: "+S.twist[0];
+    $("modeChip").textContent=key()?"🤖 KI-Bearbeitung":"🧪 Demo-Modus";
+    S.turn=0; startItem();
+  };
+  base.then(b=>{
+    S.pl.forEach(p=>p.state.url=b.url);
+    if(!key()){ const im=new Image(); im.onload=im.onerror=()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)}; im.src=b.url; return; }
+    $("prepBar").style.width="55%";$("prepTxt").textContent="Erstes Upgrade wird schon vorbereitet…";
+    const v=variant(0,items[0]);
+    Promise.race([v.img,new Promise(r=>setTimeout(r,25000))]).finally(()=>{$("prepBar").style.width="100%";setTimeout(startGame,300)});
+  }).catch(e=>{
+    $("prepErr").innerHTML=`Startbild fehlgeschlagen: ${esc(e.message)}<br>Key richtig? <button id="back">Zurück</button>`;
+    $("back").onclick=()=>show("setup");
+  });
+}
+
+function needs(i){return S.pl[i].won.length<5&&slotFree(i,S.items[S.idx])}
+function eligible(i){const p=S.pl[i];return needs(i)&&p.money>S.high&&p.money>0}
+
+function startItem(){
+  S.high=0;S.leader=-1;S.hist=[];S.revealed=false;S.busy=false;S.passedOnce=false;S.forced=false;
+  // Startreihenfolge wechselt pro Ding
+  S.turn=S.idx%2; if(!eligible(S.turn))S.turn=1-S.turn;
+  pregen(); renderAll(); speak();
+  if(!eligible(0)&&!eligible(1)) setTimeout(nobody,1500); // keiner kann bieten
+}
+/* Fußball: Jede Position muss besetzt werden. Bietet keiner, bekommt es gratis, wer die Position noch braucht. */
+function forced(){
+  const nd=[0,1].filter(needs); if(!nd.length)return false;
+  let w=nd[0];
+  if(nd.length===2){const a=S.pl[0].won.length,b=S.pl[1].won.length; w=a<b?0:b<a?1:Math.round(Math.random());}
+  S.leader=w;S.high=0;S.forced=true;S.hist.push(`${esc(S.pl[w].name)} bekommt ihn gratis`);
+  sold(); return true;
+}
+
+function renderAll(){renderItem();renderPlayers()}
+
+function renderPlayers(){
+  S.pl.forEach((p,i)=>{
+    const el=$("pl"+i);
+    if(!el.dataset.built){
+      el.innerHTML=`<h2><span class="nm"></span><span class="money"></span></h2>
+        <div class="slots">${'<div class="slot"></div>'.repeat(5)}</div>
+        <div class="imgbox"><img alt="KI-Bild"><div class="stickers"></div><div class="loader hidden"></div></div>
+        <div class="posrow nr" style="margin-top:8px"></div><ul class="items"></ul><div class="bidarea"></div>`;
+      el.dataset.built=1;
+    }
+    el.querySelector(".nm").textContent=p.name;
+    el.querySelector(".money").textContent=p.money+" €";
+    el.querySelectorAll(".slot").forEach((s,j)=>s.classList.toggle("f",j<p.won.length));
+    el.querySelector(".items").innerHTML=p.won.length?p.won.map(w=>`<li>${w.e} ${w.pos?`<b>${w.pos}</b> `:""}${esc(w.n)}${w.double?" ×2":""}</li>`).join(""):`<li style="opacity:.6">noch nix 😬</li>`;
+    el.querySelector(".posrow").innerHTML=S.cat.slots?Object.entries(S.cat.slots).map(([k,c])=>{const n=p.won.filter(w=>w.pos===k).length;return `<span style="color:${n>=c?'var(--ok)':'inherit'}">${POSN[k]} ${n}/${c}</span>`}).join(" · "):"";
+    const img=el.querySelector("img"); if(p.state.url&&img.getAttribute("src")!==p.state.url)img.src=p.state.url;
+    el.querySelector(".stickers").innerHTML=key()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("");
+    el.classList.toggle("turn",S.turn===i&&!S.busy);
+    const ba=el.querySelector(".bidarea");
+    if(S.busy){ba.innerHTML="";return}
+    if(S.turn===i&&eligible(i)){
+      const min=S.high+1;
+      ba.innerHTML=`<div class="who">🫵 <b>${esc(p.name)}</b> ist dran – ${S.leader<0?"Startgebot":"mehr als "+S.high+" €"} (max. ${p.money} €)</div>
+        <div class="bidrow"><input type="number" min="${min}" max="${p.money}" placeholder="${min} €" inputmode="numeric"><button class="bidbtn">Bieten</button></div>
+        <button class="pass">🙅 Passen</button><div class="err"></div>`;
+      const inp=ba.querySelector("input");
+      ba.querySelector(".bidbtn").onclick=()=>bid(i,inp.value);
+      inp.onkeydown=e=>{if(e.key==="Enter")bid(i,inp.value)};
+      ba.querySelector(".pass").onclick=()=>pass(i);
+      setTimeout(()=>inp.focus(),30);
+    } else {
+      const it=S.items[S.idx];
+      const why=p.won.length>=5?"hat schon 5 Dinge":!slotFree(i,it)?`hat schon genug ${it.pos==="MF"?"Mittelfeldspieler":POSN[it.pos]}`:p.money<=S.high?"kann nicht mehr mithalten":"wartet…";
+      ba.innerHTML=`<div class="wait">${S.leader===i?"🏷️ Höchstbietend: <b>"+S.high+" €</b>":esc(p.name)+" "+why}</div>`;
+    }
+  });
+}
+
+function evLabel(ev){return ev==="sale"?"💸 SALE: Wer's gewinnt, zahlt nur die Hälfte!":ev==="mystery"?"❓ MYSTERY: Was es ist, siehst du erst nach dem Kauf!":ev==="double"?"⭐ DOPPELT: Wird im Bild extra groß!":""}
+function renderItem(){
+  const it=S.items[S.idx]; const hide=it.ev==="mystery"&&!S.revealed;
+  $("itemCard").innerHTML=`<div class="nr">Ding ${S.idx+1} von ${S.items.length}</div>
+    ${it.pos?`<div class="ev" style="background:var(--card2);color:var(--txt)">Position: ${POSN[it.pos]}</div>`:""}
+    <div class="e">${hide?"🎁":it.e}</div><div class="n">${hide?"???":esc(it.n)}</div>
+    ${it.ev?`<div class="ev">${evLabel(it.ev)}</div>`:""}`;
+  const h=$("high");h.className="high"+(S.leader>=0?" l"+(S.leader+1):"");
+  h.innerHTML=S.leader<0?`<div class="nr">Noch kein Gebot</div><div class="v">0 €</div>`:
+    `<div class="nr">Aktuelles Gebot</div><div class="v">${S.high} €</div><div>von <b>${esc(S.pl[S.leader].name)}</b></div>`;
+  $("hist").innerHTML=S.hist.slice(-4).join(" → ");
+  const left=S.items.length-S.idx-1;
+  $("log").textContent=`Noch ${left} Ding${left===1?"":"e"} danach.`;
+}
+
+function bid(i,raw){
+  if(S.busy||S.turn!==i)return;
+  const p=S.pl[i],v=Math.floor(Number(raw)),err=$("pl"+i).querySelector(".err");
+  if(!raw||!Number.isFinite(v)){err.textContent="Bitte einen Betrag eintippen.";return}
+  if(v<=S.high){err.textContent=`Du musst mehr als ${S.high} € bieten.`;return}
+  if(v>p.money){err.textContent=`Du hast nur ${p.money} €.`;return}
+  S.high=v;S.leader=i;S.hist.push(`${esc(p.name)}: ${v} €`);
+  say(`${p.name} bietet ${v} Euro.`);
+  const o=1-i;
+  if(eligible(o)){S.turn=o;renderAll();flash();}
+  else {renderAll();sold();} // andere Person kann nicht mehr mitbieten
+}
+function pass(i){
+  if(S.busy||S.turn!==i)return;
+  S.hist.push(`${esc(S.pl[i].name)}: passt`);
+  const o=1-i;
+  if(S.leader>=0) return sold();
+  // noch kein Gebot: andere Person darf ein Startgebot abgeben, sonst geht's weiter
+  if(eligible(o)&&!S.passedOnce){S.passedOnce=true;S.turn=o;renderAll();say(`${S.pl[i].name} passt.`);return}
+  S.passedOnce=false; nobody();
+}
+function flash(){$("high").classList.remove("flash");void $("high").offsetWidth;$("high").classList.add("flash")}
+
+async function sold(){
+  S.busy=true;S.passedOnce=false;
+  const w=S.leader,it=S.items[S.idx],p=S.pl[w];
+  const price=it.ev==="sale"?Math.ceil(S.high/2):S.high;
+  p.money-=price; p.won.push({...it,double:it.ev==="double"});
+  if(it.ev==="mystery")S.revealed=true;
+  renderAll();
+  say((S.forced?`Keiner hat geboten. ${p.name} braucht noch einen ${POSN[it.pos]} und bekommt ihn gratis!`:`Zum Ersten, zum Zweiten, verkauft an ${p.name} für ${price} Euro!`)+(it.ev==="mystery"?` Es war: ${it.n}!`:""));
+  if(key()){
+    const v=variant(w,it), el=$("pl"+w), ld=el.querySelector(".loader");
+    let ready=false; v.img.then(()=>ready=true,()=>{});
+    await Promise.resolve();
+    if(!ready){ld.classList.remove("hidden");ld.innerHTML='<div><div class="spin"></div>Fast fertig…</div>'}
+    try{
+      const r=await v.img; p.state={key:v.key,img:v.img,url:r.url};
+    }catch(e){
+      ld.classList.remove("hidden");ld.innerHTML=`⚠️ Bild-Upgrade fehlgeschlagen<br><small>${esc(e.message)}</small>`;
+      setTimeout(()=>ld.classList.add("hidden"),4000);
+    }
+    if(!ld.innerHTML.startsWith("⚠️"))ld.classList.add("hidden");
+  }
+  renderPlayers();
+  setTimeout(next,1400);
+}
+function nobody(){if(S.busy)return; if(S.cat.slots&&forced())return; S.busy=true;renderAll();say("Keiner will's. Weiter!");setTimeout(next,900)}
+function next(){
+  S.idx++;
+  const canBid=S.pl.some(p=>p.won.length<5&&p.money>0);
+  if(S.idx>=S.items.length||(!canBid&&!S.cat.slots)) return finish();
+  startItem();
+}
+
+/* ========= ENDE & ABSTIMMUNG ========= */
+function finish(){
+  show("end");$("eCat").textContent=S.cat.art;
+  $("final").innerHTML=S.pl.map((p,i)=>`<div class="box pl ${i?'p2':''}" id="f${i}">
+     <div class="crown hidden">👑</div>
+     <h2><span>${esc(p.name)}</span><span class="money">${p.money} € übrig</span></h2>
+     <div class="imgbox"><img src="${p.state.url||""}" alt="KI-Bild"><div class="stickers">${key()?"":p.won.map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
+     <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ×2":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul></div>`).join("");
+  S.votes=[];say(`Alle Dinge sind versteigert! Jetzt wird abgestimmt.`);voteStep(0);
+}
+function voteStep(i){
+  const p=S.pl[i],o=S.pl[1-i];
+  $("vote").innerHTML=`<h2>🗳️ ${esc(p.name)} stimmt ab</h2>
+    <div class="nr">${esc(o.name)}, bitte kurz wegschauen 🙈 – die Stimme bleibt geheim, bis beide abgestimmt haben.</div>
+    <div class="votebtns"><button style="background:#5a2240" data-v="0">${esc(S.pl[0].name)}</button><button style="background:#1d4a63" data-v="1">${esc(S.pl[1].name)}</button></div>`;
+  $("vote").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.votes[i]=+b.dataset.v; i===0?voteStep(1):resolveVotes()});
+}
+async function resolveVotes(){
+  const [a,b]=S.votes, n=S.pl.map(p=>esc(p.name));
+  let html=`<h2>Ergebnis der Abstimmung</h2><div class="nr">${n[0]} → ${n[a]} · ${n[1]} → ${n[b]}</div>`;
+  if(a===b){ $("vote").innerHTML=html+`<div class="verdict">Ihr seid euch einig: <b>${n[a]}</b> gewinnt! 🎉</div>`; return crown(a); }
+  $("vote").innerHTML=html+`<div class="verdict"><div class="spin"></div>Ihr seid euch nicht einig – die App entscheidet…</div>`;
+  let w=null, reason="";
+  if(key()){ try{ const r=await aiJudge(); w=r.winner; reason=r.reason; }catch(e){ console.warn(e); } }
+  if(w===null){ const r=pointsJudge(); w=r.winner; reason=r.reason; }
+  $("vote").innerHTML=html+`<div class="verdict">⚖️ Die App entscheidet: <b>${n[w]}</b> gewinnt!<br><span class="nr">${esc(reason)}</span></div>`;
+  crown(w);
+}
+function score(p){return p.won.reduce((s,w)=>s+(w.v??VAL[w.n]??6)*(w.double?2:1),0)}
+function pointsJudge(){
+  const s=S.pl.map(score);
+  if(s[0]!==s[1]){const w=s[0]>s[1]?0:1;return {winner:w,reason:`Punktewertung der ersteigerten Dinge: ${s[0]} zu ${s[1]}.`}}
+  const w=S.pl[0].money>=S.pl[1].money?0:1;
+  return {winner:w,reason:`Gleich viele Punkte (${s[0]}) – mehr Geld übrig hat ${S.pl[w].name}.`};
+}
+const blobToDataURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)});
+async function aiJudge(){
+  const imgs=await Promise.all(S.pl.map(async p=>blobToDataURL((await p.state.img).blob)));
+  const body={model:"openai",messages:[{role:"user",content:[
+    {type:"text",text:`Zwei Spieler haben in einem Versteigerungsspiel ${S.cat.art} gebaut. Bild 1 gehört ${S.pl[0].name}, Bild 2 gehört ${S.pl[1].name}. Welches Bild zeigt ${S.cat.art}? Bewerte nur die Bilder: wie beeindruckend, schön und gelungen sie sind. Antworte NUR mit JSON: {"winner":1 oder 2,"reason":"ein kurzer lustiger Satz auf Deutsch"}`},
+    {type:"image_url",image_url:{url:imgs[0]}},{type:"image_url",image_url:{url:imgs[1]}}]}]};
+  const r=await fetch(`${API}/v1/chat/completions`,{method:"POST",headers:{Authorization:"Bearer "+key(),"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error("Judge HTTP "+r.status);
+  const t=(await r.json()).choices[0].message.content; const m=t.match(/\{[\s\S]*\}/); const j=JSON.parse(m?m[0]:t);
+  if(j.winner!==1&&j.winner!==2)throw new Error("Ungültige Antwort");
+  return {winner:j.winner-1,reason:"KI-Schiedsrichter: "+(j.reason||"")};
+}
+function crown(i){
+  [0,1].forEach(j=>{$("f"+j).classList.toggle("win",j===i);$("f"+j).querySelector(".crown").classList.toggle("hidden",j!==i)});
+  say(`${S.pl[i].name} gewinnt!`);confetti();
+}
+
+/* ========= VORLESEN ========= */
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="de-AT";u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
+function speak(){const it=S.items[S.idx];if(!it)return;
+  const name=it.ev==="mystery"?"ein Mystery-Ding":it.n;
+  say(`${it.pos?"Spieler "+(S.idx+1)+", "+POSN[it.pos]:"Ding "+(S.idx+1)}: ${name}.`+(it.ev==="sale"?" Achtung, Sale! Halber Preis.":it.ev==="double"?" Achtung, wird extra groß!":"")+` ${S.pl[S.turn].name} beginnt.`)}
+
+/* ========= KONFETTI ========= */
+function confetti(){
+  const c=document.createElement("canvas");Object.assign(c.style,{position:"fixed",inset:0,pointerEvents:"none",zIndex:9});
+  c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);const x=c.getContext("2d");
+  const P=Array.from({length:160},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height/2,v:2+Math.random()*4,r:Math.random()*6.28,c:rnd(["#ffd23f","#ff5d8f","#38c6ff","#4ade80","#fff"])}));
+  let t=0;(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.r+=.05)*1.5;x.fillStyle=p.c;x.fillRect(p.x,p.y,8,4)});
+    if(++t<220)requestAnimationFrame(f);else c.remove()})();
+}
+
+/* ========= BUTTONS ========= */
+$("start").onclick=()=>newGame(catSel);
+$("speak").onclick=speak;
+$("quit").onclick=()=>{if(confirm("Spiel wirklich abbrechen?")){speechSynthesis.cancel();show("setup")}};
+$("again").onclick=()=>newGame(S.cat.id);
+$("menu").onclick=()=>show("setup");
+</script>
+</body>
+</html>

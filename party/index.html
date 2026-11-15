@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Partyspiele</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#12101f">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--gold:#ffd23f;--ok:#4ade80;--bad:#f87171;--rad:18px;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#2a1f55,var(--bg) 60%);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:12px 16px;background:var(--card2);color:var(--txt);font-weight:700;transition:transform .08s,filter .15s}
+button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.35}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input,select{font:inherit;padding:12px;border-radius:12px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%;-webkit-user-select:text;user-select:text}
+.wrap{max-width:720px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.top h1{flex:1;margin:0;font-size:24px;text-wrap:balance}
+.back{padding:8px 12px;font-size:15px}
+.icon{padding:8px 12px}
+h1.big{font-size:clamp(30px,8vw,44px);margin:6px 0 2px;letter-spacing:-.5px}
+h1 span{color:var(--gold)}
+.sub{color:var(--mut);margin:0 0 16px;line-height:1.5}
+.box{background:var(--card);border-radius:var(--rad);padding:16px;box-shadow:0 8px 30px #0005;margin-bottom:14px}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{text-align:left;padding:16px 14px;border-radius:20px;min-height:132px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;box-shadow:0 8px 24px #0006}
+.tile .e{font-size:38px}
+.tile b{font-size:17px;display:block;margin-top:6px}
+.tile small{font-weight:500;opacity:.9;font-size:12px;line-height:1.35;display:block;margin-top:3px}
+.free{display:inline-block;background:#fff3;border-radius:999px;padding:2px 8px;font-size:11px;margin-top:6px;font-weight:700}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pchip{background:var(--card2);border-radius:999px;padding:8px 8px 8px 14px;display:flex;align-items:center;gap:6px;font-weight:600}
+.pchip button{padding:2px 8px;border-radius:999px;background:#ffffff14;font-size:13px}
+.add{display:flex;gap:8px}.add input{flex:1}
+.packs{display:flex;flex-wrap:wrap;gap:8px}
+.pack{padding:9px 12px;border-radius:999px;background:var(--card2);border:2px solid transparent;font-size:14px;font-weight:600}
+.pack.sel{border-color:var(--gold);background:#3a3263}
+.pack small{color:var(--mut);font-weight:500}
+.lbl{font-size:13px;color:var(--mut);margin:14px 0 6px;display:flex;justify-content:space-between;align-items:center}
+.lbl button{padding:4px 10px;font-size:12px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{flex:1;min-width:70px}.seg .on{background:var(--gold);color:#241a00}
+.go{width:100%;font-size:20px;padding:16px;margin-top:16px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.alt{width:100%;margin-top:10px}
+.stage{min-height:calc(100vh - 120px);display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px}
+.card{border-radius:26px;padding:30px 22px;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:10px;box-shadow:0 14px 40px #0008;color:#fff}
+.card .k{font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;font-weight:700}
+.card .t{font-size:clamp(24px,6.5vw,36px);font-weight:800;line-height:1.2;text-wrap:balance}
+.card .h{font-size:16px;opacity:.9}
+.hand{font-size:22px;line-height:1.4}.hand b{color:var(--gold);font-size:28px;display:block}
+.cnt{color:var(--mut);font-size:13px}
+.score{list-style:none;padding:0;margin:0;text-align:left}
+.score li{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card2);margin-bottom:6px;font-weight:600}
+.score li.win{background:#3a3263;outline:2px solid var(--gold)}
+.score .d{color:var(--mut);font-weight:500;font-size:14px}
+.btns{display:flex;gap:10px}.btns>*{flex:1}
+.yes{background:#15803d}.no{background:#b91c1c}
+.bomb{font-size:120px;line-height:1;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.boom{animation:boom .5s ease-out}
+@keyframes boom{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+.flash{animation:flash .6s 3}
+@keyframes flash{50%{background:#b91c1c}}
+.timer{font-size:54px;font-weight:900;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.note{color:var(--mut);font-size:14px;line-height:1.5}
+.role{font-size:70px}
+.hidden{display:none!important}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.step{text-align:left;line-height:1.55}
+.ans{font-size:46px;font-weight:900;color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script src="words.js"></script>
+<script src="cards.js"></script>
+<script>
+"use strict";
+/* ====== Grundlagen ====== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const store = { get(k, d) { try { const v = localStorage.getItem("pz_" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("pz_" + k, JSON.stringify(v)); } catch {} } };
+const view = html => { $("#app").innerHTML = html; window.scrollTo(0, 0); };
+let players = store.get("players", []);
+let sound = store.get("sound", true);
+let S = {}; // Zustand des laufenden Spiels
+
+/* Töne (nur kurze Pieptöne, keine Sprache) */
+let ac;
+function beep(f = 880, d = 0.06, v = 0.15, type = "square") {
+  if (!sound) return;
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(v, ac.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + d);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + d); } catch {}
+}
+function boomSound() { if (!sound) return; try { ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  const len = ac.sampleRate * 1.2, b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
+  const s = ac.createBufferSource(), f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 600;
+  s.buffer = b; s.connect(f); f.connect(ac.destination); s.start(); } catch {} }
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+function toggleSound() { sound = !sound; store.set("sound", sound); home(); }
+
+/* ====== Spiele-Katalog ====== */
+const GAMES = [
+  { id: "imposter", name: "Imposter", emoji: "🕵️", col: "#ff5d8f,#9d174d", desc: "Alle kennen das Wort – nur der Imposter nicht.", min: 3, packs: () => WORD_CATS },
+  { id: "schaetz", name: "Pi mal Daumen", emoji: "🎯", col: "#38c6ff,#1d4ed8", desc: "Schätzfragen: Wer am nächsten dran ist, punktet.", min: 2, packs: () => SCHAETZ },
+  { id: "bombe", name: "Heiße Bombe", emoji: "💣", col: "#ff9f1c,#be123c", desc: "Sag was Passendes und gib weiter, bevor's knallt!", min: 2, packs: () => BOMBE },
+  { id: "erklaeren", name: "Begriffe erklären", emoji: "🗣️", col: "#4ade80,#0f766e", desc: "Team gegen Team: erklären ohne das Wort zu sagen.", min: 4, packs: () => WORD_CATS },
+  { id: "eher", name: "Wer würde eher …", emoji: "👉", col: "#a78bfa,#5b21b6", desc: "Auf drei zeigen alle auf eine Person.", min: 3, packs: () => EHER },
+  { id: "nie", name: "Ich hab noch nie …", emoji: "🙊", col: "#f472b6,#9d174d", desc: "Wer's schon gemacht hat, muss es zugeben.", min: 2, packs: () => NIE },
+  { id: "wop", name: "Wahrheit oder Pflicht", emoji: "🎭", col: "#fbbf24,#b45309", desc: "Der Klassiker – mit Hunderten Fragen und Aufgaben.", min: 2,
+    packs: () => [...WAHRHEIT.map(p => ({ ...p, kind: "w", name: "Wahrheit: " + p.name })), ...PFLICHT.map(p => ({ ...p, kind: "p", name: "Pflicht: " + p.name }))] },
+  { id: "tenten", name: "10/10, aber …", emoji: "💯", col: "#22d3ee,#0e7490", desc: "Die perfekte Person – mit einem Haken. Würdest du trotzdem?", min: 2, packs: () => TENTEN },
+  { id: "werwolf", name: "Werwolf", emoji: "🐺", col: "#64748b,#1e293b", desc: "Rollen geheim verteilen, mit Spielleitungs-Skript.", min: 6, packs: null },
+];
+const game = id => GAMES.find(g => g.id === id);
+const grad = g => `background:linear-gradient(135deg,${g.col})`;
+const packCount = p => (p.items || p.words).length;
+
+/* ====== Startseite ====== */
+function home() {
+  S = {};
+  view(`
+  <div class="top"><button class="back" onclick="location.href='../'">← Menü</button><h1></h1>
+    <button class="icon" onclick="toggleSound()" aria-label="Ton ein/aus">${sound ? "🔊" : "🔇"}</button></div>
+  <h1 class="big">🎉 <span>Party</span>spiele</h1>
+  <p class="sub">Ein Handy, alle spielen. Alle Kategorien sind gratis – kein Abo, keine Werbung.</p>
+  <div class="box">
+    <div class="lbl" style="margin-top:0"><span>👥 Mitspieler:innen (${players.length})</span>${players.length ? `<button onclick="clearPlayers()">Alle löschen</button>` : ""}</div>
+    <div class="players">${players.map((p, i) => `<span class="pchip">${esc(p)}<button onclick="delPlayer(${i})" aria-label="${esc(p)} entfernen">✕</button></span>`).join("") || `<span class="note">Noch niemand – füg zuerst alle hinzu.</span>`}</div>
+    <form class="add" onsubmit="addPlayer();return false"><input id="pname" maxlength="16" placeholder="Name eingeben" autocomplete="off"><button>＋</button></form>
+  </div>
+  <div class="games">${GAMES.map(g => {
+    const n = g.packs ? g.packs().reduce((s, p) => s + packCount(p), 0) : 0;
+    return `<button class="tile" style="${grad(g)}" onclick="setup('${g.id}')"><span class="e">${g.emoji}</span><span><b>${g.name}</b><small>${g.desc}</small>
+      ${g.packs ? `<span class="free">${g.packs().length} Kategorien · ${n} ${g.id === "imposter" || g.id === "erklaeren" ? "Begriffe" : "Karten"}</span>` : `<span class="free">ab ${g.min} Personen</span>`}</span></button>`; }).join("")}</div>`);
+}
+function addPlayer() { const i = $("#pname"), n = i.value.trim(); if (!n) return;
+  if (players.some(p => p.toLowerCase() === n.toLowerCase())) { i.value = ""; return; }
+  players.push(n); store.set("players", players); home(); setTimeout(() => $("#pname").focus(), 0); }
+function delPlayer(i) { players.splice(i, 1); store.set("players", players); home(); }
+function clearPlayers() { if (confirm("Alle Mitspieler:innen löschen?")) { players = []; store.set("players", players); home(); } }
+
+/* ====== Einstellungen pro Spiel ====== */
+function setup(id) {
+  const g = game(id);
+  if (players.length < g.min) { alert(`Für ${g.name} braucht ihr mindestens ${g.min} Mitspieler:innen. Trag oben die Namen ein.`); return; }
+  const opts = store.get("opt_" + id, {});
+  S = { id, opts, sel: new Set(store.get("sel_" + id, g.packs ? g.packs().map(p => p.id + (p.kind || "")) : [])) };
+  let extra = "";
+  const seg = (key, label, vals, def) => { if (S.opts[key] == null) S.opts[key] = def;
+    return `<div class="lbl">${label}</div><div class="seg">${vals.map(([v, t]) => `<button class="${S.opts[key] === v ? "on" : ""}" onclick="setOpt('${key}',${JSON.stringify(v).replace(/"/g, "&quot;")},this)">${t}</button>`).join("")}</div>`; };
+  const n = players.length;
+  if (id === "imposter") {
+    const maxImp = Math.max(1, Math.floor((n - 1) / 2));
+    extra = seg("imp", "Anzahl Imposter", Array.from({ length: Math.min(maxImp, 5) }, (_, i) => [i + 1, String(i + 1)]), 1)
+      + seg("hint", "Hinweis für Imposter", [[true, "Mit Hinweis"], [false, "Ohne (schwer)"]], true)
+      + seg("time", "Diskussionszeit", [[0, "Ohne"], [120, "2 min"], [180, "3 min"], [300, "5 min"]], 180);
+    if (S.opts.imp > maxImp) S.opts.imp = maxImp;
+  }
+  if (id === "schaetz") extra = seg("rounds", "Fragen pro Spiel", [[5, "5"], [10, "10"], [15, "15"], [20, "20"]], 10);
+  if (id === "bombe") extra = seg("len", "Zündschnur", [["kurz", "Kurz"], ["mittel", "Mittel"], ["lang", "Lang"]], "mittel");
+  if (id === "erklaeren") extra = seg("sec", "Zeit pro Runde", [[45, "45 s"], [60, "60 s"], [90, "90 s"]], 60) + seg("goal", "Ziel", [[20, "20 Punkte"], [30, "30"], [50, "50"]], 30)
+    + seg("skip", "Überspringen kostet", [[0, "Nichts"], [1, "1 Punkt"]], 0);
+  if (id === "werwolf") {
+    const wolves = n <= 7 ? 1 : n <= 11 ? 2 : 3;
+    extra = `<p class="note">Eine Person ist Spielleitung, bekommt keine Rolle und führt durch die Nächte.</p>`
+      + `<div class="lbl">Spielleitung</div><select id="mod">${players.map((p, i) => `<option value="${i}">${esc(p)}</option>`).join("")}</select>`
+      + seg("wolves", "Werwölfe", [[1, "1"], [2, "2"], [3, "3"], [4, "4"]].filter(([v]) => v <= Math.floor((n - 1) / 2)), Math.min(wolves, Math.floor((n - 1) / 2)))
+      + `<div class="lbl">Sonderrollen</div><div class="packs">${ROLES.filter(r => r.opt).map(r => `<button class="pack ${opts["r_" + r.id] !== false ? "sel" : ""}" onclick="toggleRole('${r.id}',this)">${r.e} ${r.n}</button>`).join("")}</div>`;
+  }
+  const packs = g.packs ? `<div class="lbl"><span>Kategorien (alle gratis)</span><span><button onclick="allPacks(true)">Alle</button> <button onclick="allPacks(false)">Keine</button></span></div>
+    <div class="packs">${g.packs().map(p => { const k = p.id + (p.kind || ""); return `<button class="pack ${S.sel.has(k) ? "sel" : ""}" data-k="${k}" onclick="togglePack(this)">${p.emoji} ${esc(p.name)} <small>${packCount(p)}</small></button>`; }).join("")}</div>` : "";
+  view(`<div class="top"><button class="back" onclick="home()">←</button><h1>${g.emoji} ${g.name}</h1></div>
+    <div class="box"><p class="note" style="margin-top:0">${HOWTO[id]}</p>${extra}${packs}
+    <button class="go" onclick="startGame()">Los geht's</button></div>`);
+}
+function setOpt(k, v, el) { S.opts[k] = v; [...el.parentNode.children].forEach(b => b.classList.toggle("on", b === el)); }
+function togglePack(el) { const k = el.dataset.k; S.sel.has(k) ? S.sel.delete(k) : S.sel.add(k); el.classList.toggle("sel"); }
+function allPacks(on) { document.querySelectorAll(".pack[data-k]").forEach(el => { on ? S.sel.add(el.dataset.k) : S.sel.delete(el.dataset.k); el.classList.toggle("sel", on); }); }
+function toggleRole(id, el) { S.opts["r_" + id] = S.opts["r_" + id] === false; el.classList.toggle("sel", S.opts["r_" + id]); }
+
+const HOWTO = {
+  imposter: "Das Handy geht reihum. Alle sehen dasselbe geheime Wort – nur der Imposter nicht (er bekommt höchstens einen vagen Hinweis). Reihum sagt jede:r ein Wort, das dazu passt. Danach wird diskutiert und abgestimmt: Wer ist der Imposter? Der Imposter gewinnt, wenn er unentdeckt bleibt oder das Wort errät.",
+  schaetz: "Eine Frage, eine Zahl. Das Handy geht reihum und alle tippen geheim ihre Schätzung ein. Wer am nächsten dran ist, bekommt 1 Punkt – ein Volltreffer bringt 3.",
+  bombe: "Eine Aufgabe erscheint, die Bombe tickt. Sag schnell etwas Passendes und gib das Handy weiter. Nichts darf doppelt genannt werden. Wer das Handy hält, wenn es knallt, kassiert eine Bombe.",
+  erklaeren: "Zwei Teams. Eine Person erklärt, das eigene Team rät. Das Wort selbst (und Teile davon) sind verboten. Jedes erratene Wort bringt einen Punkt.",
+  eher: "Lies die Karte laut vor. Auf drei zeigen alle gleichzeitig auf die Person, die das am ehesten machen würde.",
+  nie: "Lies die Karte vor. Alle, die das schon einmal gemacht haben, stehen auf (oder heben die Hand) – und erzählen vielleicht die Geschichte dazu.",
+  wop: "Die App sucht aus, wer dran ist. Die Person wählt Wahrheit oder Pflicht – und muss dann ehrlich antworten oder die Aufgabe erledigen.",
+  tenten: "Stell dir die perfekte Person vor – aber mit einem Haken. Auf drei zeigen alle Daumen hoch (würde ich trotzdem) oder runter (No-Go). Wer anders entschieden hat, muss sich erklären.",
+  werwolf: "Die Werwölfe fressen nachts heimlich Dorfbewohner, tagsüber stimmt das Dorf ab, wen es verdächtigt. Das Dorf gewinnt, wenn alle Werwölfe weg sind – die Werwölfe, wenn sie in der Überzahl sind.",
+};
+
+/* Karten ziehen ohne Wiederholung (bis alles einmal dran war) */
+function makeDeck(items) { let d = shuffle(items), i = 0; return () => { if (i >= d.length) { d = shuffle(items); i = 0; } return d[i++]; }; }
+function selectedPacks() { return game(S.id).packs().filter(p => S.sel.has(p.id + (p.kind || ""))); }
+
+function startGame() {
+  const g = game(S.id);
+  if (g.packs && !S.sel.size) { alert("Wähl mindestens eine Kategorie aus."); return; }
+  store.set("opt_" + S.id, S.opts); if (g.packs) store.set("sel_" + S.id, [...S.sel]);
+  ({ imposter: impStart, schaetz: schStart, bombe: bombStart, erklaeren: erkStart, eher: cardStart, nie: cardStart, tenten: cardStart, wop: wopStart, werwolf: wwStart })[S.id]();
+}
+const topBar = (title, back = "quit()") => `<div class="top"><button class="back" onclick="${back}">✕</button><h1>${title}</h1></div>`;
+function quit() { stopTimers(); if (!S.done && !confirm("Spiel beenden?")) return; home(); }
+let timers = [];
+function stopTimers() { timers.forEach(t => { clearTimeout(t); clearInterval(t); }); timers = []; }
+const later = (f, ms) => timers.push(setTimeout(f, ms));
+const every = (f, ms) => timers.push(setInterval(f, ms));
+function handTo(name, btn, fn, sub = "") {
+  view(`${topBar(game(S.id).emoji + " " + game(S.id).name)}<div class="stage"><div class="hand">📱 Gib das Handy an<b>${esc(name)}</b></div>${sub}
+    <button class="go" onclick="${fn}">${btn}</button></div>`);
+}
+
+/* ====== Imposter ====== */
+function impStart() {
+  const pool = selectedPacks().flatMap(p => p.words.map(w => ({ w: w[0], h: w[1], cat: p.name, e: p.emoji })));
+  const used = new Set(store.get("imp_used", []));
+  let fresh = pool.filter(x => !used.has(x.w)); if (!fresh.length) { fresh = pool; used.clear(); }
+  const pick = rnd(fresh); used.add(pick.w); store.set("imp_used", [...used].slice(-400));
+  const order = shuffle(players.map((_, i) => i));
+  S.word = pick; S.imp = new Set(order.slice(0, S.opts.imp)); S.idx = 0; S.order = players.map((_, i) => i);
+  impHand();
+}
+function impHand() {
+  if (S.idx >= players.length) return impTalk();
+  handTo(players[S.order[S.idx]], "Karte aufdecken 👀", "impShow()", `<p class="cnt">${S.idx + 1} von ${players.length}</p>`);
+}
+function impShow() {
+  const imp = S.imp.has(S.order[S.idx]), w = S.word;
+  view(`${topBar("🕵️ Imposter")}<div class="stage">
+    <div class="card" style="${imp ? "background:linear-gradient(135deg,#e11d48,#4c0519)" : grad(game("imposter"))}">
+      ${imp ? `<div class="k">Psst …</div><div class="t">Du bist der IMPOSTER 🤫</div>
+        <div class="h">Kategorie: ${esc(w.cat)}${S.opts.hint ? `<br>Hinweis: <b>${esc(w.h)}</b>` : ""}</div>${S.opts.imp > 1 ? `<div class="h">Es gibt ${S.opts.imp} Imposter.</div>` : ""}`
+      : `<div class="k">${w.e} ${esc(w.cat)}</div><div class="t">${esc(w.w)}</div><div class="h">Merk dir das Wort – nicht verraten!</div>`}
+    </div><button class="go" onclick="S.idx++;impHand()">Verstecken & weitergeben</button></div>`);
+}
+function impTalk() {
+  const starter = players[rnd(players.map((_, i) => i).filter(i => !S.imp.has(i) || players.length > 3))];
+  S.left = S.opts.time;
+  view(`${topBar("🕵️ Imposter")}<div class="stage">
+    <div class="hand">Alle kennen ihr Wort.<b>${esc(starter)} beginnt!</b></div>
+    <p class="note">Reihum sagt jede:r ein Wort, das zum geheimen Begriff passt – nicht zu deutlich, sonst errät es der Imposter. Macht zwei Runden, dann diskutiert und zeigt auf drei auf euren Verdacht.</p>
+    ${S.left ? `<div class="timer" id="tm">${fmt(S.left)}</div>` : ""}
+    <button class="go" onclick="impReveal()">Auflösen 🔍</button></div>`);
+  if (S.left) every(() => { S.left--; const t = $("#tm"); if (!t) return; t.textContent = fmt(Math.max(0, S.left)); t.classList.toggle("low", S.left <= 10);
+    if (S.left <= 5 && S.left > 0) beep(660); if (S.left === 0) { beep(300, .5, .2); vib([200, 100, 200]); } }, 1000);
+}
+const nf = v => Math.abs(v) >= 10000 ? v.toLocaleString("de-AT") : String(v).replace(".", ",");
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+function impReveal() {
+  if (!confirm("Wirklich auflösen? Habt ihr abgestimmt?")) return;
+  stopTimers(); S.done = true; const names = [...S.imp].map(i => esc(players[i])).join(" & ");
+  view(`${topBar("🕵️ Imposter")}<div class="stage">
+    <div class="card" style="background:linear-gradient(135deg,#e11d48,#4c0519)"><div class="k">${S.imp.size > 1 ? "Die Imposter waren" : "Der Imposter war"}</div><div class="t">${names}</div>
+      <div class="h">Das Wort war: <b>${esc(S.word.w)}</b> (${esc(S.word.cat)})</div></div>
+    <p class="note">Wurde der Imposter erwischt? Dann darf er noch einmal das Wort raten – stimmt's, gewinnt er trotzdem!</p>
+    <button class="go" onclick="impStart()">Neue Runde</button><button class="alt" onclick="home()">Anderes Spiel</button></div>`);
+}
+
+/* ====== Pi mal Daumen (Schätzen) ====== */
+function schStart() {
+  const qs = shuffle(selectedPacks().flatMap(p => p.items.map(q => ({ ...q, cat: p.name, e: p.emoji }))));
+  S.qs = qs.slice(0, Math.min(S.opts.rounds, qs.length)); S.r = 0; S.pts = players.map(() => 0); schQ();
+}
+function schQ() {
+  if (S.r >= S.qs.length) return schEnd();
+  S.g = []; S.idx = 0; schAsk();
+}
+function schAsk() {
+  const q = S.qs[S.r];
+  if (S.idx >= players.length) return schReveal();
+  view(`${topBar("🎯 Frage " + (S.r + 1) + " / " + S.qs.length)}<div class="stage">
+    <div class="card" style="${grad(game("schaetz"))}"><div class="k">${q.e} ${esc(q.cat)}</div><div class="t">${esc(q.q)}</div></div>
+    <div class="hand"><b>${esc(players[S.idx])}</b></div>
+    <form onsubmit="schSave();return false"><input id="guess" type="text" inputmode="decimal" autocomplete="off" placeholder="Deine Schätzung${q.u ? " (" + esc(q.u) + ")" : ""}" style="font-size:24px;text-align:center">
+    <button class="go">Geheim speichern & weitergeben</button></form><p class="cnt">${S.idx + 1} von ${players.length}</p></div>`);
+  setTimeout(() => { const i = $("#guess"); i && i.focus(); }, 50);
+}
+function schSave() {
+  const raw = $("#guess").value.replace(/[.\s']/g, "").replace(",", ".");
+  const v = parseFloat(raw); if (!isFinite(v)) { $("#guess").value = ""; $("#guess").placeholder = "Bitte eine Zahl eingeben"; return; }
+  S.g[S.idx] = v; S.idx++;
+  if (S.idx < players.length) handTo(players[S.idx], "Ich bin bereit", "schAsk()"); else schReveal();
+}
+function schReveal() {
+  const q = S.qs[S.r], dist = S.g.map(v => Math.abs(v - q.a)), best = Math.min(...dist);
+  const order = players.map((p, i) => i).sort((a, b) => dist[a] - dist[b]);
+  order.forEach(i => { if (dist[i] === best) S.pts[i] += dist[i] === 0 ? 3 : 1; });
+  beep(988, .12); later(() => beep(1318, .2), 130);
+  view(`${topBar("🎯 Frage " + (S.r + 1) + " / " + S.qs.length)}<div class="stage">
+    <div class="note">${esc(q.q)}</div><div class="ans">${nf(q.a)} ${esc(q.u || "")}</div>${q.i ? `<p class="note">${esc(q.i)}</p>` : ""}
+    <ul class="score">${order.map(i => `<li class="${dist[i] === best ? "win" : ""}"><span>${dist[i] === best ? (dist[i] === 0 ? "🎯 " : "🏅 ") : ""}${esc(players[i])}</span>
+      <span>${nf(S.g[i])} <span class="d">(${dist[i] === 0 ? "exakt!" : "±" + nf(Math.round(dist[i] * 100) / 100)})</span></span></li>`).join("")}</ul>
+    <button class="go" onclick="S.r++;schQ()">${S.r + 1 < S.qs.length ? "Nächste Frage" : "Endstand"}</button></div>`);
+}
+function schEnd() { S.done = true; scoreBoard("🎯 Endstand", S.pts, "Punkte", "schStart()"); }
+function scoreBoard(title, pts, unit, again, lowWins = false) {
+  const order = players.map((_, i) => i).sort((a, b) => lowWins ? pts[a] - pts[b] : pts[b] - pts[a]), top = pts[order[0]];
+  view(`${topBar(title)}<div class="stage"><div style="font-size:70px">🏆</div>
+    <div class="hand">${(w => `<b>${w.map(i => esc(players[i])).join(" & ")}</b>${w.length > 1 ? "gewinnen!" : "gewinnt!"}`)(order.filter(i => pts[i] === top))}</div>
+    <ul class="score">${order.map(i => `<li class="${pts[i] === top ? "win" : ""}"><span>${esc(players[i])}</span><span>${pts[i]} ${pts[i] === 1 ? unit.replace(/e$/, "") : unit}</span></li>`).join("")}</ul>
+    <button class="go" onclick="${again}">Nochmal</button><button class="alt" onclick="home()">Anderes Spiel</button></div>`);
+}
+
+/* ====== Heiße Bombe ====== */
+function bombStart() { S.deck = makeDeck(selectedPacks().flatMap(p => p.items)); S.hits = S.hits || players.map(() => 0); bombReady(); }
+function bombReady() {
+  stopTimers();
+  view(`${topBar("💣 Heiße Bombe")}<div class="stage"><div class="bomb" style="animation:none">💣</div>
+    <p class="note">Wer das Handy hält, liest die Aufgabe vor, nennt etwas Passendes und gibt sofort weiter. Wann es knallt, weiß niemand!</p>
+    <button class="go" onclick="bombGo()">Zünden 🔥</button>${S.hits.some(x => x) ? `<button class="alt" onclick="bombScore()">Zwischenstand</button>` : ""}</div>`);
+}
+function bombGo() {
+  const [lo, hi] = { kurz: [12, 25], mittel: [20, 45], lang: [40, 75] }[S.opts.len];
+  S.fuse = (lo + Math.random() * (hi - lo)) * 1000; S.t0 = Date.now(); S.task = S.deck(); bombView(); bombTick();
+  later(bombBoom, S.fuse);
+}
+function bombView() {
+  view(`${topBar("💣 Heiße Bombe")}<div class="stage"><div class="bomb">💣</div>
+    <div class="card" style="${grad(game("bombe"))};min-height:180px"><div class="t">${esc(S.task)}</div></div>
+    <button class="alt" onclick="S.task=S.deck();bombView()">Andere Aufgabe ↻</button></div>`);
+}
+function bombTick() { // Ticken wird schneller, je näher der Knall
+  const rest = S.fuse - (Date.now() - S.t0); if (rest <= 0) return;
+  beep(rest < 4000 ? 1200 : 900, .04, .12);
+  const b = document.querySelector(".bomb"); if (b) b.style.animationDuration = Math.max(.2, rest / S.fuse) + "s";
+  later(bombTick, Math.max(120, Math.min(900, rest / 8)));
+}
+function bombBoom() {
+  stopTimers(); boomSound(); vib([400, 100, 400]);
+  document.body.classList.add("flash"); setTimeout(() => document.body.classList.remove("flash"), 1900);
+  view(`${topBar("💣 Heiße Bombe")}<div class="stage"><div class="bomb boom" style="animation-iteration-count:1">💥</div><div class="hand"><b>BUMM!</b>Wer hatte das Handy?</div>
+    <div class="grid2">${players.map((p, i) => `<button onclick="S.hits[${i}]++;bombScore()">${esc(p)}</button>`).join("")}</div>
+    <button class="alt" onclick="bombReady()">Niemand zählen</button></div>`);
+}
+function bombScore() {
+  S.done = true;
+  const order = players.map((_, i) => i).sort((a, b) => S.hits[b] - S.hits[a]);
+  view(`${topBar("💣 Zwischenstand")}<div class="stage"><ul class="score">${order.map(i => `<li><span>${esc(players[i])}</span><span>${"💥".repeat(Math.min(S.hits[i], 8)) || "–"} ${S.hits[i]}</span></li>`).join("")}</ul>
+    <button class="go" onclick="S.done=false;bombReady()">Nächste Runde</button><button class="alt" onclick="S.hits=null;home()">Spiel beenden</button></div>`);
+}
+
+/* ====== Begriffe erklären ====== */
+function erkStart() {
+  S.deck = makeDeck(selectedPacks().flatMap(p => p.words.map(w => ({ w: w[0], cat: p.name }))));
+  const sh = shuffle(players.map((_, i) => i)), half = Math.ceil(sh.length / 2);
+  S.teams = [{ n: "Team Blau", c: "#2563eb", m: sh.slice(0, half), p: 0, k: 0 }, { n: "Team Pink", c: "#db2777", m: sh.slice(half), p: 0, k: 0 }];
+  S.turn = 0; erkTeams();
+}
+function erkTeams() {
+  view(`${topBar("🗣️ Begriffe erklären")}<div class="stage">
+    ${S.teams.map(t => `<div class="box" style="border-left:6px solid ${t.c};text-align:left"><b>${t.n}</b><div class="note">${t.m.map(i => esc(players[i])).join(", ")}</div></div>`).join("")}
+    <button class="go" onclick="erkNext()">Passt, los!</button><button class="alt" onclick="erkStart()">Neu mischen 🔀</button></div>`);
+}
+function erkNext() {
+  const t = S.teams[S.turn % 2], who = t.m[t.k % t.m.length];
+  view(`${topBar("🗣️ " + S.teams.map(x => x.p).join(" : "))}<div class="stage">
+    <div class="hand" style="color:${t.c}">${t.n} ist dran<b>${esc(players[who])} erklärt</b></div>
+    <p class="note">Nur ${esc(players[who])} schaut aufs Handy. Ziel: ${S.opts.goal} Punkte.</p>
+    <button class="go" onclick="erkGo()">Start (${S.opts.sec} s)</button></div>`);
+}
+function erkGo() {
+  S.left = S.opts.sec; S.got = []; S.skip = 0; S.cur = S.deck(); erkCard();
+  every(() => { S.left--; const el = $("#tm"); if (el) { el.textContent = S.left; el.classList.toggle("low", S.left <= 10); }
+    if (S.left <= 5 && S.left > 0) beep(700); if (S.left <= 0) { stopTimers(); beep(300, .6, .2); vib(500); erkDone(); } }, 1000);
+}
+function erkCard() {
+  const t = S.teams[S.turn % 2];
+  view(`<div class="stage"><div class="timer" id="tm">${S.left}</div>
+    <div class="card" style="background:linear-gradient(135deg,${t.c},#1e1b33)"><div class="k">${esc(S.cur.cat)}</div><div class="t">${esc(S.cur.w)}</div></div>
+    <div class="btns"><button class="no" onclick="erkHit(false)">Überspringen</button><button class="yes" onclick="erkHit(true)">Erraten ✓</button></div>
+    <p class="cnt">${S.got.length} erraten</p></div>`);
+}
+function erkHit(ok) { if (ok) { S.got.push(S.cur.w); beep(1100, .08); } else { S.skip++; beep(400, .08); } S.cur = S.deck(); erkCard(); }
+function erkDone() {
+  const t = S.teams[S.turn % 2], pts = S.got.length - (S.opts.skip ? S.skip : 0);
+  t.p = Math.max(0, t.p + pts); t.k++; S.turn++;
+  const win = S.teams.find(x => x.p >= S.opts.goal) && S.turn % 2 === 0 ? S.teams.slice().sort((a, b) => b.p - a.p)[0] : null;
+  if (win) S.done = true;
+  view(`${topBar("🗣️ Begriffe erklären")}<div class="stage"><div class="hand">⏰ Zeit um!<b>+${pts} für ${t.n}</b></div>
+    <div class="note">${S.got.map(esc).join(" · ") || "Nichts erraten 😅"}</div>
+    <ul class="score">${S.teams.map(x => `<li style="border-left:6px solid ${x.c}"><span>${x.n}</span><span>${x.p} / ${S.opts.goal}</span></li>`).join("")}</ul>
+    ${win ? `<div class="hand"><b>🏆 ${win.n} gewinnt!</b></div><button class="go" onclick="erkStart()">Nochmal</button><button class="alt" onclick="home()">Anderes Spiel</button>`
+      : `<button class="go" onclick="erkNext()">Weiter</button>`}</div>`);
+}
+
+/* ====== Kartenspiele: Wer würde eher, Ich hab noch nie, 10/10 aber ====== */
+const PRE = { eher: "Wer würde eher …", nie: "Ich hab noch nie …", tenten: "Sie/Er ist eine 10/10, aber …" };
+function cardStart() { S.deck = makeDeck(selectedPacks().flatMap(p => p.items.map(t => ({ t, e: p.emoji, cat: p.name })))); S.n = 0; S.done = true; cardShow(); }
+function cardShow() {
+  const c = S.deck(), g = game(S.id); S.n++;
+  const tail = S.id === "eher" ? "?" : "";
+  view(`${topBar(g.emoji + " " + g.name, "home()")}<div class="stage">
+    <div class="card" style="${grad(g)}" onclick="cardShow()"><div class="k">${c.e} ${esc(c.cat)}</div><div class="h" style="font-size:20px">${PRE[S.id]}</div><div class="t">${esc(c.t)}${tail}</div></div>
+    ${S.id === "tenten" ? `<p class="note">Auf drei: 👍 würde ich trotzdem · 👎 geht gar nicht</p>` : S.id === "eher" ? `<p class="note">3 … 2 … 1 … zeigen!</p>` : `<p class="note">Wer's schon gemacht hat: aufstehen!</p>`}
+    <button class="go" onclick="cardShow()">Nächste Karte</button><p class="cnt">Karte ${S.n}</p></div>`);
+}
+
+/* ====== Wahrheit oder Pflicht ====== */
+function wopStart() {
+  const ps = selectedPacks();
+  const w = ps.filter(p => p.kind === "w").flatMap(p => p.items), pf = ps.filter(p => p.kind === "p").flatMap(p => p.items);
+  if (!w.length || !pf.length) { alert("Wähl mindestens eine Wahrheits- und eine Pflicht-Kategorie aus."); return setup("wop"); }
+  S.w = makeDeck(w); S.p = makeDeck(pf); S.who = makeDeck(players.map((_, i) => i)); S.done = true; wopTurn();
+}
+function wopTurn() {
+  S.cur = S.who();
+  view(`${topBar("🎭 Wahrheit oder Pflicht", "home()")}<div class="stage"><div class="hand">Du bist dran:<b>${esc(players[S.cur])}</b></div>
+    <div class="btns"><button class="go" style="background:linear-gradient(135deg,#38c6ff,#1d4ed8);color:#fff" onclick="wopCard('w')">Wahrheit</button>
+    <button class="go" style="background:linear-gradient(135deg,#ff5d8f,#be123c);color:#fff" onclick="wopCard('p')">Pflicht</button></div>
+    <button class="alt" onclick="wopCard(Math.random()<.5?'w':'p')">🎲 Zufall</button></div>`);
+}
+function wopCard(k) {
+  const t = k === "w" ? S.w() : S.p();
+  view(`${topBar("🎭 Wahrheit oder Pflicht", "home()")}<div class="stage"><div class="hand"><b>${esc(players[S.cur])}</b></div>
+    <div class="card" style="background:linear-gradient(135deg,${k === "w" ? "#38c6ff,#1d4ed8" : "#ff5d8f,#be123c"})"><div class="k">${k === "w" ? "Wahrheit" : "Pflicht"}</div><div class="t">${esc(t)}</div></div>
+    <button class="go" onclick="wopTurn()">Nächste Person</button><button class="alt" onclick="wopCard('${k}')">Andere Karte ↻</button></div>`);
+}
+
+/* ====== Werwolf ====== */
+const ROLES = [
+  { id: "wolf", n: "Werwolf", e: "🐺", d: "Du wachst nachts mit den anderen Werwölfen auf und ihr sucht gemeinsam ein Opfer aus. Tagsüber tust du unschuldig." },
+  { id: "seher", n: "Seher:in", e: "🔮", opt: true, d: "Jede Nacht darfst du dir von einer Person die Rolle anschauen (die Spielleitung zeigt sie dir)." },
+  { id: "hexe", n: "Hexe", e: "🧪", opt: true, d: "Du hast einen Heiltrank (rettet das Opfer der Nacht) und einen Gifttrank (tötet jemanden). Jeden nur einmal im Spiel." },
+  { id: "jaeger", n: "Jäger:in", e: "🏹", opt: true, d: "Wenn du stirbst, darfst du sofort noch eine Person mit in den Tod nehmen." },
+  { id: "amor", n: "Amor", e: "💘", opt: true, d: "In der ersten Nacht verliebst du zwei Personen. Stirbt eine davon, stirbt die andere aus Kummer mit." },
+  { id: "dorf", n: "Dorfbewohner:in", e: "🧑‍🌾", d: "Du hast keine Sonderfähigkeit. Finde tagsüber die Werwölfe und stimm sie raus!" },
+];
+function wwStart() {
+  const mod = +$("#mod").value, others = players.map((_, i) => i).filter(i => i !== mod);
+  const roles = [...Array(S.opts.wolves).fill("wolf"), ...ROLES.filter(r => r.opt && S.opts["r_" + r.id] !== false).map(r => r.id)];
+  while (roles.length < others.length) roles.push("dorf");
+  roles.length = others.length; // falls zu viele Sonderrollen
+  const mix = shuffle(roles); S.mod = mod; S.order = others; S.role = {}; others.forEach((p, i) => S.role[p] = mix[i]); S.idx = 0; wwHand();
+}
+function wwHand() {
+  if (S.idx >= S.order.length) return wwScript(0);
+  handTo(players[S.order[S.idx]], "Rolle aufdecken 👀", "wwShow()", `<p class="cnt">${S.idx + 1} von ${S.order.length}</p>`);
+}
+function wwShow() {
+  const r = ROLES.find(x => x.id === S.role[S.order[S.idx]]);
+  view(`${topBar("🐺 Werwolf")}<div class="stage"><div class="card" style="background:linear-gradient(135deg,${r.id === "wolf" ? "#7f1d1d,#1c1917" : "#334155,#0f172a"})">
+    <div class="role">${r.e}</div><div class="k">Deine Rolle</div><div class="t">${r.n}</div><div class="h">${r.d}</div></div>
+    <button class="go" onclick="S.idx++;wwHand()">Verstecken & weitergeben</button></div>`);
+}
+function wwScript(step) {
+  S.done = true;
+  const has = id => Object.values(S.role).includes(id);
+  const steps = [
+    "🌙 <b>Nacht 1.</b> „Das Dorf schläft ein. Alle schließen die Augen.“",
+    has("amor") ? "💘 „Amor wacht auf und zeigt auf zwei Personen, die sich verlieben.“ Tipp beide an, damit sie sich kurz ansehen. „Amor schläft wieder ein.“" : null,
+    has("seher") ? "🔮 „Die Seherin wacht auf und zeigt auf eine Person.“ Zeig ihr mit Daumen hoch (Dorf) oder runter (Werwolf), was die Person ist. „Die Seherin schläft wieder ein.“" : null,
+    "🐺 „Die Werwölfe wachen auf und einigen sich leise auf ein Opfer.“ Merk dir das Opfer. „Die Werwölfe schlafen wieder ein.“",
+    has("hexe") ? "🧪 „Die Hexe wacht auf.“ Zeig ihr das Opfer. „Willst du es retten? Willst du jemanden vergiften?“ „Die Hexe schläft wieder ein.“" : null,
+    "☀️ <b>Tag.</b> „Das Dorf wacht auf.“ Verkünde, wer gestorben ist (die Person zeigt ihre Rolle). Dann wird diskutiert und abgestimmt: Wer die meisten Stimmen hat, scheidet aus.",
+    "🔁 Ab jetzt wiederholt sich das: Nacht (ohne Amor) → Tag. Das Dorf gewinnt, wenn alle Werwölfe weg sind. Die Werwölfe gewinnen, wenn sie gleich viele oder mehr sind als der Rest.",
+  ].filter(Boolean);
+  view(`${topBar("🐺 Spielleitung: " + esc(players[S.mod]))}<div class="box">
+    <div class="lbl" style="margin-top:0"><span>Rollen (nur für die Spielleitung)</span><button onclick="document.getElementById('rl').classList.toggle('hidden')">anzeigen</button></div>
+    <ul class="score hidden" id="rl">${S.order.map(i => { const r = ROLES.find(x => x.id === S.role[i]); return `<li><span>${esc(players[i])}</span><span>${r.e} ${r.n}</span></li>`; }).join("")}</ul></div>
+    <div class="box step">${steps.map((s, i) => `<p style="opacity:${i === step ? 1 : .45}">${s}</p>`).join("")}</div>
+    ${step < steps.length - 1 ? `<button class="go" onclick="wwScript(${step + 1})">Nächster Schritt</button>` : `<button class="go" onclick="wwScript(0)">Nächste Nacht 🌙</button>`}
+    <button class="alt" onclick="setup('werwolf')">Neues Spiel</button>`);
+}
+
+home();
+</script>
+</body>
+</html>

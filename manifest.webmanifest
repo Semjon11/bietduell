@@ -1,7 +1,7 @@
 {
   "name": "Bietduell",
   "short_name": "Bietduell",
-  "description": "Versteigerungsspiel für zwei: ersteigere Dinge und baue das beste KI-Bild.",
+  "description": "Spieleabend: Bietduell zu zweit und Partyspiele wie Imposter, Schätzen, Heiße Bombe und Werwolf – alles gratis.",
   "id": "/bietduell/",
   "start_url": "./",
   "scope": "./",

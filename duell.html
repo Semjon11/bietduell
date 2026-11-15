@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bietduell</title>
+<!-- Als App installierbar (Startbildschirm-Icon, eigenes Fenster ohne Browserleiste) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#12101f">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bietduell">
+<style>
+:root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--p1:#ff5d8f;--p2:#38c6ff;--gold:#ffd23f;--ok:#4ade80;--bad:#f87171;--pitch:#1f7a3f;--pitch2:#23864a;--rad:16px;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#2a1f55,var(--bg) 60%);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--card2);color:var(--txt);font-weight:600;transition:transform .08s,filter .15s}
+button:hover:not(:disabled){filter:brightness(1.2)}button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.35;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input,select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%}
+.wrap{max-width:1200px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.install{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;border:2px solid var(--gold)}
+.install img{width:52px;height:52px;border-radius:12px}
+h1{font-size:clamp(28px,5vw,46px);margin:8px 0 4px;letter-spacing:-.5px;text-wrap:balance}
+h1 span{color:var(--gold)}
+.sub{color:var(--mut);margin:0 0 20px;line-height:1.5}
+.hidden{display:none!important}
+.box{background:var(--card);border-radius:var(--rad);padding:18px;box-shadow:0 8px 30px #0005}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:8px}
+.cat{padding:14px 8px;background:var(--card2);border-radius:14px;text-align:center;border:2px solid transparent;font-size:14px}
+.cat .e{font-size:34px;display:block}.cat.sel{border-color:var(--gold);background:#3a3263}
+.cat small{display:block;color:var(--mut);font-weight:500;font-size:11px;margin-top:2px}
+.big{font-size:20px;padding:14px 26px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.chip{display:inline-block;background:var(--card2);padding:6px 12px;border-radius:999px;font-size:13px;color:var(--mut)}
+.chip.ok{color:var(--ok)}.chip.warn{color:#ffd58a}
+.banner{background:#3a2a10;color:#ffd58a;padding:10px 12px;border-radius:10px;font-size:14px;margin-bottom:12px}
+/* Spielansicht: Karte oben, darunter beide Teams nebeneinander (auch am Handy) */
+.game{display:grid;grid-template-columns:1fr minmax(280px,360px) 1fr;gap:14px;align-items:start}
+@media(max-width:900px){.game{grid-template-columns:1fr 1fr;gap:10px}.center{order:-1;grid-column:1/-1}}
+.pl{border-top:5px solid var(--p1);transition:box-shadow .2s;min-width:0}.pl.p2{border-top-color:var(--p2)}
+.pl.turn{box-shadow:0 0 0 3px var(--gold),0 8px 30px #0005}
+.pl.lead .nm::after{content:" 🏷️"}
+.pl h2{margin:0 0 6px;font-size:20px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+.pl .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.money{font-size:24px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.slots{display:flex;gap:4px;margin:4px 0 10px}.slot{flex:1;height:7px;border-radius:4px;background:#3c3766}.slot.f{background:var(--ok)}
+.imgbox{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:12px;overflow:hidden;background:#0d0b1a}
+.imgbox img{width:100%;height:100%;object-fit:cover;display:block}
+.stickers{position:absolute;left:6px;right:6px;bottom:6px;display:flex;flex-wrap:wrap;gap:4px}
+.stickers span{background:#000b;border-radius:999px;padding:2px 8px;font-size:12px}
+.loader{position:absolute;inset:0;display:grid;place-items:center;background:#0d0b1acc;color:var(--mut);font-size:13px;text-align:center;padding:10px}
+.spin{width:30px;height:30px;border:4px solid #3c3766;border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.items{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.items li{background:var(--card2);padding:4px 9px;border-radius:999px;font-size:12px}
+/* Fußball-Aufstellung */
+.pitch{position:relative;border-radius:12px;padding:12px 8px;background:repeating-linear-gradient(0deg,var(--pitch) 0 28px,var(--pitch2) 28px 56px);border:2px solid #ffffff55;display:grid;gap:10px}
+.pitch::before{content:"";position:absolute;left:8%;right:8%;top:50%;border-top:2px solid #ffffff44}
+.line{display:flex;justify-content:center;gap:8px;position:relative}
+.spot{background:#0d2b18dd;border:2px solid #ffffff66;border-radius:10px;padding:5px 6px;min-width:0;flex:0 1 46%;text-align:center;font-size:12px;line-height:1.25}
+.spot b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spot.empty{border-style:dashed;color:#ffffffaa;background:#0d2b1866}
+.spot .pos{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#ffffffbb}
+.strength{margin-top:8px;font-size:13px;color:var(--mut)}
+/* Mitte: aktuelles Upgrade + Bieten */
+.center .item{text-align:center}
+.nr{color:var(--mut);font-size:14px}
+.item .e{font-size:64px;line-height:1.1;margin:6px 0}
+.item .n{font-size:24px;font-weight:800;text-wrap:balance}
+.ev{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;background:var(--gold);color:#241a00;font-weight:700;font-size:13px}
+.ev.pos{background:var(--card2);color:var(--txt)}
+.high{margin:14px 0 8px;padding:12px;border-radius:12px;background:#151229;text-align:center}
+.high .v{font-size:38px;font-weight:900;font-variant-numeric:tabular-nums}
+.high.l1{box-shadow:inset 0 0 0 3px var(--p1)}.high.l2{box-shadow:inset 0 0 0 3px var(--p2)}
+.hist{font-size:13px;color:var(--mut);text-align:center;min-height:18px}
+.bid{margin-top:10px;padding:12px;border-radius:12px;background:#151229}
+.bid .who{font-size:15px;margin-bottom:8px;text-align:center}
+.bid.t1{box-shadow:inset 0 0 0 3px var(--p1)}.bid.t2{box-shadow:inset 0 0 0 3px var(--p2)}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.quick button{font-size:17px;padding:12px 6px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.bidrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.bidrow input{font-size:20px;font-weight:800;text-align:center}
+.pass{width:100%;margin-top:8px;background:#3a2030}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:4px;text-align:center}
+.log{font-size:13px;color:var(--mut);margin-top:8px;text-align:center}
+.flash{animation:f .6s}@keyframes f{0%{transform:scale(1)}40%{transform:scale(1.04);box-shadow:0 0 0 4px var(--gold)}100%{transform:scale(1)}}
+.final{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.final{grid-template-columns:1fr}}
+.win{outline:4px solid var(--gold)}
+.crown{font-size:40px;text-align:center}
+.rules{color:var(--mut);font-size:14px;line-height:1.55}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.prep{max-width:520px;margin:60px auto;text-align:center}
+.bar{height:10px;background:#3c3766;border-radius:6px;overflow:hidden;margin:14px 0}.bar div{height:100%;background:var(--gold);width:0;transition:width .4s}
+.votebox{max-width:640px;margin:20px auto;text-align:center}
+.votebtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.votebtns button{font-size:18px;padding:16px}
+.verdict{margin-top:14px;font-size:18px;line-height:1.5}
+.confirm{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:20;padding:16px}
+.confirm .box{max-width:360px;text-align:center}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START -->
+<section id="setup">
+  <a href="./" style="display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:none;font-weight:600">← Menü</a>
+  <h1>💰 Bietduell <span>– wer baut's besser?</span></h1>
+  <p class="sub">Beide starten mit demselben Bild – zum Beispiel einer Luxusjacht. Upgrades werden einzeln versteigert. Was du kaufst, kommt in dein Bild. Am Ende wird abgestimmt, wer das Bessere gebaut hat.</p>
+  <div class="box">
+    <div class="row">
+      <div><label for="n1">Spieler:in 1</label><input id="n1" value="Spieler 1" maxlength="18"></div>
+      <div><label for="n2">Spieler:in 2</label><input id="n2" value="Spieler 2" maxlength="18"></div>
+      <div><label for="budget">Budget pro Person (€)</label><input id="budget" type="number" min="5" max="1000" value="20" inputmode="numeric"></div>
+      <div><label for="timer">Bietzeit pro Zug</label><select id="timer"><option value="0">ohne Zeitlimit</option><option value="10">10 Sekunden</option><option value="20">20 Sekunden</option></select></div>
+    </div>
+    <div class="nr" id="bilanzSetup" style="margin-top:10px"></div>
+    <div style="margin-top:12px"><span class="chip" id="quota">⏳ Verbinde mit Bild-KI…</span></div>
+    <label style="margin-top:16px">Kategorie wählen</label>
+    <div class="cats" id="cats"></div>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="big" id="start">Los geht's! 🔨</button>
+      <span class="rules">Jede Runde: andere Upgrades, andere Reihenfolge, anderes Startbild und Spezial-Events.</span>
+    </div>
+  </div>
+  <div class="box rules" style="margin-top:14px">
+    <b>So geht's:</b> Ihr bietet abwechselnd. Wer dran ist, tippt auf <b>+1 / +2 / +5 €</b> oder gibt einen Betrag ein – oder <b>passt</b>. Wer passt, überlässt das Upgrade der anderen Person. Jede:r darf höchstens 5 Upgrades ersteigern.<br>
+    <b>Fußball:</b> Keine Bilder, sondern eine Aufstellung mit 6 Plätzen (1 Tor, 2 Abwehr, 2 Mittelfeld, 1 Sturm). Es werden 12 echte Stars versteigert. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat.<br>
+    <b>Ende:</b> Beide stimmen geheim ab. Seid ihr euch nicht einig, entscheidet die App nach Punkten.
+  </div>
+</section>
+
+<!-- VORBEREITUNG -->
+<section id="prep" class="hidden">
+  <div class="box prep">
+    <div class="spin"></div>
+    <h2 id="prepTitle">Spiel wird vorbereitet…</h2>
+    <div class="bar"><div id="prepBar"></div></div>
+    <div class="nr" id="prepTxt">Startbild wird geladen</div>
+  </div>
+</section>
+
+<!-- SPIEL -->
+<section id="game" class="hidden">
+  <div class="top">
+    <h1 style="font-size:26px;margin:0" id="gTitle"></h1>
+    <button id="quit">✖ Abbrechen</button>
+  </div>
+  <div class="banner hidden" id="aiBanner">Die Gratis-Bilder für heute sind aufgebraucht. Ihr könnt weiterspielen – neue Upgrades erscheinen als Sticker auf dem Bild.</div>
+  <div class="game">
+    <div class="box pl p1" id="pl0"></div>
+    <div class="box center">
+      <div class="item" id="itemCard"></div>
+      <div class="high" id="high"></div>
+      <div class="hist" id="hist"></div>
+      <div id="bidBox"></div>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="box pl p2" id="pl1"></div>
+  </div>
+</section>
+
+<!-- ENDE -->
+<section id="end" class="hidden">
+  <h1 style="text-align:center">🏁 Wer hat <span id="eCat"></span>?</h1>
+  <div class="box votebox" id="vote"></div>
+  <div class="final" id="final"></div>
+  <div style="text-align:center;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button class="big" id="again">🔁 Nochmal (gleiche Kategorie)</button>
+    <button id="menu">📋 Andere Kategorie</button>
+  </div>
+</section>
+</div>
+
+<div class="confirm hidden" id="confirmBox"><div class="box"><p style="font-size:18px;margin-top:0">Spiel wirklich abbrechen?</p><div class="row"><button id="cNo">Weiterspielen</button><button id="cYes" style="background:#5a2240">Abbrechen</button></div></div></div>
+
+<script>
+/* ========= KATEGORIEN =========
+   Jede Kategorie startet mit einem SCHÖNEN Grundbild (start), das für beide gleich ist.
+   Die Dinge sind echte Upgrades, die im Bild sichtbar dazukommen: [Emoji, Name, englische Bildanweisung, Position (nur Fußball), Punktewert].
+   Pro Spiel werden 10 zufällig gezogen. */
+const CATS = [
+ {id:"jacht",e:"🛥️",n:"Jacht",art:"die schönste Jacht",subj:"yacht",scene:"professional photo of a luxury yacht, side view, the whole yacht visible",
+  start:["a sleek white modern luxury motor yacht anchored in calm turquoise water near a rocky coast","an elegant white superyacht with dark tinted windows anchored in a clear blue bay","a stylish white luxury yacht with teak decks anchored off a Mediterranean coast"],
+  items:[["🏄","Paddle-Station","colorful stand-up paddle boards and kayaks on the swim platform at the back","",7],["👨‍🍳","Privatkoch","a private chef in a white uniform grilling seafood on the open sun deck","",7],["🌊","Jetskis","two shiny jet skis in the water right next to the yacht","",8],["🚁","Hubschrauber","a helicopter parked on a helipad on the top deck","",9],["🏊","Pool an Deck","a glass-walled swimming pool on the front deck","",9],["🛝","Wasserrutsche","a giant inflatable water slide from the top deck into the sea","",8],["🛁","Whirlpool","a bubbling jacuzzi on the upper deck","",7],["🎧","DJ-Party","a DJ booth with party lights and people dancing on the deck","",7],["☀️","Sonnendeck","white sun loungers and umbrellas on the sun deck","",6],["💡","Unterwasser-Lichter","glowing blue underwater lights around the hull","",7],["🐬","Delfine","dolphins jumping out of the water next to the yacht","",7],["🚤","Beiboot","a small speedboat tender next to the yacht","",6],["🎬","Freiluftkino","a big outdoor cinema screen on the back deck","",7],["✨","Goldene Akzente","gold-plated railings and gold details on the hull","",8],["🪂","Parasailing","a colorful parasailing parachute flying behind the yacht","",7],["🎆","Feuerwerk","fireworks exploding in the sky above the yacht","",8],["🤿","Tauchbasis","diving equipment and divers on the swim platform","",6],["🏢","Drittes Deck","an additional third deck on top making the yacht bigger","",9]]},
+ {id:"insel",e:"🏝️",n:"Insel",art:"die schönste Insel",subj:"island",scene:"aerial drone photo of a small private tropical island, the whole island visible",
+  start:["a beautiful small tropical island with white sand beaches and palm trees in turquoise water","a lush green tropical island with a sandy lagoon and palm trees in clear blue sea","a small paradise island with a white beach, palm trees and a coral lagoon"],
+  items:[["🏡","Luxusvilla","a modern luxury villa with big glass windows among the palms","",9],["🏊","Infinity-Pool","an infinity pool overlooking the ocean","",8],["🛖","Wasser-Bungalows","a row of overwater bungalows on stilts in the lagoon","",9],["🚁","Helikopterlandeplatz","a helipad with a helicopter","",8],["🛥️","Steg mit Jacht","a wooden pier with a luxury yacht moored","",8],["🍹","Strandbar","a beach bar with lights and lounge chairs","",6],["🗼","Leuchtturm","a tall red and white lighthouse","",6],["💦","Wasserfall","a waterfall flowing down a green hill","",7],["🌳","Baumhaus-Lodge","a big treehouse lodge connected by rope bridges","",7],["🛝","Riesenrutsche","a giant water slide from a hill into the sea","",7],["🦩","Flamingos","a flock of pink flamingos on the beach","",6],["🎾","Tennisplatz","a tennis court","",6],["⛳","Golfplatz","a green golf course","",7],["⛵","Segelboot","a white sailboat anchored near the beach","",6],["🔥","Lagerfeuer-Lounge","a beach lounge with a bonfire and hammocks","",6],["🎆","Feuerwerk","fireworks above the island","",7],["🐠","Korallenriff","a colorful coral reef visible in the clear water","",7]]},
+ {id:"haus",e:"🏡",n:"Villa",art:"die beste Villa",subj:"villa",scene:"professional photo of a luxury villa on a big property, the whole property visible",
+  start:["a modern white luxury villa with big glass windows on a large green property","an elegant modern villa with a flat roof and a large lawn","a stylish modern mansion with wooden facade on a big property"],
+  items:[["🏊","Pool mit Rutsche","a large swimming pool with a water slide","",9],["🏎️","Supercar-Garage","an open glass garage with colorful supercars","",9],["🎾","Tennisplatz","a tennis court","",6],["🌇","Dachterrasse","a rooftop terrace with lounge furniture and lights","",7],["🚁","Helikopterlandeplatz","a helipad with a helicopter","",8],["⛲","Springbrunnen","a big fountain in front of the villa","",6],["🌳","Baumhaus","a big treehouse","",6],["⚽","Fußballplatz","a private football pitch","",7],["🐟","Koi-Teich","a koi pond with a wooden bridge","",6],["🔥","Feuerstelle","an outdoor fire pit lounge","",6],["🐎","Pferdestall","a stable with horses","",7],["🎬","Freiluftkino","an outdoor cinema screen with seats","",7],["🏀","Basketballplatz","a basketball court","",6],["🍇","Weinberg","rows of vineyards around the property","",7],["🏁","Kartbahn","a private go-kart race track","",8],["🎢","Achterbahn","a small roller coaster in the garden","",9]]},
+ {id:"jet",e:"✈️",n:"Privatjet",art:"den besten Privatjet",subj:"private jet",scene:"professional photo of a private jet parked on an airport apron, side view, the whole jet visible",
+  start:["a sleek white modern private business jet with the stairs down","an elegant white private jet with a dark blue stripe","a shiny white long-range private jet parked on the tarmac"],
+  items:[["✨","Goldene Lackierung","shiny gold paint on the whole jet","",9],["🟥","Roter Teppich","a red carpet leading to the stairs","",6],["🍾","Champagner-Empfang","a table with champagne glasses next to the stairs","",6],["🚘","Limousine","a black stretch limousine parked next to the jet","",7],["🏢","Eigener Hangar","a modern private hangar with the company logo behind it","",7],["👩‍✈️","Crew","a pilot and flight attendants in uniforms standing at the stairs","",6],["🏁","Rennstreifen","racing stripes along the jet","",6],["💜","Neon-Licht","neon underglow lights under the jet","",7],["🐉","Drachen-Design","a big dragon painting on the side of the jet","",8],["🏎️","Sportwagen","a red sports car parked next to the jet","",7],["🚀","Raketentriebwerke","extra rocket engines with flames","",8],["🚁","Helikopter-Shuttle","a helicopter parked next to the jet","",8],["🪟","Panoramafenster","huge panoramic windows","",7],["🎈","Willkommens-Ballons","balloons and decorations at the stairs","",5],["🛡️","Militär-Look","matte black stealth paint","",7]]},
+ {id:"auto",e:"🏎️",n:"Sportwagen",art:"das beste Auto",subj:"sports car",scene:"professional photo of a sports car, three quarter view, the whole car visible",
+  start:["a sleek modern silver sports car on a mountain road","a shiny black sports car in front of a modern building","a white modern sports car on a coastal road"],
+  items:[["🦋","Flügeltüren","gullwing doors open","",8],["🪞","Chrom-Lack","mirror chrome paint","",8],["🛫","Heckflügel","a big carbon rear wing","",7],["💜","Neon-Unterboden","neon underglow","",7],["⚫","Carbon-Look","carbon fiber body parts","",7],["🚀","Raketenantrieb","rocket boosters with flames at the back","",9],["🥇","Goldfelgen","gold rims","",7],["🔥","Flammen-Lack","flame paint job","",7],["🏁","Rennstreifen","racing stripes","",6],["🛸","Schwebe-Modus","hovering above the road with blue glow instead of wheels","",9],["☀️","Cabrio","convertible with the roof open","",6],["🔊","V12-Motor","a massive exposed chrome engine on the hood","",8],["🏆","Pokal auf dem Dach","a big golden trophy on the roof","",6],["🌈","Regenbogen-Lack","iridescent rainbow paint","",7],["🛞","Rennreifen","wide racing slick tires","",6]]},
+ {id:"fussball",e:"⚽",n:"Fußballteam (5)",art:"das beste Fußballteam",subj:"football team",lineup:true,slots:{TW:1,V:2,MF:2,ST:1},
+  scene:"team photo of exactly five football players standing side by side in one row on a pitch, from left to right: a goalkeeper wearing gloves, a defender, two midfielders, a striker, full bodies visible",
+  start:["all five are regular players in plain white kits on a well-kept grass pitch in a big stadium","all five are regular players in plain blue kits in a big stadium","all five are regular players in plain red kits in a big stadium"],
+  // Echte Stars: Name steht auf der Karte, im Bild wird nur Statur/Stil beschrieben (keine Gesichter echter Personen nachgebaut)
+  items:[
+   ["🧤","Thibaut Courtois","a very tall goalkeeper with short dark hair and giant gloves","TW",9],
+   ["🧤","Alisson Becker","a tall bearded goalkeeper with dark hair in a bright green goalkeeper kit","TW",9],
+   ["🧤","Manuel Neuer","a tall experienced goalkeeper with short blond hair in a neon goalkeeper kit","TW",8],
+   ["🧤","Gianluigi Donnarumma","a giant goalkeeper with dark hair and a beard, arms spread wide","TW",8],
+   ["🧤","Emiliano Martínez","a confident goalkeeper with dark hair celebrating with fists clenched","TW",8],
+   ["🛡️","Virgil van Dijk","a very tall muscular defender with a short beard and captain armband","V",9],
+   ["🛡️","William Saliba","a tall athletic young defender with short dark hair","V",8],
+   ["🛡️","Rúben Dias","a strong defender with a beard and a serious look","V",8],
+   ["🛡️","Achraf Hakimi","a fast athletic full-back with short curly hair","V",8],
+   ["🛡️","David Alaba","an elegant defender with a short beard and a headband","V",8],
+   ["🎩","Jude Bellingham","a confident young midfielder celebrating with arms spread wide","MF",9],
+   ["🎩","Kevin De Bruyne","a blond midfielder with a calm confident look","MF",9],
+   ["🎩","Florian Wirtz","a young skillful midfielder with short brown hair dribbling a ball","MF",9],
+   ["🎩","Jamal Musiala","a slim young dribbler with short curly hair juggling a ball","MF",9],
+   ["🎩","Pedri","a slim young playmaker with dark hair","MF",8],
+   ["🎩","Rodri","a tall calm defensive midfielder with dark hair","MF",9],
+   ["🎩","Luka Modrić","an experienced slim playmaker with long blond hair","MF",8],
+   ["🎩","Marcel Sabitzer","a strong midfielder with short hair shooting a ball","MF",7],
+   ["⚡","Erling Haaland","a very tall muscular striker with long blond hair tied back","ST",10],
+   ["⚡","Kylian Mbappé","a very fast athletic striker with a shaved head celebrating with arms crossed","ST",10],
+   ["⚡","Harry Kane","a strong striker with short brown hair pointing to the sky","ST",9],
+   ["⚡","Lamine Yamal","a very young skillful winger with curly hair dribbling","ST",9],
+   ["⚡","Vinícius Júnior","a fast skillful winger with dark hair dancing in celebration","ST",9],
+   ["⚡","Marko Arnautović","a tall powerful striker with a beard and tattoos","ST",8]]},
+ {id:"basket",e:"🏀",n:"Basketballteam (5)",art:"das beste Basketballteam",subj:"basketball team",scene:"team photo of five basketball players standing side by side on an indoor court, full bodies visible",
+  start:["five regular players in plain grey kits on a clean indoor court","five regular players in plain white kits in a school sports hall","five regular players in plain black kits on an indoor court"],
+  items:[["🦒","2,30 m Center","one player becomes an extremely tall center","",9],["🎯","Dreier-Maschine","one player becomes a confident sharpshooter spinning a ball on his finger","",8],["🦘","Dunk-König","one player becomes an athletic dunker jumping high","",9],["🧠","Spielmacher","one player becomes a genius point guard with a headband","",8],["🛡️","Verteidigungs-Monster","one player becomes a huge muscular defender","",8],["🤖","Cyborg-Forward","one player becomes a cyborg","",7],["👟","Leuchtende Schuhe","everyone wears glowing sneakers","",6],["👕","Gold-Trikots","everyone wears shiny gold jerseys","",7],["🏟️","Volle Arena","the background becomes a packed arena with lights","",8],["🐻","Bär-Maskottchen","a bear mascot stands next to them","",5],["🎉","Cheerleader","cheerleaders and confetti around them","",6],["🧑‍🏫","Trainer-Legende","a legendary coach in a suit stands next to them","",6],["🏆","Meisterpokal","a huge championship trophy in front of them","",8],["🔥","Feuerball","one player holds a basketball on fire","",7]]},
+ {id:"held",e:"🦸",n:"Superheld:in",art:"die stärkste Heldenfigur",subj:"superhero",scene:"cinematic full body photo of a superhero standing on a rooftop of a city",
+  start:["a confident superhero in a simple blue suit with a red cape","a confident superhero in a simple black suit with a silver cape","a confident superhero in a simple green suit with a mask"],
+  items:[["🕊️","Fliegen","the superhero is now flying in the air above the rooftop","",9],["🔥","Feuerhände","both hands are burning with fire","",8],["❄️","Eis-Kräfte","ice crystals and frost swirling around the hands","",7],["⚡","Blitze","lightning bolts around the body","",8],["🛡️","Goldrüstung","golden armor on the suit","",8],["✨","Lichtumhang","the cape is made of glowing light","",7],["🐉","Drache","a dragon sitting next to the superhero","",9],["👁️","Laserblick","red laser beams from the eyes","",7],["🌀","Portal","a glowing magic portal behind the superhero","",7],["⏱️","Zeitreise-Uhr","a big glowing watch on the wrist","",6],["🤖","Roboter-Arm","a high-tech robotic arm","",7],["🦅","Adler-Begleiter","a golden eagle on the shoulder","",6],["🌟","Aura","a bright golden aura around the body","",7],["🛸","Hoverboard","standing on a glowing hoverboard","",7],["⚔️","Laserschwert","holding a glowing energy sword","",8]]},
+ {id:"burg",e:"🏰",n:"Burg",art:"die mächtigste Burg",subj:"castle",scene:"epic professional photo of a castle on a hill, the whole castle visible",
+  start:["a majestic medieval stone castle on a green hill","a beautiful fairytale castle with white walls on a hill","a strong stone fortress castle on a rocky hill"],
+  items:[["🐉","Drache auf dem Turm","a dragon sitting on the highest tower","",9],["🐊","Wassergraben","a moat with water around the castle","",6],["🌉","Zugbrücke","a wooden drawbridge at the gate","",6],["🗼","Extra-Türme","additional tall towers","",8],["🚩","Fahnen","colorful banners and flags","",5],["⚔️","Ritter-Armee","an army of knights in front of the castle","",8],["💦","Wasserfall","a waterfall next to the castle","",7],["💎","Schatz","a glowing treasure chest at the gate","",7],["🔮","Zaubererturm","a wizard tower with magic glow","",8],["🌿","Labyrinth-Garten","a hedge maze garden","",6],["🦄","Einhörner","unicorns grazing in front of the castle","",7],["🌕","Vollmond","a huge full moon behind the castle","",6],["🎆","Feuerwerk","fireworks above the castle","",7],["🏹","Kanonen","cannons on the walls","",6],["✨","Goldene Dächer","golden roofs on the towers","",8]]},
+ {id:"park",e:"🎢",n:"Freizeitpark",art:"den besten Freizeitpark",subj:"amusement park",scene:"aerial photo of an amusement park, the whole park visible",
+  start:["a clean small amusement park with a carousel, paths and green lawns","a small modern theme park with colorful paths and a fountain","a small amusement park with a carousel and food stands"],
+  items:[["🎢","Looping-Achterbahn","a huge roller coaster with loops","",9],["🎡","Riesenrad","a giant ferris wheel","",8],["🛶","Wildwasserbahn","a log flume water ride","",7],["🗼","Freifallturm","a tall drop tower","",8],["👻","Geisterbahn","a spooky haunted house ride","",6],["🏰","Märchenschloss","a fairytale castle in the center","",8],["🌊","Wasserpark","a water park with slides","",8],["🏎️","Kartbahn","a go-kart track","",6],["🎆","Feuerwerk","fireworks in the sky","",7],["🦖","Dino-Welt","life-size dinosaur figures","",7],["🐙","Riesenkrake","a giant octopus ride","",7],["🚗","Autoscooter","bumper cars","",5],["🍭","Süßigkeiten-Stände","colorful candy and ice cream stands","",5],["🚝","Einschienenbahn","a monorail around the park","",7],["🎈","Heißluftballon","a hot air balloon above the park","",6]]},
+ {id:"zimmer",e:"🎮",n:"Gaming-Zimmer",art:"das beste Zimmer",subj:"room",scene:"professional photo of a bedroom interior, wide angle",
+  start:["a clean modern teenager bedroom with a desk, a gaming PC and a bed","a tidy modern bedroom with a desk, a monitor and a big window","a cozy modern bedroom with a desk, a gaming chair and a bed"],
+  items:[["🖥️","Triple-Monitor","a huge triple curved monitor setup on the desk","",9],["🌈","RGB-Licht","rgb lighting everywhere","",7],["💺","Gaming-Thron","a big racing gaming chair","",7],["🧃","Getränke-Kühlschrank","a glass drink fridge full of drinks","",6],["🛋️","Riesen-Sitzsack","a giant bean bag","",6],["📽️","Beamer-Wand","a projector image on a full wall","",8],["🥽","VR-Station","a virtual reality headset station","",7],["🕹️","Arcade-Automat","a retro arcade machine","",7],["🏁","Rennsimulator","a racing simulator cockpit","",8],["🐠","Aquarium-Wand","an aquarium wall","",8],["💡","Neon-Schild","a neon sign on the wall","",5],["🔵","Bällebad","a ball pit","",6],["🛝","Rutsche","a slide from a loft bed into the room","",7],["🍿","Popcorn-Maschine","a popcorn machine","",5],["🏆","Pokal-Regal","a shelf full of gaming trophies","",6]]},
+ {id:"tier",e:"🐉",n:"Fabelwesen-Haustier",art:"das coolste Haustier",subj:"creature",scene:"fantasy portrait photo of a pet creature in a meadow",
+  start:["a cute fluffy small white fox-like creature with big eyes","a cute small fluffy cat-like creature with blue eyes","a cute small fluffy puppy-like creature with soft fur"],
+  items:[["🐲","Drachenflügel","big dragon wings","",9],["🦄","Einhorn-Horn","a glowing unicorn horn","",8],["🦁","Löwenmähne","a golden lion mane","",7],["🌈","Regenbogenfell","rainbow colored fur","",7],["🔥","Feueratem","breathing fire","",8],["💎","Kristallaugen","glowing crystal eyes","",6],["👑","Krone","a tiny golden crown","",6],["🌟","Leuchtaura","a glowing magical aura","",7],["🛡️","Goldrüstung","golden armor","",8],["🦚","Pfauenschwanz","a big peacock tail","",7],["⚡","Blitze","lightning sparks around it","",7],["🦋","Schmetterlinge","glowing butterflies around it","",5],["🎀","Schleife","a big red bow","",4],["🌸","Blumenkranz","a flower crown","",5],["🐾","Riesengröße","it is now as big as a horse","",8]]},
+ {id:"raum",e:"🚀",n:"Raumschiff",art:"das beste Raumschiff",subj:"spaceship",scene:"sci-fi photo of a spaceship in space, the whole ship visible",
+  start:["a sleek white futuristic spaceship near a blue planet","an elegant silver spaceship flying near a moon","a sleek modern spaceship flying among the stars"],
+  items:[["🔥","Hyperantrieb","glowing blue hyperdrive engines","",9],["🛡️","Energieschild","a blue energy shield bubble","",7],["🔫","Laserkanonen","laser cannons firing","",7],["🌌","Glaskuppel","a glass dome cockpit","",6],["🛸","Begleit-Drohnen","escort drones flying around it","",6],["🪐","Ringe","rotating rings around the ship","",8],["✨","Goldene Panzerung","golden armor plating","",8],["🐉","Weltraum-Drache","a space dragon flying next to it","",9],["🌈","Regenbogen-Spur","a rainbow exhaust trail","",6],["🧲","Traktorstrahl","a tractor beam","",6],["🏙️","Stadt-Kuppel","a small city inside a dome on top","",9],["☄️","Komet","a bright comet in the background","",5],["🚀","Zweites Schiff","a smaller escort spaceship","",7],["💡","Neon-Linien","glowing neon lines on the hull","",6],["🌍","Erde im Hintergrund","planet earth huge in the background","",6]]},
+ {id:"burger",e:"🍔",n:"Burger",art:"den besten Burger",subj:"burger",scene:"professional food photography of a burger on a wooden board",
+  start:["a tasty classic cheeseburger","a juicy classic beef burger with lettuce and tomato","a classic burger with a sesame bun"],
+  items:[["🥩","Wagyu-Patty","an extra thick juicy wagyu beef patty","",9],["🧀","Doppelt Käse","melted double cheese dripping","",7],["🥓","Knuspriger Speck","crispy bacon","",7],["🥑","Avocado","avocado slices","",6],["🍞","Brioche-Bun","a glossy brioche bun","",6],["🧅","Zwiebelringe","crispy onion rings","",6],["🥇","Blattgold","edible gold leaf on top","",9],["🍟","Trüffel-Pommes","truffle fries on the side","",7],["🌶️","Jalapeños","jalapeños","",5],["🍳","Spiegelei","a fried egg on top","",6],["🥤","Milchshake","a big milkshake next to it","",6],["🏗️","Turmhoch","stacked into a tall tower with many layers","",8],["🔥","Flambiert","flames around it","",7],["🍄","Pilze","grilled mushrooms","",5],["🧁","Dessert-Teller","a dessert plate with brownies next to it","",6]]},
+];
+
+/* ========= EINSTELLUNGEN ========= */
+const SERVER="https://bietduell.bietduell-server.workers.dev";   // eigener Gratis-Server (Cloudflare)
+const APP_TOKEN="5eVy6tDqE1BjMTOfriTKebvf";                      // steht absichtlich hier; Schutz = Tageslimit am Server
+const AI_MODEL="cf/flux-2-klein-4b";                             // sparsamstes Gratis-Modell
+const POSN={TW:"Tor",V:"Abwehr",MF:"Mittelfeld",ST:"Sturm"};
+const POS_ORDER=["ST","MF","V","TW"];                            // Aufstellung von oben (Sturm) nach unten (Tor)
+
+/* ========= HILFSFUNKTIONEN ========= */
+let catSel="random", S=null, aiOff=false;
+const $=id=>document.getElementById(id);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const isLineup=()=>!!(S&&S.cat.lineup);
+const maxWins=()=>S.cat.slots?Object.values(S.cat.slots).reduce((a,b)=>a+b,0):5;
+function show(id){["setup","prep","game","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
+try{ ["n1","n2","budget","timer"].forEach(id=>{const v=localStorage.getItem("bd_"+id); if(v)$(id).value=v}); }catch(e){}
+
+function renderCats(){
+  $("cats").innerHTML=`<button class="cat ${catSel==='random'?'sel':''}" data-id="random"><span class="e">🎲</span>Zufall</button>`+
+   CATS.map(c=>`<button class="cat ${catSel===c.id?'sel':''}" data-id="${c.id}"><span class="e">${c.e}</span>${c.n}${c.lineup?'<small>ohne Bilder</small>':''}</button>`).join("");
+  $("cats").querySelectorAll(".cat").forEach(b=>b.onclick=()=>{catSel=b.dataset.id;renderCats()});
+}
+renderCats();
+
+/* ========= BILD-KI (gratis über den eigenen Server) =========
+   Startbilder liegen fertig in der App (Ordner start/) – kosten nichts.
+   Upgrades: Das aktuelle Bild wird bearbeitet, das Grundbild bleibt gleich.
+   Vorbereitung: Für die Person, die gerade vorne liegt, wird das Upgrade schon während des Bietens gerechnet. */
+const cache=new Map();
+async function api(path,opt={}){
+  const r=await fetch(SERVER+path,{...opt,headers:{...(opt.headers||{}),"X-Spiel-Passwort":APP_TOKEN}});
+  if(!r.ok){let m="";try{const j=await r.json();m=j.error||"";if(j.limit)aiLimit()}catch(e){}
+    if(r.status===429)aiLimit(); throw new Error(m||("Fehler "+r.status))}
+  return r;
+}
+function aiLimit(){ if(aiOff)return; aiOff=true; $("aiBanner").classList.remove("hidden"); loadQuota(); }
+async function loadStart(){
+  const i=S.startIdx;
+  try{ const r=await fetch(`start/${S.cat.id}-${i}.png`); if(r.ok){const blob=await r.blob(); return {blob,url:URL.createObjectURL(blob)}} }catch(e){}
+  const prompt=S.cat.scene+", "+S.cat.start[i]+", on a bright sunny day, highly detailed, no text";
+  // Ersatz 1: vom eigenen Server erzeugen lassen
+  if(!aiOff){ try{ const blob=await (await api(`/base?seed=${S.seed}&free=1&prompt=${encodeURIComponent(prompt)}`)).blob(); return {blob,url:URL.createObjectURL(blob)}; }catch(e){} }
+  // Ersatz 2: kostenloser Bilddienst ohne Konto (nur Anzeige, Upgrades dann als Sticker)
+  aiLimit();
+  return {url:`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=640&height=480&seed=${S.seed}&nologo=true`};
+}
+function editPrompt(it){
+  return `Edit this image. Apply this change to the ${S.cat.subj} so that it is clearly and prominently visible: ${it.p}${it.ev==="double"?" (make it very large and eye-catching)":""}. `+
+   `Keep everything else exactly the same: the same ${S.cat.subj} with the same shape and structure, same framing and zoom, same camera angle, same lighting and art style, and keep every detail that is already in the image. Do not crop or zoom. No text.`;
+}
+async function genEdit(src,it){
+  const fd=new FormData();
+  fd.append("image",src.blob,"bild.png"); fd.append("prompt",editPrompt(it));
+  fd.append("model",AI_MODEL); fd.append("seed",String(S.seed));
+  const blob=await (await api("/edit",{method:"POST",body:fd})).blob();
+  return {blob,url:URL.createObjectURL(blob)};
+}
+function variant(i,it){
+  const st=S.pl[i].state, k=st.key+"|"+it.n;
+  if(!cache.has(k)){ const p=(async()=>genEdit(await st.img,it))(); p.catch(()=>{}); cache.set(k,p); }
+  return {key:k,img:cache.get(k)};
+}
+function pregen(){
+  if(isLineup()||aiOff)return;
+  const it=S.items[S.idx]; if(!it||S.leader<0)return;
+  if(needs(S.leader)) variant(S.leader,it);
+}
+
+/* ========= TAGES-KONTINGENT ========= */
+async function loadQuota(){
+  const q=$("quota");
+  try{ const j=await (await api("/status")).json();
+    if(j.rundenUebrig>0&&!j.kiLeer){ q.className="chip ok"; q.textContent=`✅ Gratis-KI-Bilder: heute noch ca. ${j.rundenUebrig} Runden`; if(!S||$("setup").offsetParent)aiOff=false; }
+    else { q.className="chip warn"; q.textContent="⚠️ KI-Bilder für heute aufgebraucht – Spielen geht trotzdem (Sticker statt neuer Bilder, Fußball ganz normal)"; aiOff=true; }
+  }catch(e){ q.className="chip warn"; q.textContent="⚠️ Bild-KI nicht erreichbar – Spielen geht trotzdem (Sticker statt neuer Bilder)"; }
+}
+loadQuota();
+
+/* ========= SPIEL ========= */
+function newGame(catId){
+  const cat=catId==="random"||!catId?rnd(CATS):CATS.find(c=>c.id===catId);
+  try{["n1","n2","budget","timer"].forEach(id=>localStorage.setItem("bd_"+id,$(id).value))}catch(e){}
+  const budget=Math.max(1,parseInt($("budget").value)||20);
+  let raw;
+  if(cat.slots){ raw=[]; for(const [pos,c] of Object.entries(cat.slots)) raw.push(...shuffle(cat.items.filter(x=>x[3]===pos)).slice(0,c*2)); raw=shuffle(raw); }
+  else raw=shuffle(cat.items).slice(0,10);
+  const items=raw.map(i=>({e:i[0],n:i[1],p:i[2],pos:i[3]||null,v:i[4]||6,ev:null}));
+  const evs=shuffle(["sale","mystery","double"]).slice(0,2);
+  shuffle([...Array(items.length-1).keys()].map(x=>x+1)).slice(0,2).forEach((ix,k)=>items[ix].ev=evs[k]);
+  cache.clear();
+  S={cat,items,idx:0,startIdx:Math.floor(Math.random()*cat.start.length),seed:Math.floor(Math.random()*1e6),
+     high:0,leader:-1,turn:0,hist:[],revealed:false,busy:false,passedOnce:false,forced:false,
+     pl:[0,1].map(i=>({name:$("n"+(i+1)).value.trim()||("Spieler "+(i+1)),money:budget,won:[],inImage:0}))};
+  $("aiBanner").classList.toggle("hidden",!aiOff||isLineup());
+  ["pl0","pl1"].forEach(id=>{$(id).dataset.built="";$(id).innerHTML=""});
+  const startGame=()=>{ show("game"); $("gTitle").textContent=cat.e+" "+cat.n; startItem(); };
+  if(isLineup()) return startGame();
+  show("prep"); $("prepBar").style.width="30%"; $("prepTitle").textContent=`${cat.e} ${cat.n} wird vorbereitet…`;
+  const base=loadStart(); base.catch(()=>{});
+  S.pl.forEach(p=>p.state={key:"start",img:base,url:null});
+  base.then(b=>{ S.pl.forEach(p=>p.state.url=b.url); $("prepBar").style.width="100%"; setTimeout(startGame,250); })
+      .catch(()=>{ aiLimit(); S.pl.forEach(p=>p.state.url=""); startGame(); });
+}
+
+function needs(i){const p=S.pl[i],it=S.items[S.idx];if(p.won.length>=maxWins())return false;
+  if(S.cat.slots&&it&&it.pos)return p.won.filter(w=>w.pos===it.pos).length<S.cat.slots[it.pos];return true}
+function eligible(i){const p=S.pl[i];return needs(i)&&p.money>S.high&&p.money>0}
+
+function startItem(){
+  Object.assign(S,{high:0,leader:-1,hist:[],revealed:false,busy:false,passedOnce:false,forced:false});
+  S.turn=S.idx%2; if(!eligible(S.turn))S.turn=1-S.turn;
+  renderAll();
+  if(!eligible(0)&&!eligible(1)) setTimeout(nobody,1200);
+}
+function renderAll(){renderItem();renderPlayers();renderBid()}
+
+function lineupHTML(p){
+  const sl=S.cat.slots;
+  return `<div class="pitch">${POS_ORDER.map(pos=>{const got=p.won.filter(w=>w.pos===pos);
+    return `<div class="line">${Array.from({length:sl[pos]},(_,k)=>{const w=got[k];
+      return w?`<div class="spot"><span class="pos">${POSN[pos]}</span><b>${esc(w.n)}</b>${w.double?"⭐":""}</div>`:`<div class="spot empty"><span class="pos">${POSN[pos]}</span><b>?</b></div>`}).join("")}</div>`}).join("")}</div>
+   <div class="strength">Teamstärke: <b>${score(p)}</b> Punkte</div>`;
+}
+function renderPlayers(){
+  S.pl.forEach((p,i)=>{
+    const el=$("pl"+i);
+    if(!el.dataset.built){
+      el.innerHTML=`<h2><span class="nm"></span><span class="money"></span></h2><div class="slots"></div><div class="vis"></div><ul class="items"></ul>`;
+      el.dataset.built=1;
+    }
+    el.querySelector(".nm").textContent=p.name;
+    el.querySelector(".money").textContent=p.money+" €";
+    el.querySelector(".slots").innerHTML=Array.from({length:maxWins()},(_,j)=>`<div class="slot ${j<p.won.length?'f':''}"></div>`).join("");
+    const vis=el.querySelector(".vis");
+    if(isLineup()){ vis.innerHTML=lineupHTML(p); el.querySelector(".items").innerHTML=""; }
+    else{
+      if(!vis.querySelector(".imgbox")) vis.innerHTML=`<div class="imgbox"><img alt="Bild von ${esc(p.name)}"><div class="stickers"></div><div class="loader hidden"></div></div>`;
+      const img=vis.querySelector("img"); if(p.state.url&&img.getAttribute("src")!==p.state.url)img.src=p.state.url;
+      vis.querySelector(".stickers").innerHTML=p.won.slice(p.inImage).map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("");
+      el.querySelector(".items").innerHTML=p.won.length?p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ⭐":""}</li>`).join(""):`<li style="opacity:.6">noch nix</li>`;
+    }
+    el.classList.toggle("turn",S.turn===i&&!S.busy);
+    el.classList.toggle("lead",S.leader===i&&!S.busy);
+  });
+}
+
+function evLabel(ev){
+  if(ev==="sale")return "💸 SALE: Wer's gewinnt, zahlt nur die Hälfte!";
+  if(ev==="mystery")return "❓ MYSTERY: Was es ist, siehst du erst nach dem Kauf!";
+  if(ev==="double")return isLineup()?"⭐ DOPPELTE PUNKTE für die Teamstärke!":"⭐ EXTRA GROSS im Bild!";
+  return "";
+}
+function renderItem(){
+  const it=S.items[S.idx], hide=it.ev==="mystery"&&!S.revealed;
+  $("itemCard").innerHTML=`<div class="nr">${isLineup()?"Spieler":"Upgrade"} ${S.idx+1} von ${S.items.length}</div>
+    ${it.pos?`<div class="ev pos">Position: ${POSN[it.pos]}</div>`:""}
+    <div class="e">${hide?"🎁":it.e}</div><div class="n">${hide?"???":esc(it.n)}</div>
+    ${it.ev?`<div class="ev">${evLabel(it.ev)}</div>`:""}`;
+  const h=$("high"); h.className="high"+(S.leader>=0?" l"+(S.leader+1):"");
+  h.innerHTML=S.leader<0?`<div class="nr">Noch kein Gebot</div><div class="v">0 €</div>`:
+    `<div class="nr">Höchstes Gebot</div><div class="v">${S.high} €</div><div>von <b>${esc(S.pl[S.leader].name)}</b></div>`;
+  $("hist").innerHTML=S.hist.slice(-4).join(" → ");
+  const left=S.items.length-S.idx-1;
+  $("log").textContent=left?`Danach noch ${left}.`:"Das ist das letzte!";
+}
+/* Optionaler Timer: Wer die Bietzeit verstreichen lässt, passt automatisch. */
+let tick=null;
+function stopTimer(){clearInterval(tick);tick=null}
+function startTimer(i){
+  stopTimer(); const sec=parseInt($("timer").value)||0; if(!sec)return;
+  const end=Date.now()+sec*1000, key=S.idx+"-"+S.hist.length;
+  const upd=()=>{ const el=$("tLeft"); const left=Math.max(0,Math.ceil((end-Date.now())/1000));
+    if(el){el.textContent=`⏱️ ${left} s`;el.style.color=left<=3?"var(--bad)":""}
+    if(left<=0){ stopTimer(); if(S&&!S.busy&&S.turn===i&&S.idx+"-"+S.hist.length===key) pass(i); } };
+  upd(); tick=setInterval(upd,250);
+}
+function renderBid(){
+  const box=$("bidBox"); const i=S.turn, p=S.pl[i];
+  if(S.busy||!eligible(i)){ box.innerHTML=""; stopTimer(); return; }
+  const min=S.high+1, maxB=p.money;
+  box.innerHTML=`<div class="bid t${i+1}"><div class="who">🫵 <b>${esc(p.name)}</b> ist dran · ${maxB} € übrig <span id="tLeft" style="font-weight:800"></span></div>
+    <div class="quick">${[1,2,5].map(d=>`<button data-v="${S.high+d}" ${S.high+d>maxB?"disabled":""}>${S.high+d} €</button>`).join("")}</div>
+    <div class="bidrow"><input id="bidIn" type="number" min="${min}" max="${maxB}" placeholder="eigener Betrag" inputmode="numeric" aria-label="Eigenes Gebot"><button id="bidGo">Bieten</button></div>
+    <button class="pass" id="passBtn">🙅 Passen</button><div class="err" id="bidErr"></div></div>`;
+  box.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>bid(i,b.dataset.v));
+  $("bidGo").onclick=()=>bid(i,$("bidIn").value);
+  $("bidIn").onkeydown=e=>{if(e.key==="Enter")bid(i,$("bidIn").value)};
+  $("passBtn").onclick=()=>pass(i);
+  startTimer(i);
+}
+
+function bid(i,raw){
+  if(S.busy||S.turn!==i)return;
+  const p=S.pl[i],v=Math.floor(Number(raw)),err=$("bidErr");
+  if(!raw||!Number.isFinite(v)){err.textContent="Bitte einen Betrag wählen.";return}
+  if(v<=S.high){err.textContent=`Mehr als ${S.high} € bieten.`;return}
+  if(v>p.money){err.textContent=`Du hast nur ${p.money} €.`;return}
+  S.high=v;S.leader=i;S.hist.push(`${esc(p.name)}: ${v} €`);pregen();
+  const o=1-i;
+  if(eligible(o)){S.turn=o;renderAll();flash();}
+  else{renderAll();sold();}
+}
+function pass(i){
+  if(S.busy||S.turn!==i)return;
+  S.hist.push(`${esc(S.pl[i].name)}: passt`);
+  if(S.leader>=0) return sold();
+  const o=1-i;
+  if(eligible(o)&&!S.passedOnce){S.passedOnce=true;S.turn=o;renderAll();return}
+  nobody();
+}
+function flash(){$("high").classList.remove("flash");void $("high").offsetWidth;$("high").classList.add("flash")}
+
+/* Fußball: Jede Position muss besetzt werden. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat. */
+function forced(){
+  const nd=[0,1].filter(needs); if(!nd.length)return false;
+  let w=nd[0];
+  if(nd.length===2){const a=S.pl[0].won.length,b=S.pl[1].won.length;w=a<b?0:b<a?1:Math.round(Math.random())}
+  S.leader=w;S.high=0;S.forced=true;S.hist.push(`${esc(S.pl[w].name)} bekommt ihn gratis`);
+  sold();return true;
+}
+function nobody(){
+  if(S.busy)return;
+  if(S.cat.slots&&forced())return;
+  S.busy=true;S.hist.push("Keiner will's");renderAll();setTimeout(next,900);
+}
+
+async function sold(){
+  S.busy=true;S.passedOnce=false;
+  const w=S.leader,it=S.items[S.idx],p=S.pl[w];
+  const price=it.ev==="sale"?Math.ceil(S.high/2):S.high;
+  p.money-=price; p.won.push({...it,double:it.ev==="double"});
+  if(it.ev==="mystery")S.revealed=true;
+  $("log").textContent=S.forced?`${p.name} bekommt ${it.n} gratis.`:`Verkauft an ${p.name} für ${price} €!`;
+  renderItem();renderPlayers();renderBid();
+  if(!isLineup()&&!aiOff){
+    const v=variant(w,it), ld=$("pl"+w).querySelector(".loader");
+    let ready=false; v.img.then(()=>ready=true,()=>{}); await sleep(0);
+    if(!ready){ld.classList.remove("hidden");ld.innerHTML='<div><div class="spin"></div>Upgrade wird eingebaut…</div>'}
+    try{ const r=await v.img; p.state={key:v.key,img:v.img,url:r.url}; p.inImage=p.won.length; }
+    catch(e){ /* Kontingent leer oder Fehler: als Sticker weiterspielen */ }
+    ld.classList.add("hidden");
+  }
+  renderPlayers();
+  setTimeout(next,S.forced?1300:1000);
+}
+function next(){
+  S.idx++;
+  const anyNeeds=S.pl.some(p=>p.won.length<maxWins()&&(p.money>0||S.cat.slots));
+  if(S.idx>=S.items.length||!anyNeeds) return finish();
+  startItem();
+}
+
+/* ========= ENDE & ABSTIMMUNG ========= */
+function score(p){return p.won.reduce((s,w)=>s+(w.v||6)*(w.double?2:1),0)}
+function finish(){
+  show("end");$("eCat").textContent=S.cat.art;
+  $("final").innerHTML=S.pl.map((p,i)=>`<div class="box pl ${i?'p2':''}" id="f${i}">
+     <div class="crown hidden">👑</div>
+     <h2><span class="nm">${esc(p.name)}</span><span class="money">${p.money} € übrig</span></h2>
+     ${isLineup()?lineupHTML(p):`<div class="imgbox">${p.state.url?`<img src="${p.state.url}" alt="Endbild von ${esc(p.name)}">`:""}<div class="stickers">${p.won.slice(p.inImage).map(w=>`<span>${w.e} ${esc(w.n)}</span>`).join("")}</div></div>
+     <ul class="items">${p.won.map(w=>`<li>${w.e} ${esc(w.n)}${w.double?" ⭐":""}</li>`).join("")||"<li>nix ersteigert</li>"}</ul>
+     ${p.state.url&&p.state.url.startsWith("blob:")?`<a class="chip" style="margin-top:10px;text-decoration:none" href="${p.state.url}" download="bietduell-${S.cat.id}-${esc(p.name)}.png">📥 Bild speichern</a>`:""}`}</div>`).join("");
+  stopTimer(); S.votes=[];voteStep(0);loadQuota();
+}
+/* Siegesbilanz: wird pro Namenspaar auf diesem Gerät gemerkt */
+function pairKey(){const n=[$("n1").value.trim()||"Spieler 1",$("n2").value.trim()||"Spieler 2"];return "bd_bilanz_"+[...n].sort().join("|")}
+function getBilanz(){try{return JSON.parse(localStorage.getItem(pairKey()))||{}}catch(e){return {}}}
+function addWin(name){const b=getBilanz();b[name]=(b[name]||0)+1;try{localStorage.setItem(pairKey(),JSON.stringify(b))}catch(e){}return b}
+function bilanzText(b){const n=[$("n1").value.trim()||"Spieler 1",$("n2").value.trim()||"Spieler 2"];
+  return (b[n[0]]||0)+(b[n[1]]||0)?`🏆 Bilanz: ${esc(n[0])} ${b[n[0]]||0} : ${b[n[1]]||0} ${esc(n[1])}`:""}
+function showBilanz(){$("bilanzSetup").innerHTML=bilanzText(getBilanz())}
+["n1","n2"].forEach(id=>$(id).addEventListener("input",showBilanz)); showBilanz();
+function voteStep(i){
+  const p=S.pl[i],o=S.pl[1-i];
+  $("vote").innerHTML=`<h2>🗳️ ${esc(p.name)} stimmt ab</h2>
+    <div class="nr">${esc(o.name)}, bitte kurz wegschauen 🙈 – die Stimme bleibt geheim, bis beide abgestimmt haben.</div>
+    <div class="votebtns"><button style="background:#5a2240" data-v="0">${esc(S.pl[0].name)}</button><button style="background:#1d4a63" data-v="1">${esc(S.pl[1].name)}</button></div>`;
+  $("vote").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.votes[i]=+b.dataset.v;i===0?voteStep(1):resolveVotes()});
+}
+function resolveVotes(){
+  const [a,b]=S.votes,n=S.pl.map(p=>esc(p.name)),s=S.pl.map(score);
+  let html=`<h2>Ergebnis</h2><div class="nr">${n[0]} → ${n[a]} · ${n[1]} → ${n[b]}</div>`;
+  if(a===b){ $("vote").innerHTML=html+`<div class="verdict">Ihr seid euch einig: <b>${n[a]}</b> gewinnt! 🎉</div>`; return crown(a); }
+  let w,why;
+  if(s[0]!==s[1]){w=s[0]>s[1]?0:1;why=`${isLineup()?"Teamstärke":"Punkte der Upgrades"}: ${n[0]} ${s[0]} – ${n[1]} ${s[1]}`}
+  else if(S.pl[0].money!==S.pl[1].money){w=S.pl[0].money>S.pl[1].money?0:1;why=`Gleich viele Punkte (${s[0]}) – ${n[w]} hat mehr Geld übrig.`}
+  else{w=Math.round(Math.random());why="Komplett gleich – das Los hat entschieden."}
+  $("vote").innerHTML=html+`<div class="verdict">Ihr seid euch nicht einig – ⚖️ die App entscheidet: <b>${n[w]}</b> gewinnt!<br><span class="nr">${why}</span></div>`;
+  crown(w);
+}
+function crown(i){
+  [0,1].forEach(j=>{$("f"+j).classList.toggle("win",j===i);$("f"+j).querySelector(".crown").classList.toggle("hidden",j!==i)});
+  const b=addWin(S.pl[i].name); const t=bilanzText(b); if(t)$("vote").insertAdjacentHTML("beforeend",`<div class="verdict" style="font-size:16px">${t}</div>`);
+  showBilanz(); confetti();
+}
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const c=document.createElement("canvas");Object.assign(c.style,{position:"fixed",inset:0,pointerEvents:"none",zIndex:9});
+  c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);const x=c.getContext("2d");
+  const P=Array.from({length:160},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height/2,v:2+Math.random()*4,r:Math.random()*6.28,c:rnd(["#ffd23f","#ff5d8f","#38c6ff","#4ade80","#fff"])}));
+  let t=0;(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.r+=.05)*1.5;x.fillStyle=p.c;x.fillRect(p.x,p.y,8,4)});
+    if(++t<220)requestAnimationFrame(f);else c.remove()})();
+}
+
+/* ========= BUTTONS ========= */
+$("start").onclick=()=>newGame(catSel);
+$("quit").onclick=()=>$("confirmBox").classList.remove("hidden");
+$("cNo").onclick=()=>$("confirmBox").classList.add("hidden");
+$("cYes").onclick=()=>{stopTimer();$("confirmBox").classList.add("hidden");show("setup");loadQuota()};
+$("again").onclick=()=>newGame(S.cat.id);
+$("menu").onclick=()=>{show("setup");loadQuota()};
+
+/* ========= ALS APP INSTALLIEREN ========= */
+if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

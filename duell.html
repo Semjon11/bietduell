@@ -134,7 +134,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
   </div>
   <div class="box rules" style="margin-top:14px">
     <b>So geht's:</b> Ihr bietet abwechselnd. Wer dran ist, tippt auf <b>+1 / +2 / +5 €</b> oder gibt einen Betrag ein – oder <b>passt</b>. Wer passt, überlässt das Upgrade der anderen Person. Jede:r darf höchstens 5 Upgrades ersteigern.<br>
-    <b>Fußball:</b> Keine Bilder, sondern eine Aufstellung mit 6 Plätzen (1 Tor, 2 Abwehr, 2 Mittelfeld, 1 Sturm). Es werden 12 echte Fußballer versteigert – Weltstars, aber auch Meme-Kicker 😂 und Transfer-Flops 📉. Die sind billig und lustig, aber schwach fürs Team. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat.<br>
+    <b>Fußball:</b> Keine Bilder, sondern eine Aufstellung mit 6 Plätzen (1 Tor, 2 Abwehr, 2 Mittelfeld, 1 Sturm). Es werden 12 echte Fußballer versteigert – aktuelle Stars, Legenden, aber auch Meme-Kicker 😂 und Transfer-Flops 📉. <b>Gewertet wird immer die Prime</b>, also die beste Form der Karriere (z. B. Ronaldinho bei Barça, Hazard bei Chelsea). Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat.<br>
     <b>Ende:</b> Beide stimmen geheim ab. Seid ihr euch nicht einig, entscheidet die App nach Punkten.
   </div>
 </section>
@@ -211,21 +211,21 @@ const CATS = [
   items:[
    ["🧤","Thibaut Courtois","a very tall goalkeeper with short dark hair and giant gloves","TW",9],
    ["🧤","Alisson Becker","a tall bearded goalkeeper with dark hair in a bright green goalkeeper kit","TW",9],
-   ["🧤","Manuel Neuer","a tall experienced goalkeeper with short blond hair in a neon goalkeeper kit","TW",8],
+   ["🧤","Manuel Neuer","a tall experienced goalkeeper with short blond hair in a neon goalkeeper kit","TW",10],
    ["🧤","Gianluigi Donnarumma","a giant goalkeeper with dark hair and a beard, arms spread wide","TW",8],
    ["🧤","Emiliano Martínez","a confident goalkeeper with dark hair celebrating with fists clenched","TW",8],
    ["🛡️","Virgil van Dijk","a very tall muscular defender with a short beard and captain armband","V",9],
    ["🛡️","William Saliba","a tall athletic young defender with short dark hair","V",8],
    ["🛡️","Rúben Dias","a strong defender with a beard and a serious look","V",8],
    ["🛡️","Achraf Hakimi","a fast athletic full-back with short curly hair","V",8],
-   ["🛡️","David Alaba","an elegant defender with a short beard and a headband","V",8],
+   ["🛡️","David Alaba","an elegant defender with a short beard and a headband","V",9],
    ["🎩","Jude Bellingham","a confident young midfielder celebrating with arms spread wide","MF",9],
    ["🎩","Kevin De Bruyne","a blond midfielder with a calm confident look","MF",9],
    ["🎩","Florian Wirtz","a young skillful midfielder with short brown hair dribbling a ball","MF",9],
    ["🎩","Jamal Musiala","a slim young dribbler with short curly hair juggling a ball","MF",9],
    ["🎩","Pedri","a slim young playmaker with dark hair","MF",8],
    ["🎩","Rodri","a tall calm defensive midfielder with dark hair","MF",9],
-   ["🎩","Luka Modrić","an experienced slim playmaker with long blond hair","MF",8],
+   ["🎩","Luka Modrić","an experienced slim playmaker with long blond hair","MF",9],
    ["🎩","Marcel Sabitzer","a strong midfielder with short hair shooting a ball","MF",7],
    ["⚡","Erling Haaland","a very tall muscular striker with long blond hair tied back","ST",10],
    ["⚡","Kylian Mbappé","a very fast athletic striker with a shaved head celebrating with arms crossed","ST",10],
@@ -233,27 +233,50 @@ const CATS = [
    ["⚡","Lamine Yamal","a very young skillful winger with curly hair dribbling","ST",9],
    ["⚡","Vinícius Júnior","a fast skillful winger with dark hair dancing in celebration","ST",9],
    ["⚡","Marko Arnautović","a tall powerful striker with a beard and tattoos","ST",8],
-   // Meme-Kicker und Flops, die man von TikTok und EA FC kennt: billig, lustig – aber schwach fürs Team
-   ["🧤","Loris Karius","","TW",3,"flop"],
-   ["🧤","Kepa Arrizabalaga","","TW",4,"flop"],
-   ["🧤","André Onana","","TW",5,"meme"],
-   ["🛡️","Harry Maguire","","V",5,"meme"],
-   ["🛡️","Phil Jones","","V",3,"meme"],
-   ["🛡️","Shkodran Mustafi","","V",3,"meme"],
-   ["🛡️","David Luiz","","V",5,"meme"],
-   ["🎩","Jesse Lingard","","MF",5,"meme"],
-   ["🎩","Eden Hazard (Real-Version)","","MF",5,"flop"],
-   ["🎩","Philippe Coutinho","","MF",5,"flop"],
-   ["🎩","Donny van de Beek","","MF",3,"flop"],
-   ["⚡","Antony","","ST",4,"meme"],
-   ["⚡","Nicolas Pépé","","ST",4,"flop"],
-   ["⚡","Timo Werner","","ST",5,"meme"],
-   ["⚡","Romelu Lukaku","","ST",6,"meme"],
-   ["⚡","Darwin Núñez","","ST",6,"meme"],
-   ["⚡","Mario Balotelli","","ST",5,"meme"],
-   ["⚡","Nicklas Bendtner","","ST",3,"meme"],
+   // Legenden – gewertet wird immer die Prime (beste Form der Karriere)
+   ["🧤","Gianluigi Buffon","","TW",10],
+   ["🧤","Iker Casillas","","TW",9],
+   ["🧤","Jan Oblak","","TW",9],
+   ["🛡️","Sergio Ramos","","V",10],
+   ["🛡️","Marcelo","","V",9],
+   ["🛡️","Thiago Silva","","V",9],
+   ["🛡️","Philipp Lahm","","V",9],
+   ["🛡️","Carles Puyol","","V",9],
+   ["🎩","Andrés Iniesta","","MF",10],
+   ["🎩","Xavi","","MF",10],
+   ["🎩","Toni Kroos","","MF",9],
+   ["🎩","Kaká","","MF",10],
+   ["🎩","Ronaldinho","","MF",10],
+   ["⚡","Lionel Messi","","ST",10],
+   ["⚡","Cristiano Ronaldo","","ST",10],
+   ["⚡","Neymar","","ST",10],
+   ["⚡","Zlatan Ibrahimović","","ST",9],
+   ["⚡","Karim Benzema","","ST",9],
+   ["⚡","Robert Lewandowski","","ST",10],
+   ["⚡","Luis Suárez","","ST",9],
+   ["⚡","Gareth Bale","","ST",9],
+   ["⚡","Arjen Robben","","ST",9],
+   // Meme-Kicker und Flops (TikTok/EA FC): ebenfalls in Prime-Form gewertet, aber meist schwächer als die Stars
+   ["🧤","Loris Karius","","TW",6,"flop"],
+   ["🧤","Kepa Arrizabalaga","","TW",6,"flop"],
+   ["🧤","André Onana","","TW",7,"meme"],
+   ["🛡️","Harry Maguire","","V",7,"meme"],
+   ["🛡️","Phil Jones","","V",6,"meme"],
+   ["🛡️","Shkodran Mustafi","","V",6,"meme"],
+   ["🛡️","David Luiz","","V",7,"meme"],
+   ["🎩","Jesse Lingard","","MF",6,"meme"],
+   ["🎩","Eden Hazard","","MF",9,"meme"],
+   ["🎩","Philippe Coutinho","","MF",8,"flop"],
+   ["🎩","Donny van de Beek","","MF",7,"flop"],
+   ["⚡","Antony","","ST",6,"meme"],
+   ["⚡","Nicolas Pépé","","ST",7,"flop"],
+   ["⚡","Timo Werner","","ST",7,"meme"],
+   ["⚡","Romelu Lukaku","","ST",8,"meme"],
+   ["⚡","Darwin Núñez","","ST",7,"meme"],
+   ["⚡","Mario Balotelli","","ST",7,"meme"],
+   ["⚡","Nicklas Bendtner","","ST",5,"meme"],
    ["⚡","Adebayo Akinfenwa","","ST",4,"meme"],
-   ["⚡","Peter Crouch","","ST",4,"meme"]]},
+   ["⚡","Peter Crouch","","ST",6,"meme"]]},
  {id:"basket",e:"🏀",n:"Basketballteam (5)",art:"das beste Basketballteam",subj:"basketball team",scene:"team photo of five basketball players standing side by side on an indoor court, full bodies visible",
   start:["five regular players in plain grey kits on a clean indoor court","five regular players in plain white kits in a school sports hall","five regular players in plain black kits on an indoor court"],
   items:[["🦒","2,30 m Center","one player becomes an extremely tall center","",9],["🎯","Dreier-Maschine","one player becomes a confident sharpshooter spinning a ball on his finger","",8],["🦘","Dunk-König","one player becomes an athletic dunker jumping high","",9],["🧠","Spielmacher","one player becomes a genius point guard with a headband","",8],["🛡️","Verteidigungs-Monster","one player becomes a huge muscular defender","",8],["🤖","Cyborg-Forward","one player becomes a cyborg","",7],["👟","Leuchtende Schuhe","everyone wears glowing sneakers","",6],["👕","Gold-Trikots","everyone wears shiny gold jerseys","",7],["🏟️","Volle Arena","the background becomes a packed arena with lights","",8],["🐻","Bär-Maskottchen","a bear mascot stands next to them","",5],["🎉","Cheerleader","cheerleaders and confetti around them","",6],["🧑‍🏫","Trainer-Legende","a legendary coach in a suit stands next to them","",6],["🏆","Meisterpokal","a huge championship trophy in front of them","",8],["🔥","Feuerball","one player holds a basketball on fire","",7]]},
@@ -438,7 +461,7 @@ function evLabel(ev){
 function renderItem(){
   const it=S.items[S.idx], hide=it.ev==="mystery"&&!S.revealed;
   $("itemCard").innerHTML=`<div class="nr">${isLineup()?"Spieler":"Upgrade"} ${S.idx+1} von ${S.items.length}</div>
-    ${it.pos?`<div class="ev pos">Position: ${POSN[it.pos]}</div>`:""}
+    ${it.pos?`<div class="ev pos">Position: ${POSN[it.pos]} · zählt in Prime-Form ⭐</div>`:""}
     <div class="e">${hide?"🎁":it.e}</div><div class="n">${hide?"???":esc(it.n)}</div>
     ${!hide&&it.tag?`<div class="ev pos">${TAGS[it.tag]}</div>`:""}
     ${it.ev?`<div class="ev">${evLabel(it.ev)}</div>`:""}`;

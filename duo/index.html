@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>1 gegen 1</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#12101f">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--bg:#12101f;--card:#1e1b33;--card2:#29254a;--txt:#f3f1ff;--mut:#a9a3cc;--gold:#ffd23f;--p1:#ff5d8f;--p2:#38c6ff;--ok:#4ade80;--bad:#f87171;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#2a1f55,var(--bg) 60%);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:12px 16px;background:var(--card2);color:var(--txt);font-weight:700;transition:transform .08s,filter .15s}
+button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.35}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input{font:inherit;padding:12px;border-radius:12px;border:1px solid #3c3766;background:#151229;color:var(--txt);width:100%;-webkit-user-select:text;user-select:text}
+.wrap{max-width:640px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.top h1{flex:1;margin:0;font-size:22px}
+.back{padding:8px 12px}
+h1.big{font-size:clamp(30px,8vw,44px);margin:6px 0 2px}
+h1 span{color:var(--gold)}
+.sub{color:var(--mut);margin:0 0 16px;line-height:1.5}
+.box{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 8px 30px #0005;margin-bottom:14px}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.names label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
+#n1{border-color:var(--p1)}#n2{border-color:var(--p2)}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{text-align:left;padding:16px 14px;border-radius:20px;min-height:124px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;box-shadow:0 8px 24px #0006}
+.tile .e{font-size:36px}.tile b{font-size:17px;display:block;margin-top:6px}
+.tile small{font-weight:500;opacity:.9;font-size:12px;line-height:1.35;display:block;margin-top:3px}
+.stage{display:flex;flex-direction:column;gap:14px;text-align:center}
+.sc{display:flex;justify-content:center;gap:10px;align-items:center;font-weight:800;font-size:20px}
+.sc .a{color:var(--p1)}.sc .b{color:var(--p2)}
+.turn{font-size:22px;font-weight:800}.turn.p0{color:var(--p1)}.turn.p1{color:var(--p2)}
+.note{color:var(--mut);font-size:14px;line-height:1.5}
+.go{width:100%;font-size:20px;padding:16px;background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#241a00}
+.alt{width:100%}
+.hand{font-size:22px;line-height:1.4}.hand b{display:block;font-size:30px}
+.card{border-radius:24px;padding:24px 18px;box-shadow:0 14px 40px #0008;color:#fff}
+.card .k{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;font-weight:700}
+.card .t{font-size:clamp(24px,7vw,34px);font-weight:900;margin-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chips button{padding:10px 12px;font-size:15px}
+.chips button.used{opacity:.25;text-decoration:line-through}
+.chips button.bomb{background:var(--bad);color:#fff;opacity:1;text-decoration:none}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick button{padding:8px 12px;font-size:14px}
+/* geteilter Bildschirm: obere Hälfte gedreht, damit man sich gegenüber sitzen kann */
+.split{position:fixed;inset:0;display:grid;grid-template-rows:1fr auto 1fr;z-index:5;background:var(--bg)}
+.half{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center;transition:background .15s}
+.half.top{transform:rotate(180deg)}
+.half.p0{background:#3a1430}.half.p1{background:#10304a}
+.half .big{font-size:clamp(28px,9vw,48px);font-weight:900}
+.half .pts{font-size:16px;font-weight:700;opacity:.85}
+.mid{display:flex;justify-content:center;gap:10px;padding:6px;background:#0d0b1a}
+.mid button{padding:8px 14px;font-size:14px}
+.green .half{background:#15803d!important}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:420px}
+.opts button{font-size:26px;padding:16px 0}
+.board{display:grid;gap:6px;margin:0 auto;width:100%;max-width:420px}
+.c4{grid-template-columns:repeat(7,1fr);background:#1d3fa8;padding:8px;border-radius:16px}
+.c4 .cell{aspect-ratio:1;border-radius:50%;background:#0d0b1a;padding:0}
+.c4 .cell.p0{background:var(--p1)}.c4 .cell.p1{background:var(--p2)}.c4 .cell.win{outline:4px solid var(--gold)}
+.ttt{grid-template-columns:repeat(3,1fr);max-width:320px}
+.ttt .cell{aspect-ratio:1;font-size:56px;font-weight:900;padding:0;background:var(--card)}
+.ttt .cell.p0{color:var(--p1)}.ttt .cell.p1{color:var(--p2)}.ttt .cell.win{background:#3a3263}
+.sticks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:90px;padding:8px}
+.stick{width:10px;height:70px;border-radius:5px;background:linear-gradient(#ef4444 0 14px,#e8c08a 14px)}
+.take{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.take button{font-size:22px;padding:16px 0}
+.rps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rps button{font-size:52px;padding:18px 0}
+.hidden{display:none!important}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.pop{animation:pop .4s ease-out}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script src="lists.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const store = { get(k, d) { try { const v = localStorage.getItem("pz_" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("pz_" + k, JSON.stringify(v)); } catch {} } };
+const view = html => { $("#app").innerHTML = html; window.scrollTo(0, 0); };
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+let ac; function beep(f = 880, d = .07, v = .15) { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  const o = ac.createOscillator(), g = ac.createGain(); o.type = "square"; o.frequency.value = f; g.gain.setValueAtTime(v, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + d); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + d); } catch {} }
+let names = store.get("duo", ["Spieler:in 1", "Spieler:in 2"]);
+let S = {}, timers = [];
+const stop = () => { timers.forEach(clearTimeout); timers = []; };
+const later = (f, ms) => timers.push(setTimeout(f, ms));
+const nm = i => `<span style="color:var(--p${i + 1})">${esc(names[i])}</span>`;
+const score = () => `<div class="sc"><span class="a">${esc(names[0])} ${S.sc[0]}</span><span>:</span><span class="b">${S.sc[1]} ${esc(names[1])}</span></div>`;
+const bar = t => `<div class="top"><button class="back" onclick="quit()">✕</button><h1>${t}</h1></div>`;
+function quit() { stop(); home(); }
+
+const GAMES = [
+  { id: "blos", n: "Bloß nicht!", e: "💀", col: "#f43f5e,#7f1d1d", d: "Die App versteckt z. B. ein Land mit P. Wer es zuerst sagt, verliert!" },
+  { id: "reakt", n: "Reaktionsduell", e: "⚡", col: "#facc15,#ca8a04", d: "Wer zuerst tippt, wenn's grün wird. Zu früh = Punkt weg!" },
+  { id: "mathe", n: "Mathe-Duell", e: "🧮", col: "#38c6ff,#1d4ed8", d: "Gleiche Rechnung für beide – wer schneller richtig tippt." },
+  { id: "vier", n: "Vier in einer Reihe", e: "🔴", col: "#60a5fa,#1e3a8a", d: "Steine einwerfen – wer zuerst vier in einer Reihe hat." },
+  { id: "ttt", n: "Tic-Tac-Toe", e: "❌", col: "#a78bfa,#5b21b6", d: "Der schnelle Klassiker – drei in einer Reihe." },
+  { id: "nim", n: "Streichholz-Duell", e: "🔥", col: "#fb923c,#9a3412", d: "Nimm 1–3 Hölzer. Wer das letzte nimmt, verliert." },
+  { id: "ssp", n: "Schere, Stein, Papier", e: "✊", col: "#4ade80,#166534", d: "Geheim wählen, gleichzeitig aufdecken. Wer zuerst 3 hat." },
+];
+const game = id => GAMES.find(g => g.id === id);
+
+function home() {
+  stop(); S = {};
+  view(`<div class="top"><button class="back" onclick="location.href='../'">← Menü</button><h1></h1></div>
+  <h1 class="big">⚔️ <span>1 gegen 1</span></h1>
+  <p class="sub">Duelle für zwei auf einem Handy. Bei ⚡ und 🧮 legt ihr das Handy zwischen euch – jede:r hat eine Bildschirmhälfte.</p>
+  <div class="box names"><div><label for="n1">Spieler:in 1</label><input id="n1" maxlength="14" value="${esc(names[0])}" onchange="saveNames()"></div>
+    <div><label for="n2">Spieler:in 2</label><input id="n2" maxlength="14" value="${esc(names[1])}" onchange="saveNames()"></div></div>
+  <div class="games">${GAMES.map(g => `<button class="tile" style="background:linear-gradient(135deg,${g.col})" onclick="start('${g.id}')"><span class="e">${g.e}</span><span><b>${g.n}</b><small>${g.d}</small></span></button>`).join("")}</div>`);
+}
+function saveNames() { if (!$("#n1")) return; names = [$("#n1").value.trim() || "Spieler:in 1", $("#n2").value.trim() || "Spieler:in 2"]; store.set("duo", names); }
+function start(id) { saveNames(); S = { id, sc: [0, 0], first: 0 }; ({ blos: blosSetup, reakt: reaktStart, mathe: matheStart, vier: vierNew, ttt: tttNew, nim: nimNew, ssp: sspRound })[id](); }
+
+/* ===== Bloß nicht! ===== */
+function blosSetup() {
+  view(`${bar("💀 Bloß nicht!")}<div class="stage">
+    <p class="note">Die App sucht sich heimlich <b>einen</b> Begriff aus der Kategorie aus. Ihr nennt abwechselnd einen passenden Begriff und tippt ihn an. Wer den geheimen Begriff erwischt, hat verloren!</p>
+    <button class="go" onclick="blosRound(rnd(BLOS))">🎲 Zufällige Kategorie</button>
+    <div class="pick">${BLOS.map((c, i) => `<button onclick="blosRound(BLOS[${i}])">${c.e} ${esc(c.n)}</button>`).join("")}</div></div>`);
+}
+function blosRound(cat) {
+  S.cat = cat; S.secret = rnd(cat.items); S.used = new Set(); S.turn = S.first; S.first = 1 - S.first; blosView();
+}
+function blosView(boom) {
+  const c = S.cat, left = c.items.length - S.used.size;
+  view(`${bar("💀 Bloß nicht!")}<div class="stage">${score()}
+    <div class="card" style="background:linear-gradient(135deg,#f43f5e,#7f1d1d)"><div class="k">Kategorie</div><div class="t">${c.e} ${esc(c.n)}</div></div>
+    ${boom ? `<div class="hand pop">💥 ${nm(S.turn)} hat <b>${esc(S.secret)}</b> erwischt!</div>
+      <button class="go" onclick="blosRound(S.cat)">Nochmal gleiche Kategorie</button><button class="alt" onclick="blosSetup()">Andere Kategorie</button>`
+    : `<div class="turn p${S.turn}">${esc(names[S.turn])} ist dran</div><p class="note">Sag einen Begriff laut und tipp ihn an. Noch ${left} übrig – einer davon ist die Falle.</p>`}
+    <div class="chips">${c.items.map((w, i) => `<button class="${S.used.has(w) ? "used" : ""}${boom && w === S.secret ? " bomb" : ""}" ${boom || S.used.has(w) ? "disabled" : ""} onclick="blosTap(${i})">${esc(w)}</button>`).join("")}</div></div>`);
+}
+function blosTap(i) {
+  const w = S.cat.items[i];
+  if (w === S.secret) { S.sc[1 - S.turn]++; vib([300, 80, 300]); beep(140, .5, .25); return blosView(true); }
+  S.used.add(w); beep(900, .05); S.turn = 1 - S.turn; blosView();
+}
+
+/* ===== geteilter Bildschirm ===== */
+function split(top, bottom, midHtml = "") {
+  view(`<div class="split" id="sp"><div class="half top p0" id="h0">${top}</div><div class="mid">${midHtml}<button onclick="quit()">✕ Beenden</button></div><div class="half p1" id="h1">${bottom}</div></div>`);
+}
+const GOAL = 5;
+
+/* ===== Reaktionsduell ===== */
+function reaktStart() { S.r = 0; reaktReady(); }
+function reaktReady(msg = ["", ""]) {
+  stop();
+  if (Math.max(...S.sc) >= GOAL) return duoWin("reaktStart()");
+  const half = i => `<div class="big">${msg[i] || "Daumen bereit!"}</div><div class="pts">${esc(names[i])}: ${S.sc[i]} / ${GOAL}</div><div class="note">Tippen, sobald es GRÜN wird</div>`;
+  split(half(0), half(1));
+  S.state = "wait";
+  ["h0", "h1"].forEach((id, i) => $("#" + id).onpointerdown = () => reaktTap(i));
+  later(() => { if (S.state !== "wait") return; S.state = "go"; $("#sp").classList.add("green"); document.querySelectorAll(".half .big").forEach(b => b.textContent = "JETZT!"); beep(1200, .12); },
+    1500 + Math.random() * 3500);
+}
+function reaktTap(i) {
+  if (S.state === "wait") { S.state = "done"; S.sc[1 - i]++; vib(200); later(() => reaktReady(i ? ["Glück gehabt 😏", "Zu früh! ❌"] : ["Zu früh! ❌", "Glück gehabt 😏"]), 50); }
+  else if (S.state === "go") { S.state = "done"; S.sc[i]++; beep(1500, .1); later(() => reaktReady(i ? ["Zu langsam 🐢", "Punkt! ⚡"] : ["Punkt! ⚡", "Zu langsam 🐢"]), 50); }
+}
+
+/* ===== Mathe-Duell ===== */
+function matheStart() { S.lock = [false, false]; matheTask(); }
+function makeTask() {
+  const k = Math.floor(Math.random() * 4); let a, b, r, op;
+  if (k === 0) { a = 5 + Math.floor(Math.random() * 60); b = 5 + Math.floor(Math.random() * 40); r = a + b; op = "+"; }
+  if (k === 1) { a = 20 + Math.floor(Math.random() * 70); b = 2 + Math.floor(Math.random() * (a - 2)); r = a - b; op = "−"; }
+  if (k === 2) { a = 2 + Math.floor(Math.random() * 11); b = 2 + Math.floor(Math.random() * 11); r = a * b; op = "×"; }
+  if (k === 3) { b = 2 + Math.floor(Math.random() * 10); r = 2 + Math.floor(Math.random() * 11); a = b * r; op = "÷"; }
+  const wrong = new Set(); while (wrong.size < 2) { const d = rnd([-10, -2, -1, 1, 2, 10, 3, -3]); if (r + d > 0 && r + d !== r) wrong.add(r + d); }
+  return { q: `${a} ${op} ${b}`, r, o: [r, ...wrong] };
+}
+function matheTask(msg = ["", ""]) {
+  if (Math.max(...S.sc) >= 7) return duoWin("matheStart()", 7);
+  S.t = makeTask(); S.lock = [false, false]; S.state = "go";
+  const half = i => `<div class="pts">${esc(names[i])}: ${S.sc[i]} / 7 ${msg[i] || ""}</div><div class="big">${S.t.q} = ?</div>
+    <div class="opts">${shuffle(S.t.o).map(v => `<button onpointerdown="matheTap(${i},${v},this)">${v}</button>`).join("")}</div>`;
+  split(half(0), half(1));
+}
+function matheTap(i, v, el) {
+  if (S.state !== "go" || S.lock[i]) return;
+  if (v === S.t.r) { S.state = "done"; S.sc[i]++; beep(1300, .08); el.style.background = "var(--ok)"; later(() => matheTask(i ? ["", "✅"] : ["✅", ""]), 450); }
+  else { S.lock[i] = true; el.style.background = "var(--bad)"; beep(200, .15); vib(120);
+    if (S.lock[0] && S.lock[1]) { S.state = "done"; later(() => matheTask(), 600); } }
+}
+
+function duoWin(again, goal = GOAL) {
+  stop(); const w = S.sc[0] > S.sc[1] ? 0 : 1;
+  view(`${bar(game(S.id).e + " " + game(S.id).n)}<div class="stage"><div style="font-size:80px" class="pop">🏆</div>
+    <div class="hand">${nm(w)} gewinnt!</div>${score()}
+    <button class="go" onclick="S.sc=[0,0];${again}">Revanche</button><button class="alt" onclick="home()">Anderes Duell</button></div>`);
+}
+
+/* ===== Vier in einer Reihe ===== */
+function vierNew() { S.b = Array.from({ length: 6 }, () => Array(7).fill(-1)); S.turn = S.first; S.first = 1 - S.first; S.over = false; S.win = []; vierView(); }
+function vierView(msg) {
+  view(`${bar("🔴 Vier in einer Reihe")}<div class="stage">${score()}
+    <div class="turn p${S.turn}">${msg || esc(names[S.turn]) + " ist dran " + (S.turn ? "🔵" : "🔴")}</div>
+    <div class="board c4">${S.b.map((row, r) => row.map((v, c) => `<button class="cell ${v >= 0 ? "p" + v : ""} ${S.win.some(([a, b]) => a === r && b === c) ? "win" : ""}" aria-label="Spalte ${c + 1}" onclick="vierDrop(${c})"></button>`).join("")).join("")}</div>
+    ${S.over ? `<button class="go" onclick="vierNew()">Nächste Runde</button>` : `<p class="note">Tipp in eine Spalte, um einen Stein einzuwerfen.</p>`}</div>`);
+}
+function vierDrop(c) {
+  if (S.over) return; let r = 5; while (r >= 0 && S.b[r][c] >= 0) r--; if (r < 0) return;
+  S.b[r][c] = S.turn; beep(500 + r * 60, .05);
+  const line = vierCheck(r, c);
+  if (line) { S.over = true; S.win = line; S.sc[S.turn]++; vib(200); return vierView("🏆 " + esc(names[S.turn]) + " gewinnt die Runde!"); }
+  if (S.b[0].every(v => v >= 0)) { S.over = true; return vierView("Unentschieden – Brett voll!"); }
+  S.turn = 1 - S.turn; vierView();
+}
+function vierCheck(r, c) {
+  const p = S.b[r][c];
+  for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+    const cells = [[r, c]];
+    for (const s of [1, -1]) { let rr = r + dr * s, cc = c + dc * s; while (rr >= 0 && rr < 6 && cc >= 0 && cc < 7 && S.b[rr][cc] === p) { cells.push([rr, cc]); rr += dr * s; cc += dc * s; } }
+    if (cells.length >= 4) return cells;
+  }
+  return null;
+}
+
+/* ===== Tic-Tac-Toe ===== */
+function tttNew() { S.b = Array(9).fill(-1); S.turn = S.first; S.first = 1 - S.first; S.over = false; S.win = []; tttView(); }
+const SYM = ["✕", "◯"];
+function tttView(msg) {
+  view(`${bar("❌ Tic-Tac-Toe")}<div class="stage">${score()}
+    <div class="turn p${S.turn}">${msg || esc(names[S.turn]) + " (" + SYM[S.turn] + ") ist dran"}</div>
+    <div class="board ttt">${S.b.map((v, i) => `<button class="cell ${v >= 0 ? "p" + v : ""} ${S.win.includes(i) ? "win" : ""}" aria-label="Feld ${i + 1}" onclick="tttSet(${i})">${v >= 0 ? SYM[v] : ""}</button>`).join("")}</div>
+    ${S.over ? `<button class="go" onclick="tttNew()">Nächste Runde</button>` : ""}</div>`);
+}
+function tttSet(i) {
+  if (S.over || S.b[i] >= 0) return; S.b[i] = S.turn; beep(700, .05);
+  for (const l of [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]])
+    if (l.every(k => S.b[k] === S.turn)) { S.over = true; S.win = l; S.sc[S.turn]++; return tttView("🏆 " + esc(names[S.turn]) + " gewinnt die Runde!"); }
+  if (S.b.every(v => v >= 0)) { S.over = true; return tttView("Unentschieden!"); }
+  S.turn = 1 - S.turn; tttView();
+}
+
+/* ===== Streichholz-Duell ===== */
+function nimNew() { S.n = 21; S.turn = S.first; S.first = 1 - S.first; S.over = false; nimView(); }
+function nimView(msg) {
+  view(`${bar("🔥 Streichholz-Duell")}<div class="stage">${score()}
+    <div class="turn p${S.turn}">${msg || esc(names[S.turn]) + " ist dran"}</div>
+    <div class="box"><div class="sticks">${'<div class="stick"></div>'.repeat(S.n)}</div><div class="note">${S.n} Hölzer übrig</div></div>
+    ${S.over ? `<button class="go" onclick="nimNew()">Nächste Runde</button>` : `<div class="take">${[1, 2, 3].map(k => `<button ${k > S.n ? "disabled" : ""} onclick="nimTake(${k})">−${k}</button>`).join("")}</div>
+    <p class="note">Wer das letzte Holz nehmen muss, verliert. Tipp: Es gibt einen Trick, mit dem man fast immer gewinnt …</p>`}</div>`);
+}
+function nimTake(k) {
+  S.n -= k; beep(600, .05);
+  if (S.n <= 0) { S.over = true; S.sc[1 - S.turn]++; vib(200); return nimView("🔥 " + esc(names[S.turn]) + " hat das letzte Holz – " + esc(names[1 - S.turn]) + " gewinnt!"); }
+  S.turn = 1 - S.turn; nimView();
+}
+
+/* ===== Schere, Stein, Papier ===== */
+const RPS = ["✌️", "✊", "✋"], RPSN = ["Schere", "Stein", "Papier"];
+function sspRound() {
+  if (Math.max(...S.sc) >= 3) return duoWin("sspRound()", 3);
+  S.pick = []; sspAsk(0);
+}
+function sspAsk(i) {
+  view(`${bar("✊ Schere, Stein, Papier")}<div class="stage">${score()}
+    <div class="hand">📱 Nur ${nm(i)} schaut!<b>Wähl geheim:</b></div>
+    <div class="rps">${RPS.map((e, k) => `<button aria-label="${RPSN[k]}" onclick="sspPick(${i},${k})">${e}</button>`).join("")}</div>
+    <p class="note">Danach das Handy an ${esc(names[1 - i])} geben.</p></div>`);
+}
+function sspPick(i, k) {
+  S.pick[i] = k; beep(800, .04);
+  if (i === 0) return view(`${bar("✊ Schere, Stein, Papier")}<div class="stage"><div class="hand">✅ Gespeichert!<br>Gib das Handy an<b>${nm(1)}</b></div><button class="go" onclick="sspAsk(1)">Ich bin bereit</button></div>`);
+  const [a, b] = S.pick, d = (a - b + 3) % 3; // 1 = Spieler 1 gewinnt (Stein>Schere, Papier>Stein, Schere>Papier)
+  let msg = "Unentschieden – nochmal!";
+  if (d === 1) { S.sc[0]++; msg = nm(0) + " gewinnt die Runde!"; } else if (d === 2) { S.sc[1]++; msg = nm(1) + " gewinnt die Runde!"; }
+  view(`${bar("✊ Schere, Stein, Papier")}<div class="stage">${score()}
+    <div style="display:flex;justify-content:space-around;font-size:80px" class="pop"><span>${RPS[a]}</span><span>${RPS[b]}</span></div>
+    <div style="display:flex;justify-content:space-around">${nm(0)}${nm(1)}</div><div class="hand">${msg}</div>
+    <button class="go" onclick="sspRound()">Weiter</button></div>`);
+}
+
+home();
+</script>
+</body>
+</html>

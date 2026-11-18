@@ -134,7 +134,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
   </div>
   <div class="box rules" style="margin-top:14px">
     <b>So geht's:</b> Ihr bietet abwechselnd. Wer dran ist, tippt auf <b>+1 / +2 / +5 €</b> oder gibt einen Betrag ein – oder <b>passt</b>. Wer passt, überlässt das Upgrade der anderen Person. Jede:r darf höchstens 5 Upgrades ersteigern.<br>
-    <b>Fußball:</b> Keine Bilder, sondern eine Aufstellung mit 6 Plätzen (1 Tor, 2 Abwehr, 2 Mittelfeld, 1 Sturm). Es werden 12 echte Stars versteigert. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat.<br>
+    <b>Fußball:</b> Keine Bilder, sondern eine Aufstellung mit 6 Plätzen (1 Tor, 2 Abwehr, 2 Mittelfeld, 1 Sturm). Es werden 12 echte Fußballer versteigert – Weltstars, aber auch Meme-Kicker 😂 und Transfer-Flops 📉. Die sind billig und lustig, aber schwach fürs Team. Bietet keiner, bekommt den Spieler gratis, wer die Position noch frei hat.<br>
     <b>Ende:</b> Beide stimmen geheim ab. Seid ihr euch nicht einig, entscheidet die App nach Punkten.
   </div>
 </section>
@@ -204,7 +204,7 @@ const CATS = [
  {id:"auto",e:"🏎️",n:"Sportwagen",art:"das beste Auto",subj:"sports car",scene:"professional photo of a sports car, three quarter view, the whole car visible",
   start:["a sleek modern silver sports car on a mountain road","a shiny black sports car in front of a modern building","a white modern sports car on a coastal road"],
   items:[["🦋","Flügeltüren","gullwing doors open","",8],["🪞","Chrom-Lack","mirror chrome paint","",8],["🛫","Heckflügel","a big carbon rear wing","",7],["💜","Neon-Unterboden","neon underglow","",7],["⚫","Carbon-Look","carbon fiber body parts","",7],["🚀","Raketenantrieb","rocket boosters with flames at the back","",9],["🥇","Goldfelgen","gold rims","",7],["🔥","Flammen-Lack","flame paint job","",7],["🏁","Rennstreifen","racing stripes","",6],["🛸","Schwebe-Modus","hovering above the road with blue glow instead of wheels","",9],["☀️","Cabrio","convertible with the roof open","",6],["🔊","V12-Motor","a massive exposed chrome engine on the hood","",8],["🏆","Pokal auf dem Dach","a big golden trophy on the roof","",6],["🌈","Regenbogen-Lack","iridescent rainbow paint","",7],["🛞","Rennreifen","wide racing slick tires","",6]]},
- {id:"fussball",e:"⚽",n:"Fußballteam (5)",art:"das beste Fußballteam",subj:"football team",lineup:true,slots:{TW:1,V:2,MF:2,ST:1},
+ {id:"fussball",e:"⚽",n:"Fußballteam (6)",art:"das beste Fußballteam",subj:"football team",lineup:true,slots:{TW:1,V:2,MF:2,ST:1},
   scene:"team photo of exactly five football players standing side by side in one row on a pitch, from left to right: a goalkeeper wearing gloves, a defender, two midfielders, a striker, full bodies visible",
   start:["all five are regular players in plain white kits on a well-kept grass pitch in a big stadium","all five are regular players in plain blue kits in a big stadium","all five are regular players in plain red kits in a big stadium"],
   // Echte Stars: Name steht auf der Karte, im Bild wird nur Statur/Stil beschrieben (keine Gesichter echter Personen nachgebaut)
@@ -232,7 +232,29 @@ const CATS = [
    ["⚡","Harry Kane","a strong striker with short brown hair pointing to the sky","ST",9],
    ["⚡","Lamine Yamal","a very young skillful winger with curly hair dribbling","ST",9],
    ["⚡","Vinícius Júnior","a fast skillful winger with dark hair dancing in celebration","ST",9],
-   ["⚡","Marko Arnautović","a tall powerful striker with a beard and tattoos","ST",8]]},
+   ["⚡","Marko Arnautović","a tall powerful striker with a beard and tattoos","ST",8],
+   // Meme-Kicker und Flops: billig, lustig – aber schwach fürs Team
+   ["🧤","Loris Karius","","TW",3,"flop"],
+   ["🧤","Massimo Taibi","","TW",2,"flop"],
+   ["🧤","René Higuita","","TW",5,"meme"],
+   ["🧤","David James","","TW",4,"meme"],
+   ["🛡️","Harry Maguire","","V",5,"meme"],
+   ["🛡️","Phil Jones","","V",3,"meme"],
+   ["🛡️","Shkodran Mustafi","","V",3,"meme"],
+   ["🛡️","Djimi Traoré","","V",3,"meme"],
+   ["🛡️","David Luiz","","V",6,"meme"],
+   ["🎩","Jesse Lingard","","MF",5,"meme"],
+   ["🎩","Bebé","","MF",2,"flop"],
+   ["🎩","Kléberson","","MF",3,"flop"],
+   ["🎩","Kerlon","","MF",3,"meme"],
+   ["🎩","Alexander Hleb","","MF",4,"flop"],
+   ["⚡","Ali Dia","","ST",1,"flop"],
+   ["⚡","Nicklas Bendtner","","ST",4,"meme"],
+   ["⚡","Peter Crouch","","ST",6,"meme"],
+   ["⚡","Adebayo Akinfenwa","","ST",5,"meme"],
+   ["⚡","Mario Balotelli","","ST",6,"meme"],
+   ["⚡","Andy Carroll","","ST",4,"flop"],
+   ["⚡","Emile Heskey","","ST",5,"meme"]]},
  {id:"basket",e:"🏀",n:"Basketballteam (5)",art:"das beste Basketballteam",subj:"basketball team",scene:"team photo of five basketball players standing side by side on an indoor court, full bodies visible",
   start:["five regular players in plain grey kits on a clean indoor court","five regular players in plain white kits in a school sports hall","five regular players in plain black kits on an indoor court"],
   items:[["🦒","2,30 m Center","one player becomes an extremely tall center","",9],["🎯","Dreier-Maschine","one player becomes a confident sharpshooter spinning a ball on his finger","",8],["🦘","Dunk-König","one player becomes an athletic dunker jumping high","",9],["🧠","Spielmacher","one player becomes a genius point guard with a headband","",8],["🛡️","Verteidigungs-Monster","one player becomes a huge muscular defender","",8],["🤖","Cyborg-Forward","one player becomes a cyborg","",7],["👟","Leuchtende Schuhe","everyone wears glowing sneakers","",6],["👕","Gold-Trikots","everyone wears shiny gold jerseys","",7],["🏟️","Volle Arena","the background becomes a packed arena with lights","",8],["🐻","Bär-Maskottchen","a bear mascot stands next to them","",5],["🎉","Cheerleader","cheerleaders and confetti around them","",6],["🧑‍🏫","Trainer-Legende","a legendary coach in a suit stands next to them","",6],["🏆","Meisterpokal","a huge championship trophy in front of them","",8],["🔥","Feuerball","one player holds a basketball on fire","",7]]},
@@ -264,6 +286,7 @@ const SERVER="https://bietduell.bietduell-server.workers.dev";   // eigener Grat
 const APP_TOKEN="5eVy6tDqE1BjMTOfriTKebvf";                      // steht absichtlich hier; Schutz = Tageslimit am Server
 const AI_MODEL="cf/flux-2-klein-4b";                             // sparsamstes Gratis-Modell
 const POSN={TW:"Tor",V:"Abwehr",MF:"Mittelfeld",ST:"Sturm"};
+const TAGS={meme:"😂 Meme-Kicker",flop:"📉 Transfer-Flop"};
 const POS_ORDER=["ST","MF","V","TW"];                            // Aufstellung von oben (Sturm) nach unten (Tor)
 
 /* ========= HILFSFUNKTIONEN ========= */
@@ -347,7 +370,7 @@ function newGame(catId){
   let raw;
   if(cat.slots){ raw=[]; for(const [pos,c] of Object.entries(cat.slots)) raw.push(...shuffle(cat.items.filter(x=>x[3]===pos)).slice(0,c*2)); raw=shuffle(raw); }
   else raw=shuffle(cat.items).slice(0,10);
-  const items=raw.map(i=>({e:i[0],n:i[1],p:i[2],pos:i[3]||null,v:i[4]||6,ev:null}));
+  const items=raw.map(i=>({e:i[0],n:i[1],p:i[2],pos:i[3]||null,v:i[4]||6,tag:i[5]||null,ev:null}));
   const evs=shuffle(["sale","mystery","double"]).slice(0,2);
   shuffle([...Array(items.length-1).keys()].map(x=>x+1)).slice(0,2).forEach((ix,k)=>items[ix].ev=evs[k]);
   cache.clear();
@@ -381,7 +404,7 @@ function lineupHTML(p){
   const sl=S.cat.slots;
   return `<div class="pitch">${POS_ORDER.map(pos=>{const got=p.won.filter(w=>w.pos===pos);
     return `<div class="line">${Array.from({length:sl[pos]},(_,k)=>{const w=got[k];
-      return w?`<div class="spot"><span class="pos">${POSN[pos]}</span><b>${esc(w.n)}</b>${w.double?"⭐":""}</div>`:`<div class="spot empty"><span class="pos">${POSN[pos]}</span><b>?</b></div>`}).join("")}</div>`}).join("")}</div>
+      return w?`<div class="spot"><span class="pos">${POSN[pos]}</span><b>${esc(w.n)}${w.tag?" "+TAGS[w.tag].slice(0,2):""}</b>${w.double?"⭐":""}</div>`:`<div class="spot empty"><span class="pos">${POSN[pos]}</span><b>?</b></div>`}).join("")}</div>`}).join("")}</div>
    <div class="strength">Teamstärke: <b>${score(p)}</b> Punkte</div>`;
 }
 function renderPlayers(){
@@ -418,6 +441,7 @@ function renderItem(){
   $("itemCard").innerHTML=`<div class="nr">${isLineup()?"Spieler":"Upgrade"} ${S.idx+1} von ${S.items.length}</div>
     ${it.pos?`<div class="ev pos">Position: ${POSN[it.pos]}</div>`:""}
     <div class="e">${hide?"🎁":it.e}</div><div class="n">${hide?"???":esc(it.n)}</div>
+    ${!hide&&it.tag?`<div class="ev pos">${TAGS[it.tag]}</div>`:""}
     ${it.ev?`<div class="ev">${evLabel(it.ev)}</div>`:""}`;
   const h=$("high"); h.className="high"+(S.leader>=0?" l"+(S.leader+1):"");
   h.innerHTML=S.leader<0?`<div class="nr">Noch kein Gebot</div><div class="v">0 €</div>`:

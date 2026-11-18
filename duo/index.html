@@ -79,6 +79,23 @@ h1 span{color:var(--gold)}
 .rps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .rps button{font-size:52px;padding:18px 0}
 .hidden{display:none!important}
+.sec{font-size:18px;margin:20px 0 10px}
+.ranks{display:grid;gap:8px}.rk{display:flex;gap:12px;align-items:center;text-align:left;font-size:17px;padding:12px 14px}
+.rk span{background:var(--gold);color:#241a00;border-radius:8px;width:30px;height:30px;display:grid;place-items:center;flex:none}
+.rk:disabled{opacity:.55}
+table.cmp{width:100%;border-collapse:separate;border-spacing:0 6px;font-weight:600}.cmp th{font-size:14px;text-align:left;padding:0 10px}
+.cmp td{padding:10px;background:var(--card2);text-align:left}.cmp td:first-child{border-radius:10px 0 0 10px;width:40px;color:var(--gold)}.cmp td:last-child{border-radius:0 10px 10px 0}
+.cmp tr.eq td{background:#3a3263}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:440px}.two button{font-size:18px;padding:18px 8px;min-height:90px}
+.tk{display:grid;grid-template-columns:.9fr 1fr 1fr 1fr;gap:6px}
+.tk .hd{font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px;background:var(--card);border-radius:10px;min-height:44px}
+.tk .cell{aspect-ratio:1;padding:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card2);font-size:22px;color:var(--mut)}
+.tk .cell b{font-size:34px}.tk .cell small{font-size:10px;font-weight:600;line-height:1.1}
+.tk .cell.p0{color:var(--p1)}.tk .cell.p1{color:var(--p2)}.tk .cell.win{background:#3a3263}.tk .cell:disabled{opacity:1}
+.btns2{display:flex;gap:10px}.btns2>*{flex:1;padding:16px;font-size:18px}.yes{background:#15803d}.no{background:#b91c1c}
+.timer{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums}
+.t2{font-size:22px;font-weight:800;margin-top:4px}
+
 @keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 .pop{animation:pop .4s ease-out}
 </style>
@@ -86,6 +103,7 @@ h1 span{color:var(--gold)}
 <body>
 <div class="wrap" id="app"></div>
 <script src="lists.js"></script>
+<script src="tiktok.js"></script>
 <script>
 "use strict";
 const $ = s => document.querySelector(s);
@@ -109,8 +127,14 @@ const bar = t => `<div class="top"><button class="back" onclick="quit()">✕</bu
 function quit() { stop(); home(); }
 
 const GAMES = [
-  { id: "blos", n: "Bloß nicht!", e: "💀", col: "#f43f5e,#7f1d1d", d: "Die App versteckt z. B. ein Land mit P. Wer es zuerst sagt, verliert!" },
-  { id: "reakt", n: "Reaktionsduell", e: "⚡", col: "#facc15,#ca8a04", d: "Wer zuerst tippt, wenn's grün wird. Zu früh = Punkt weg!" },
+  { id: "blind", tt: 1, n: "Blind Ranking", e: "🙈", col: "#ec4899,#7c3aed", d: "5 Dinge blind auf Platz 1–5 setzen – dann vergleichen und streiten." },
+  { id: "tiki", tt: 1, n: "Tiki-Taka-Toe", e: "⚽", col: "#22c55e,#14532d", d: "Fußball-Tic-Tac-Toe: Nenn einen Spieler, der zu Verein und Land passt." },
+  { id: "old", tt: 1, n: "Älter oder neuer?", e: "⏳", col: "#f59e0b,#92400e", d: "iPhone oder YouTube – was gibt's länger? Wer zuerst richtig tippt." },
+  { id: "tug", tt: 1, n: "Tauziehen", e: "💪", col: "#ef4444,#7f1d1d", d: "Tipp-Battle: Wer schneller tippt, erobert den Bildschirm." },
+  { id: "five", tt: 1, n: "5-Sekunden-Duell", e: "⏱️", col: "#f97316,#be123c", d: "Nenne 3 Dinge in 5 Sekunden – klingt leicht, ist es nicht." },
+  { id: "kenn", tt: 1, n: "Wer kennt mich besser?", e: "💞", col: "#f472b6,#9d174d", d: "Der BFF-Test: Wie gut kennt ihr euch wirklich?" },
+  { id: "blos", tt: 1, n: "Bloß nicht!", e: "💀", col: "#f43f5e,#7f1d1d", d: "Die App versteckt z. B. ein Land mit P. Wer es zuerst sagt, verliert!" },
+  { id: "reakt", tt: 1, n: "Reaktionsduell", e: "⚡", col: "#facc15,#ca8a04", d: "Wer zuerst tippt, wenn's grün wird. Zu früh = Punkt weg!" },
   { id: "mathe", n: "Mathe-Duell", e: "🧮", col: "#38c6ff,#1d4ed8", d: "Gleiche Rechnung für beide – wer schneller richtig tippt." },
   { id: "vier", n: "Vier in einer Reihe", e: "🔴", col: "#60a5fa,#1e3a8a", d: "Steine einwerfen – wer zuerst vier in einer Reihe hat." },
   { id: "ttt", n: "Tic-Tac-Toe", e: "❌", col: "#a78bfa,#5b21b6", d: "Der schnelle Klassiker – drei in einer Reihe." },
@@ -123,13 +147,14 @@ function home() {
   stop(); S = {};
   view(`<div class="top"><button class="back" onclick="location.href='../'">← Menü</button><h1></h1></div>
   <h1 class="big">⚔️ <span>1 gegen 1</span></h1>
-  <p class="sub">Duelle für zwei auf einem Handy. Bei ⚡ und 🧮 legt ihr das Handy zwischen euch – jede:r hat eine Bildschirmhälfte.</p>
+  <p class="sub">Duelle für zwei auf einem Handy – mit den Spielen, die gerade auf TikTok laufen. Bei ⚡, ⏳, 💪 und 🧮 legt ihr das Handy zwischen euch, jede:r hat eine Bildschirmhälfte.</p>
   <div class="box names"><div><label for="n1">Spieler:in 1</label><input id="n1" maxlength="14" value="${esc(names[0])}" onchange="saveNames()"></div>
     <div><label for="n2">Spieler:in 2</label><input id="n2" maxlength="14" value="${esc(names[1])}" onchange="saveNames()"></div></div>
-  <div class="games">${GAMES.map(g => `<button class="tile" style="background:linear-gradient(135deg,${g.col})" onclick="start('${g.id}')"><span class="e">${g.e}</span><span><b>${g.n}</b><small>${g.d}</small></span></button>`).join("")}</div>`);
+  <h2 class="sec">🔥 TikTok-Trends</h2><div class="games">${GAMES.filter(g => g.tt).map(g => `<button class="tile" style="background:linear-gradient(135deg,${g.col})" onclick="start('${g.id}')"><span class="e">${g.e}</span><span><b>${g.n}</b><small>${g.d}</small></span></button>`).join("")}</div>
+  <h2 class="sec">🎲 Klassiker</h2><div class="games">${GAMES.filter(g => !g.tt).map(g => `<button class="tile" style="background:linear-gradient(135deg,${g.col})" onclick="start('${g.id}')"><span class="e">${g.e}</span><span><b>${g.n}</b><small>${g.d}</small></span></button>`).join("")}</div>`);
 }
 function saveNames() { if (!$("#n1")) return; names = [$("#n1").value.trim() || "Spieler:in 1", $("#n2").value.trim() || "Spieler:in 2"]; store.set("duo", names); }
-function start(id) { saveNames(); S = { id, sc: [0, 0], first: 0 }; ({ blos: blosSetup, reakt: reaktStart, mathe: matheStart, vier: vierNew, ttt: tttNew, nim: nimNew, ssp: sspRound })[id](); }
+function start(id) { stop(); saveNames(); S = { id, sc: [0, 0], first: 0 }; ({ blind: blindSetup, tiki: tikiStart, old: oldStart, tug: tugStart, five: fiveStart, kenn: kennStart, blos: blosSetup, reakt: reaktStart, mathe: matheStart, vier: vierNew, ttt: tttNew, nim: nimNew, ssp: sspRound })[id](); }
 
 /* ===== Bloß nicht! ===== */
 function blosSetup() {
@@ -205,9 +230,9 @@ function matheTap(i, v, el) {
 }
 
 function duoWin(again, goal = GOAL) {
-  stop(); const w = S.sc[0] > S.sc[1] ? 0 : 1;
+  stop(); const w = S.sc[0] > S.sc[1] ? 0 : S.sc[1] > S.sc[0] ? 1 : -1;
   view(`${bar(game(S.id).e + " " + game(S.id).n)}<div class="stage"><div style="font-size:80px" class="pop">🏆</div>
-    <div class="hand">${nm(w)} gewinnt!</div>${score()}
+    <div class="hand">${w < 0 ? "Unentschieden – ihr seid gleich gut! 🤝" : nm(w) + " gewinnt!"}</div>${score()}
     <button class="go" onclick="S.sc=[0,0];${again}">Revanche</button><button class="alt" onclick="home()">Anderes Duell</button></div>`);
 }
 
@@ -292,6 +317,151 @@ function sspPick(i, k) {
     <div style="display:flex;justify-content:space-around">${nm(0)}${nm(1)}</div><div class="hand">${msg}</div>
     <button class="go" onclick="sspRound()">Weiter</button></div>`);
 }
+
+/* ===== TikTok-Trend: Blind Ranking ===== */
+function blindSetup() {
+  view(`${bar("🙈 Blind Ranking")}<div class="stage">
+    <p class="note">5 Dinge kommen nacheinander. Setz jedes sofort auf Platz 1–5, ohne zu wissen, was noch kommt! Danach rankt die andere Person dieselben Dinge, und ihr vergleicht.</p>
+    <button class="go" onclick="blindStart(rnd(BLIND))">🎲 Zufällige Kategorie</button>
+    <div class="pick">${BLIND.map((c, i) => `<button onclick="blindStart(BLIND[${i}])">${c.e} ${esc(c.n)}</button>`).join("")}</div></div>`);
+}
+function blindStart(cat) { S.cat = cat; S.seq = shuffle(cat.items).slice(0, 5); S.rank = [Array(5).fill(null), Array(5).fill(null)]; S.p = S.first; S.first = 1 - S.first; S.k = 0; S.done = 0; blindHand(); }
+function blindHand() {
+  view(`${bar("🙈 Blind Ranking")}<div class="stage"><div class="hand">📱 Jetzt rankt ${nm(S.p)}<b>${S.cat.e} ${esc(S.cat.n)}</b></div>
+    <p class="note">Nicht spicken, ${esc(names[1 - S.p])}! 🙈</p><button class="go" onclick="blindView()">Los</button></div>`);
+}
+function blindView() {
+  const it = S.seq[S.k], r = S.rank[S.p];
+  view(`${bar("🙈 Blind Ranking")}<div class="stage"><div class="turn p${S.p}">${esc(names[S.p])} rankt · ${S.k + 1}/5</div>
+    <div class="card" style="background:linear-gradient(135deg,#ec4899,#7c3aed)"><div class="k">${S.cat.e} ${esc(S.cat.n)}</div><div class="t pop">${esc(it)}</div></div>
+    <div class="ranks">${r.map((v, i) => `<button class="rk" ${v != null ? "disabled" : ""} onclick="blindPut(${i})"><span>${i + 1}</span>${v != null ? esc(S.seq[v]) : "frei"}</button>`).join("")}</div></div>`);
+}
+function blindPut(i) {
+  S.rank[S.p][i] = S.k; beep(800, .05); S.k++;
+  if (S.k < 5) return blindView();
+  S.done++; if (S.done < 2) { S.p = 1 - S.p; S.k = 0; return blindHand(); }
+  const same = [0, 1, 2, 3, 4].filter(i => S.rank[0][i] === S.rank[1][i]).length;
+  view(`${bar("🙈 Blind Ranking")}<div class="stage"><div class="hand">${S.cat.e} ${esc(S.cat.n)}<b>${same} von 5 gleich ${same >= 3 ? "🤝" : same ? "🤔" : "💥"}</b></div>
+    <table class="cmp"><tr><th>#</th><th style="color:var(--p1)">${esc(names[0])}</th><th style="color:var(--p2)">${esc(names[1])}</th></tr>
+    ${[0, 1, 2, 3, 4].map(i => `<tr class="${S.rank[0][i] === S.rank[1][i] ? "eq" : ""}"><td>${i + 1}</td><td>${esc(S.seq[S.rank[0][i]])}</td><td>${esc(S.seq[S.rank[1][i]])}</td></tr>`).join("")}</table>
+    <p class="note">Jetzt verteidigt eure Rankings! 😤</p>
+    <button class="go" onclick="blindStart(rnd(BLIND))">Nächste Runde</button><button class="alt" onclick="blindSetup()">Kategorie wählen</button></div>`);
+}
+
+/* ===== TikTok-Trend: Älter oder neuer? (Higher or Lower) ===== */
+function oldStart() { oldTask(); }
+function oldTask(info) {
+  if (Math.max(...S.sc) >= 7) return duoWin("oldStart()");
+  let a, b; do { a = rnd(YEARS); b = rnd(YEARS); } while (a[1] === b[1]);
+  S.t = { a, b }; S.lock = [false, false]; S.state = "go";
+  const half = i => `<div class="pts">${esc(names[i])}: ${S.sc[i]} / 7</div>${info ? `<div class="note">${info}</div>` : ""}<div class="big" style="font-size:24px">Was gibt's schon länger?</div>
+    <div class="two">${[a, b].map((x, k) => `<button onpointerdown="oldTap(${i},${k},this)">${esc(x[0])}</button>`).join("")}</div>`;
+  split(half(0), half(1));
+}
+function oldTap(i, k, el) {
+  if (S.state !== "go" || S.lock[i]) return;
+  const { a, b } = S.t, ok = k === 0 ? a[1] < b[1] : b[1] < a[1], info = `${esc(a[0])}: ${a[1]} · ${esc(b[0])}: ${b[1]}`;
+  if (ok) { S.state = "done"; S.sc[i]++; el.style.background = "var(--ok)"; beep(1300, .08); later(() => oldTask(info), 900); }
+  else { S.lock[i] = true; el.style.background = "var(--bad)"; beep(200, .15); vib(120); if (S.lock[0] && S.lock[1]) { S.state = "done"; later(() => oldTask(info), 900); } }
+}
+
+/* ===== TikTok-Trend: Tiki-Taka-Toe (Fußball-Tic-Tac-Toe) ===== */
+function tikiStart() { S.rows = shuffle(TTT_CLUBS).slice(0, 3); S.cols = shuffle(TTT_NATIONS).slice(0, 3); S.b = Array(9).fill(-1); S.pn = Array(9).fill(""); S.turn = S.first; S.first = 1 - S.first; S.over = false; S.win = []; tikiView(); }
+function tikiView(msg) {
+  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage">${score()}
+    <div class="turn p${S.turn}">${msg || esc(names[S.turn]) + " (" + SYM[S.turn] + ") ist dran"}</div>
+    <div class="tk"><div></div>${S.cols.map(c => `<div class="hd">${esc(c)}</div>`).join("")}
+    ${S.rows.map((r, ri) => `<div class="hd">${esc(r)}</div>` + [0, 1, 2].map(ci => { const i = ri * 3 + ci, v = S.b[i];
+      return `<button class="cell ${v >= 0 ? "p" + v : ""} ${S.win.includes(i) ? "win" : ""}" ${v >= 0 || S.over ? "disabled" : ""} onclick="tikiPick(${i})">${v >= 0 ? `<b>${SYM[v]}</b><small>${esc(S.pn[i])}</small>` : "?"}</button>`; }).join("")).join("")}</div>
+    ${S.over ? `<button class="go" onclick="tikiStart()">Neues Brett</button>` : `<p class="note">Tipp ein Feld und nenn einen Spieler, der für den Verein gespielt hat <b>und</b> aus dem Land kommt. ${esc(names[1 - S.turn])} entscheidet, ob's stimmt.</p>
+      <button class="alt" onclick="S.turn=1-S.turn;tikiView()">Mir fällt keiner ein – weitergeben</button>`}</div>`);
+}
+function tikiPick(i) {
+  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage"><div class="turn p${S.turn}">${esc(names[S.turn])}, nenn einen Spieler:</div>
+    <div class="card" style="background:linear-gradient(135deg,#16a34a,#14532d)"><div class="t">${esc(S.rows[Math.floor(i / 3)])}<br>✕<br>${esc(S.cols[i % 3])}</div></div>
+    <input id="pn" placeholder="Name eintippen (optional)" maxlength="30" autocomplete="off">
+    <p class="note">${nm(1 - S.turn)}: Stimmt die Antwort?</p>
+    <div class="btns2"><button class="no" onclick="tikiJudge(${i},false)">✗ Falsch</button><button class="yes" onclick="tikiJudge(${i},true)">✓ Stimmt</button></div>
+    <button class="alt" onclick="tikiView()">Anderes Feld wählen</button></div>`);
+}
+function tikiJudge(i, ok) {
+  if (ok) {
+    S.b[i] = S.turn; S.pn[i] = ($("#pn").value || "").trim(); beep(1000, .08);
+    for (const l of [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]])
+      if (l.every(k => S.b[k] === S.turn)) { S.over = true; S.win = l; S.sc[S.turn]++; vib(200); return tikiView("🏆 " + esc(names[S.turn]) + " gewinnt!"); }
+    if (S.b.every(v => v >= 0)) { S.over = true; return tikiView("Unentschieden!"); }
+  } else beep(200, .15);
+  S.turn = 1 - S.turn; tikiView(ok ? "" : "❌ Zählt nicht! Jetzt ist " + esc(names[S.turn]) + " dran");
+}
+
+/* ===== TikTok-Trend: Tauziehen (Tipp-Battle) ===== */
+const TUG = 30;
+function tugStart() {
+  if (Math.max(...S.sc) >= 3) return duoWin("tugStart()");
+  S.pos = 0; S.state = "count";
+  const half = i => `<div class="pts">${esc(names[i])} · ${S.sc[i]} / 3</div><div class="big">Bereit …</div><div class="note">So schnell tippen wie möglich – erobere den Bildschirm!</div>`;
+  split(half(0), half(1));
+  ["h0", "h1"].forEach((id, i) => $("#" + id).onpointerdown = e => { e.preventDefault(); tugTap(i); });
+  let n = 3; const tick = () => { document.querySelectorAll(".half .big").forEach(b => b.textContent = n > 0 ? n : "TIPP! 💪"); beep(n > 0 ? 600 : 1200, .1);
+    if (n === 0) { S.state = "go"; return; } n--; later(tick, 700); };
+  later(tick, 400);
+}
+function tugTap(i) {
+  if (S.state !== "go") return;
+  S.pos += i === 0 ? -1 : 1;
+  const f = 50 + (S.pos / TUG) * 42; $("#sp").style.gridTemplateRows = `${100 - f}fr auto ${f}fr`;
+  if (Math.abs(S.pos) >= TUG) {
+    S.state = "done"; const w = S.pos < 0 ? 0 : 1; S.sc[w]++; vib(300); beep(1500, .2);
+    document.querySelectorAll(".half .big").forEach((b, j) => b.textContent = j === w ? "GEWONNEN 🏆" : "Verloren 😵");
+    later(tugStart, 1600);
+  }
+}
+
+/* ===== TikTok-Trend: 5-Sekunden-Duell ===== */
+function fiveStart() { S.deck = shuffle(FIVE); S.di = 0; S.turn = S.first; S.first = 1 - S.first; fiveReady(); }
+function fiveReady() {
+  if (Math.max(...S.sc) >= 5) return duoWin("fiveStart()");
+  view(`${bar("⏱️ 5-Sekunden-Duell")}<div class="stage">${score()}<div class="hand">${nm(S.turn)} ist dran<b>Bereit?</b></div>
+    <p class="note">Gleich kommt eine Aufgabe. Du hast 5 Sekunden für 3 Antworten – laut sagen! ${esc(names[1 - S.turn])} passt auf. Wer zuerst 5 Punkte hat, gewinnt.</p>
+    <button class="go" onclick="fiveGo()">Aufdecken ⏱️</button></div>`);
+}
+function fiveGo() {
+  const t = S.deck[S.di++ % S.deck.length]; let left = 5;
+  view(`${bar("⏱️ 5-Sekunden-Duell")}<div class="stage"><div class="timer" id="tm">5</div>
+    <div class="card" style="background:linear-gradient(135deg,#f97316,#be123c)"><div class="k">Nenne</div><div class="t">${esc(t)}</div></div><div id="judge"></div></div>`);
+  const tick = () => { left--; const el = $("#tm"); if (!el) return; el.textContent = left;
+    if (left > 0) { beep(700, .06); later(tick, 1000); return; }
+    beep(250, .5, .2); vib(300); el.textContent = "⏰";
+    $("#judge").innerHTML = `<p class="note">${nm(1 - S.turn)}: Hat ${esc(names[S.turn])} 3 richtige genannt?</p>
+      <div class="btns2"><button class="no" onclick="fiveJudge(false)">✗ Nein</button><button class="yes" onclick="fiveJudge(true)">✓ Ja</button></div>`; };
+  later(tick, 1000);
+}
+function fiveJudge(ok) { if (ok) S.sc[S.turn]++; S.turn = 1 - S.turn; fiveReady(); }
+
+/* ===== TikTok-Trend: Wer kennt mich besser? ===== */
+function kennStart() { S.deck = shuffle(KENN); S.di = 0; S.star = S.first; S.first = 1 - S.first; S.q = 0; kennAsk(); }
+function kennAsk() {
+  if (S.q >= 10) return duoWin("kennStart()");
+  S.cur = S.deck[S.di++ % S.deck.length];
+  view(`${bar("💞 Wer kennt mich besser?")}<div class="stage">${score()}<div class="hand">📱 Nur ${nm(S.star)} schaut!<b>Frage ${S.q + 1} von 10</b></div>
+    <div class="card" style="background:linear-gradient(135deg,#f472b6,#9d174d)"><div class="t" style="font-size:24px">${esc(S.cur)}</div></div>
+    <form onsubmit="kennSave();return false"><input id="ans" placeholder="Deine ehrliche Antwort" maxlength="60" autocomplete="off"><button class="go" style="margin-top:10px">Geheim speichern</button></form></div>`);
+}
+function kennSave() {
+  S.ans = $("#ans").value.trim() || "(keine Antwort)";
+  view(`${bar("💞 Wer kennt mich besser?")}<div class="stage"><div class="hand">Gib das Handy an<b>${nm(1 - S.star)}</b></div>
+    <div class="card" style="background:linear-gradient(135deg,#f472b6,#9d174d)"><div class="k">Was hat ${esc(names[S.star])} geantwortet?</div><div class="t" style="font-size:22px">„${esc(S.cur)}“</div></div>
+    <form onsubmit="kennReveal();return false"><input id="gs" placeholder="Dein Tipp" maxlength="60" autocomplete="off"><button class="go" style="margin-top:10px">Aufdecken</button></form></div>`);
+}
+function kennReveal() {
+  const gs = $("#gs").value.trim() || "(kein Tipp)";
+  view(`${bar("💞 Wer kennt mich besser?")}<div class="stage"><div class="note">${esc(S.cur)}</div>
+    <div class="box"><div class="note">${nm(S.star)} hat geantwortet:</div><div class="t2">${esc(S.ans)}</div></div>
+    <div class="box"><div class="note">Tipp von ${nm(1 - S.star)}:</div><div class="t2">${esc(gs)}</div></div>
+    <p class="note">${nm(S.star)} entscheidet: Zählt das?</p>
+    <div class="btns2"><button class="no" onclick="kennJudge(false)">✗ Daneben</button><button class="yes" onclick="kennJudge(true)">✓ Richtig</button></div></div>`);
+}
+function kennJudge(ok) { if (ok) S.sc[1 - S.star]++; S.q++; S.star = 1 - S.star; kennAsk(); }
 
 home();
 </script>

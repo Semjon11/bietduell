@@ -81,6 +81,20 @@ h1 span{color:var(--gold)}
 @keyframes sp{to{transform:rotate(360deg)}}
 .turn{font-size:18px;font-weight:700}
 .grid2 button{min-height:62px;font-size:15px}
+.stirn{position:fixed;inset:0;display:grid;grid-template-rows:1fr auto 1fr;background:var(--bg);z-index:5}
+.stirn .sz{border-radius:0;font-size:24px}.stirn .ok{background:#15803d}.stirn .no{background:#7f1d1d}
+.stirn .sw{padding:18px;text-align:center;background:#1e1b33}.stirn .sw .t{font-size:clamp(32px,10vw,56px);font-weight:900;text-wrap:balance}.stirn .timer{font-size:28px}
+.cv{width:100%;aspect-ratio:1;border-radius:16px;background:#fff;touch-action:none}
+.pens{display:flex;gap:8px;justify-content:center}.pens button{width:38px;height:38px;border-radius:50%;padding:0;border:3px solid #fff4}
+.letter{font-size:120px;font-weight:900;color:var(--gold);line-height:1}
+.pop{animation:boom .5s ease-out}
+.cats2{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.cats2 span{background:var(--card2);border-radius:999px;padding:8px 14px;font-weight:700}
+.finger{position:fixed;inset:0;background:#0d0b1a;touch-action:none;z-index:5;overflow:hidden}
+.finger .fq{position:absolute;top:max(14px,env(safe-area-inset-top));left:14px;z-index:2}
+.finger .fh{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;font-size:22px;font-weight:700;color:var(--mut);pointer-events:none}
+.finger .dot{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;box-shadow:0 0 0 8px #fff3;animation:pulse 1s ease-in-out infinite;pointer-events:none}
+.finger .dot.win{width:180px;height:180px;margin:-90px 0 0 -90px;box-shadow:0 0 0 14px #fff8,0 0 80px 30px #fff4}
+.finger .dot.lose{opacity:.12}
 .ans{font-size:46px;font-weight:900;color:var(--gold)}
 </style>
 </head>
@@ -90,6 +104,7 @@ h1 span{color:var(--gold)}
 <script src="cards.js"></script>
 <script src="films.js"></script>
 <script src="spicy.js"></script>
+<script src="more.js"></script>
 <script>
 "use strict";
 /* ====== Grundlagen ====== */
@@ -133,6 +148,12 @@ const GAMES = [
     packs: () => [...WAHRHEIT.map(p => ({ ...p, kind: "w", name: "Wahrheit: " + p.name })), ...PFLICHT.map(p => ({ ...p, kind: "p", name: "Pflicht: " + p.name }))] },
   { id: "tenten", name: "10/10, aber …", emoji: "💯", col: "#22d3ee,#0e7490", desc: "Die perfekte Person – mit einem Haken. Würdest du trotzdem?", min: 2, packs: () => TENTEN },
   { id: "film", name: "Filmszene", emoji: "🎬", col: "#f43f5e,#581c87", desc: "Ein Foto aus einem Film – welcher ist es? Vier Antworten zur Wahl.", min: 2, packs: null },
+  { id: "stirn", name: "Stirnraten", emoji: "🤳", col: "#06b6d4,#1e40af", desc: "Handy an die Stirn – die anderen erklären, du rätst.", min: 3, packs: () => WORD_CATS },
+  { id: "mal", name: "Zeichnen & Raten", emoji: "✏️", col: "#84cc16,#3f6212", desc: "Zeichne am Handy, die anderen raten, was es ist.", min: 3, packs: () => WORD_CATS, def: ["essen", "tiere", "berufe", "haushalt", "fahrzeuge", "sport", "natur", "kleidung", "fantasy", "weihnachten"] },
+  { id: "gleich", name: "Gleich gedacht", emoji: "🐑", col: "#e879f9,#86198f", desc: "Schreib, was die anderen schreiben – Herdentiere gewinnen.", min: 3, packs: null },
+  { id: "slf", name: "Stadt-Land-Fluss", emoji: "🔤", col: "#fbbf24,#0f766e", desc: "Buchstabe würfeln, Kategorien, Timer, STOPP!", min: 2, packs: null },
+  { id: "lachen", name: "Nicht lachen!", emoji: "😐", col: "#fb7185,#9f1239", desc: "Bring die anderen zum Lachen – oder bleib eiskalt.", min: 2, packs: null },
+  { id: "finger", name: "Finger-Roulette", emoji: "👆", col: "#94a3b8,#334155", desc: "Alle Finger aufs Handy – die App wählt eine Person aus.", min: 0, packs: null },
   { id: "werwolf", name: "Werwolf", emoji: "🐺", col: "#64748b,#1e293b", desc: "Rollen geheim verteilen, mit Spielleitungs-Skript.", min: 6, packs: null },
 ];
 const game = id => GAMES.find(g => g.id === id);
@@ -168,7 +189,7 @@ function setup(id) {
   const g = game(id);
   if (players.length < g.min) { alert(`Für ${g.name} braucht ihr mindestens ${g.min} Mitspieler:innen. Trag oben die Namen ein.`); return; }
   const opts = store.get("opt_" + id, {});
-  S = { id, opts, sel: new Set(store.get("sel_" + id, g.packs ? g.packs().map(p => p.id + (p.kind || "")) : [])) };
+  S = { id, opts, sel: new Set(store.get("sel_" + id, g.def || (g.packs ? g.packs().map(p => p.id + (p.kind || "")) : []))) };
   let extra = "";
   const seg = (key, label, vals, def) => { if (S.opts[key] == null) S.opts[key] = def;
     return `<div class="lbl">${label}</div><div class="seg">${vals.map(([v, t]) => `<button class="${S.opts[key] === v ? "on" : ""}" onclick="setOpt('${key}',${JSON.stringify(v).replace(/"/g, "&quot;")},this)">${t}</button>`).join("")}</div>`; };
@@ -183,6 +204,11 @@ function setup(id) {
   if (id === "film") extra = seg("level", "Schwierigkeit", [[1, "😊 Leicht"], [2, "😎 Mittel"], [3, "🔥 Schwer"], [4, "💀 Extrem"]], 1)
     + `<p class="note" style="margin:6px 0 0">Leicht: Filme, die jede:r kennt, mit den bekanntesten Szenen. Mittel: mehr Filme, ähnliche Antworten. Schwer: auch Klassiker und seltenere Szenen. Extrem: nur ein stark vergrößerter Ausschnitt, 10 Sekunden Zeit, kein Tipp.</p>`
     + seg("rounds", "Runden (jede:r ist pro Runde einmal dran)", [[3, "3"], [5, "5"], [8, "8"]], 5);
+  if (id === "stirn") extra = seg("sec", "Zeit pro Person", [[45, "45 s"], [60, "60 s"], [90, "90 s"]], 60) + seg("rounds", "Runden", [[1, "1"], [2, "2"], [3, "3"]], 2);
+  if (id === "mal") extra = seg("sec", "Zeit zum Zeichnen", [[60, "60 s"], [90, "90 s"], [120, "2 min"]], 90) + seg("rounds", "Runden", [[1, "1"], [2, "2"], [3, "3"]], 1);
+  if (id === "gleich") extra = seg("rounds", "Fragen", [[5, "5"], [8, "8"], [12, "12"]], 8);
+  if (id === "slf") extra = seg("sec", "Zeit pro Buchstabe", [[60, "60 s"], [90, "90 s"], [120, "2 min"]], 90) + seg("cats", "Kategorien", [["klassisch", "Klassisch"], ["mix", "Zufalls-Mix"]], "klassisch");
+  if (id === "lachen") extra = seg("rounds", "Runden", [[1, "1"], [2, "2"], [3, "3"]], 2);
   if (id === "schaetz") extra = seg("rounds", "Fragen pro Spiel", [[5, "5"], [10, "10"], [15, "15"], [20, "20"]], 10);
   if (id === "bombe") extra = seg("len", "Zündschnur", [["kurz", "Kurz"], ["mittel", "Mittel"], ["lang", "Lang"]], "mittel");
   if (id === "erklaeren") extra = seg("sec", "Zeit pro Runde", [[45, "45 s"], [60, "60 s"], [90, "90 s"]], 60) + seg("goal", "Ziel", [[20, "20 Punkte"], [30, "30"], [50, "50"]], 30)
@@ -215,6 +241,12 @@ const HOWTO = {
   wop: "Die App sucht aus, wer dran ist. Die Person wählt Wahrheit oder Pflicht – und muss dann ehrlich antworten oder die Aufgabe erledigen.",
   tenten: "Stell dir die perfekte Person vor – aber mit einem Haken. Auf drei zeigen alle Daumen hoch (würde ich trotzdem) oder runter (No-Go). Wer anders entschieden hat, muss sich erklären.",
   film: "Reihum bekommt jede:r ein Szenenfoto aus einem bekannten Film und tippt auf eine von vier Antworten. Richtig = 2 Punkte. Wer den Tipp (Laufzeit und Genre) nimmt, bekommt nur 1 Punkt.",
+  stirn: "Wer dran ist, hält das Handy an die Stirn und sieht das Wort nicht. Die anderen erklären, zeigen oder singen – du rätst so viele Wörter wie möglich.",
+  mal: "Wer dran ist, sieht ein Wort und zeichnet es am Handy. Wer es zuerst errät, bekommt einen Punkt – die Zeichnerin oder der Zeichner auch.",
+  gleich: "Alle schreiben geheim eine Antwort, z. B. auf „Nenne eine Farbe“. Punkte gibt's nur, wenn andere dasselbe geschrieben haben. Denk wie die Herde!",
+  slf: "Die App würfelt einen Buchstaben und zeigt die Kategorien. Alle schreiben auf Zettel. Wer fertig ist, drückt STOPP – oder die Zeit läuft ab.",
+  lachen: "Eine Person muss ernst bleiben, eine andere versucht sie mit einer Aufgabe in 30 Sekunden zum Lachen zu bringen.",
+  finger: "Alle legen gleichzeitig einen Finger aufs Handy. Nach kurzer Zeit wählt die App zufällig eine Person aus – perfekt für „Wer muss?“.",
   werwolf: "Die Werwölfe fressen nachts heimlich Dorfbewohner, tagsüber stimmt das Dorf ab, wen es verdächtigt. Das Dorf gewinnt, wenn alle Werwölfe weg sind – die Werwölfe, wenn sie in der Überzahl sind.",
 };
 
@@ -226,7 +258,7 @@ function startGame() {
   const g = game(S.id);
   if (g.packs && !S.sel.size) { alert("Wähl mindestens eine Kategorie aus."); return; }
   store.set("opt_" + S.id, S.opts); if (g.packs) store.set("sel_" + S.id, [...S.sel]);
-  ({ imposter: impStart, schaetz: schStart, bombe: bombStart, erklaeren: erkStart, eher: cardStart, nie: cardStart, tenten: cardStart, wop: wopStart, film: filmStart, werwolf: wwStart })[S.id]();
+  ({ imposter: impStart, schaetz: schStart, bombe: bombStart, erklaeren: erkStart, eher: cardStart, nie: cardStart, tenten: cardStart, wop: wopStart, film: filmStart, stirn: stirnStart, mal: malStart, gleich: gleichStart, slf: slfStart, lachen: lachStart, finger: fingerStart, werwolf: wwStart })[S.id]();
 }
 const topBar = (title, back = "quit()") => `<div class="top"><button class="back" onclick="${back}">✕</button><h1>${title}</h1></div>`;
 function quit() { stopTimers(); if (!S.done && !confirm("Spiel beenden?")) return; home(); }

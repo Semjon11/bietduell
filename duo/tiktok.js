@@ -34,8 +34,19 @@ const YEARS = [
 ];
 
 // Tiki-Taka-Toe: Zeilen = Vereine, Spalten = Nationen
-const TTT_CLUBS = ["Real Madrid", "FC Barcelona", "FC Bayern", "Paris Saint-Germain", "Juventus", "Chelsea", "Manchester United", "Manchester City", "Liverpool", "Arsenal", "Inter Mailand", "AC Mailand", "Borussia Dortmund", "Atlético Madrid"];
-const TTT_NATIONS = ["🇫🇷 Frankreich", "🇧🇷 Brasilien", "🇪🇸 Spanien", "🇩🇪 Deutschland", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", "🇦🇷 Argentinien", "🇵🇹 Portugal", "🇳🇱 Niederlande", "🇮🇹 Italien", "🇧🇪 Belgien"];
+const TTT_CLUBS = ["Real Madrid", "FC Barcelona", "FC Bayern", "Paris Saint-Germain", "Juventus", "Chelsea", "Manchester United", "Manchester City", "Liverpool", "Arsenal", "Inter Mailand", "AC Mailand", "Borussia Dortmund", "Atlético Madrid", "Tottenham", "Ajax Amsterdam", "Benfica", "SSC Neapel", "AS Rom", "Bayer Leverkusen", "RB Leipzig", "Red Bull Salzburg", "FC Sevilla", "AS Monaco"];
+const TTT_NATIONS = ["🇫🇷 Frankreich", "🇧🇷 Brasilien", "🇪🇸 Spanien", "🇩🇪 Deutschland", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", "🇦🇷 Argentinien", "🇵🇹 Portugal", "🇳🇱 Niederlande", "🇮🇹 Italien", "🇧🇪 Belgien", "🇦🇹 Österreich", "🇭🇷 Kroatien", "🇺🇾 Uruguay", "🇸🇳 Senegal"];
+// Erfolge und Eigenschaften – jeweils mit vielen möglichen Antworten
+const TTT_ACH = ["🏆 Weltmeister", "🇪🇺 Europameister", "⭐ Champions-League-Sieger", "🧤 Torhüter", "©️ Kapitän der Nationalmannschaft", "💯 Über 100 Länderspiele",
+  "🇸🇦 Spielte in Saudi-Arabien", "🇺🇸 Spielte in den USA (MLS)", "📋 Wurde später Trainer", "🦶 Linksfuß", "🔟 Trug die Nummer 10", "7️⃣ Trug die Nummer 7",
+  "🇩🇪 Spielte in der Bundesliga", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Spielte in der Premier League", "🇪🇸 Spielte in LaLiga", "🇮🇹 Spielte in der Serie A", "🥇 Torschützenkönig einer Top-Liga", "🎮 Hatte ein EA-FC-Rating über 90"];
+const TTT_MODES = [
+  { id: "land", e: "🌍", n: "Verein × Land", d: "Klassisch: Spieler, der für den Verein gespielt hat und aus dem Land kommt." },
+  { id: "erfolg", e: "🏆", n: "Verein × Erfolg", d: "Z. B. Real Madrid × Weltmeister oder Arsenal × Linksfuß." },
+  { id: "verein", e: "🔁", n: "Verein × Verein", d: "Spieler, der für beide Vereine gespielt hat – z. B. Bayern × Real." },
+  { id: "land2", e: "🌐", n: "Land × Erfolg", d: "Z. B. Brasilien × Champions-League-Sieger oder Österreich × Bundesliga." },
+  { id: "mix", e: "🎲", n: "Wilder Mix", d: "Alles gemischt – jedes Brett ist anders." },
+];
 
 // 5-Sekunden-Duell: drei Dinge in fünf Sekunden nennen
 const FIVE = [

@@ -179,7 +179,9 @@ function setup(id) {
       + seg("time", "Diskussionszeit", [[0, "Ohne"], [120, "2 min"], [180, "3 min"], [300, "5 min"]], 180);
     if (S.opts.imp > maxImp) S.opts.imp = maxImp;
   }
-  if (id === "film") extra = seg("rounds", "Runden (jede:r ist pro Runde einmal dran)", [[3, "3"], [5, "5"], [8, "8"]], 5);
+  if (id === "film") extra = seg("level", "Schwierigkeit", [[1, "😊 Leicht"], [2, "😎 Mittel"], [3, "🔥 Schwer"]], 1)
+    + `<p class="note" style="margin:6px 0 0">Leicht: Filme, die jede:r kennt, mit den bekanntesten Szenen. Mittel: mehr Filme, ähnliche Antworten. Schwer: auch Klassiker und seltenere Szenen.</p>`
+    + seg("rounds", "Runden (jede:r ist pro Runde einmal dran)", [[3, "3"], [5, "5"], [8, "8"]], 5);
   if (id === "schaetz") extra = seg("rounds", "Fragen pro Spiel", [[5, "5"], [10, "10"], [15, "15"], [20, "20"]], 10);
   if (id === "bombe") extra = seg("len", "Zündschnur", [["kurz", "Kurz"], ["mittel", "Mittel"], ["lang", "Lang"]], "mittel");
   if (id === "erklaeren") extra = seg("sec", "Zeit pro Runde", [[45, "45 s"], [60, "60 s"], [90, "90 s"]], 60) + seg("goal", "Ziel", [[20, "20 Punkte"], [30, "30"], [50, "50"]], 30)
@@ -445,7 +447,8 @@ function wopCard(k) {
 /* ====== Filmszene erraten ====== */
 const IMG = f => "https://image.tmdb.org/t/p/w780/" + f + ".jpg";
 function filmStart() {
-  S.deck = makeDeck(FILMS); S.pts = players.map(() => 0); S.r = 0; S.n = S.opts.rounds * players.length; filmTurn();
+  S.pool = FILMS.filter(f => S.opts.level === 1 ? f.d === 1 : S.opts.level === 2 ? f.d <= 2 : f.d >= 2);
+  S.deck = makeDeck(S.pool); S.pts = players.map(() => 0); S.r = 0; S.n = S.opts.rounds * players.length; filmTurn();
 }
 function filmTurn() {
   if (S.r >= S.n) { S.done = true; return scoreBoard("🎬 Endstand", S.pts, "Punkte", "filmStart()"); }
@@ -453,13 +456,13 @@ function filmTurn() {
   handTo(players[p], "Szene zeigen 🎬", "filmShow()", `<p class="cnt">Runde ${Math.floor(S.r / players.length) + 1} von ${S.opts.rounds}</p>`);
 }
 function filmShow() {
-  const f = S.deck(), pool = FILMS.filter(x => x !== f);
+  const f = S.deck(), pool = S.pool.filter(x => x !== f), lv = S.opts.level;
   const same = shuffle(pool.filter(x => x.g.some(g => f.g.includes(g)))), rest = shuffle(pool.filter(x => !same.includes(x)));
-  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(f.img); S.ii = 0;
-  S.opt = shuffle([f, ...[...same, ...rest].slice(0, 3)]);
+  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(lv === 1 ? f.img.slice(0, 3) : lv === 2 ? f.img.slice(0, 6) : f.img.slice(3)); S.ii = 0;
+  S.opt = shuffle([f, ...(lv === 1 ? shuffle(pool) : [...same, ...rest]).slice(0, 3)]);
   const p = S.r % players.length;
   view(`${topBar("🎬 Filmszene")}<div class="stage" style="justify-content:flex-start">
-    <div class="turn">${esc(players[p])}: Aus welchem Film ist diese Szene?</div>
+    <div class="turn">${esc(players[p])}: Aus welchem Film ist diese Szene? <span class="cnt">${["", "😊 Leicht", "😎 Mittel", "🔥 Schwer"][lv]}</span></div>
     <div class="shot"><img id="shot" src="${IMG(S.imgs[0])}" alt="Szene aus einem Film" onerror="filmNextImg()"><div class="spin2" id="sl"></div></div>
     <div class="grid2" id="opts">${S.opt.map((o, i) => `<button onclick="filmPick(${i},this)">${esc(o.t)}</button>`).join("")}</div>
     <div id="tipbox"><button class="alt" onclick="filmTip()">💡 Tipp: Laufzeit & Genre zeigen (nur 1 Punkt statt 2)</button></div>

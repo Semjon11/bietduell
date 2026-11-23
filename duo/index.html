@@ -130,7 +130,7 @@ function quit() { stop(); home(); }
 
 const GAMES = [
   { id: "blind", tt: 1, n: "Blind Ranking", e: "🙈", col: "#ec4899,#7c3aed", d: "5 Dinge blind auf Platz 1–5 setzen – dann vergleichen und streiten." },
-  { id: "tiki", tt: 1, n: "Tiki-Taka-Toe", e: "⚽", col: "#22c55e,#14532d", d: "Fußball-Tic-Tac-Toe: Nenn einen Spieler, der zu Verein und Land passt." },
+  { id: "tiki", tt: 1, n: "Tiki-Taka-Toe", e: "⚽", col: "#22c55e,#14532d", d: "Tic-Tac-Toe mit Kategorien: Fußball, Tiere, Länder, Filme, Stars, Essen und mehr." },
   { id: "old", tt: 1, n: "Älter oder neuer?", e: "⏳", col: "#f59e0b,#92400e", d: "iPhone oder YouTube – was gibt's länger? Wer zuerst richtig tippt." },
   { id: "tug", tt: 1, n: "Tauziehen", e: "💪", col: "#ef4444,#7f1d1d", d: "Tipp-Battle: Wer schneller tippt, erobert den Bildschirm." },
   { id: "five", tt: 1, n: "5-Sekunden-Duell", e: "⏱️", col: "#f97316,#be123c", d: "Nenne 3 Dinge in 5 Sekunden – klingt leicht, ist es nicht." },
@@ -369,11 +369,13 @@ function oldTap(i, k, el) {
 
 /* ===== TikTok-Trend: Tiki-Taka-Toe (Fußball-Tic-Tac-Toe) ===== */
 function tikiSetup() {
-  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage"><p class="note">Wähl die Kategorien fürs Brett. Wer ein Feld will, nennt einen passenden Spieler – die andere Person entscheidet, ob's stimmt.</p>
-    ${TTT_MODES.map(m => `<button class="rk" onclick="S.mode='${m.id}';tikiStart()"><span>${m.e}</span><div><b>${m.n}</b><div class="note">${m.d}</div></div></button>`).join("")}</div>`);
+  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage"><p class="note">Wähl die Kategorien fürs Brett. Wer ein Feld will, nennt etwas, das zu Zeile und Spalte passt – die andere Person entscheidet, ob's stimmt.</p>
+    <h2 class="sec">⚽ Fußball</h2>${TTT_MODES.map(m => `<button class="rk" onclick="S.mode='${m.id}';tikiStart()"><span>${m.e}</span><div><b>${m.n}</b><div class="note">${m.d}</div></div></button>`).join("")}
+    <h2 class="sec">🎲 Ohne Fußball</h2>${TTT_THEMES.map(m => `<button class="rk" onclick="S.mode='${m.id}';tikiStart()"><span>${m.e}</span><div><b>${m.n}</b><div class="note">${m.d}</div></div></button>`).join("")}</div>`);
 }
 function tikiAxes() {
   const m = S.mode || "land", pick = (a, n, not = []) => shuffle(a.filter(x => !not.includes(x))).slice(0, n);
+  const th = TTT_THEMES.find(t => t.id === m); if (th) return [pick(th.rows, 3), pick(th.cols, 3)];
   if (m === "land") return [pick(TTT_CLUBS, 3), pick(TTT_NATIONS, 3)];
   // keine trivialen Felder wie „Arsenal × Spielte in der Premier League“
   const LG = { "Real Madrid": "LaLiga", "FC Barcelona": "LaLiga", "Atlético Madrid": "LaLiga", "FC Sevilla": "LaLiga", "FC Bayern": "Bundesliga", "Borussia Dortmund": "Bundesliga",
@@ -387,18 +389,19 @@ function tikiAxes() {
   const r = pick(TTT_CLUBS, 3), pool = shuffle([...pick(TTT_NATIONS, 2), ...pick(achFor(r), 2), ...pick(TTT_CLUBS, 2, r)]);
   return [r, pool.slice(0, 3)];
 }
+const tikiTheme = () => TTT_THEMES.find(t => t.id === S.mode);
 function tikiStart() { [S.rows, S.cols] = tikiAxes(); S.b = Array(9).fill(-1); S.pn = Array(9).fill(""); S.turn = S.first; S.first = 1 - S.first; S.over = false; S.win = []; tikiView(); }
 function tikiView(msg) {
-  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage">${score()}
+  view(`${bar((tikiTheme() ? tikiTheme().e : "⚽") + " Tiki-Taka-Toe")}<div class="stage">${score()}
     <div class="turn p${S.turn}">${msg || esc(names[S.turn]) + " (" + SYM[S.turn] + ") ist dran"}</div>
     <div class="tk"><div></div>${S.cols.map(c => `<div class="hd">${esc(c)}</div>`).join("")}
     ${S.rows.map((r, ri) => `<div class="hd">${esc(r)}</div>` + [0, 1, 2].map(ci => { const i = ri * 3 + ci, v = S.b[i];
       return `<button class="cell ${v >= 0 ? "p" + v : ""} ${S.win.includes(i) ? "win" : ""}" ${v >= 0 || S.over ? "disabled" : ""} onclick="tikiPick(${i})">${v >= 0 ? `<b>${SYM[v]}</b><small>${esc(S.pn[i])}</small>` : "?"}</button>`; }).join("")).join("")}</div>
-    ${S.over ? `<button class="go" onclick="tikiStart()">Neues Brett</button><button class="alt" onclick="tikiSetup()">Kategorien wechseln</button>` : `<p class="note">Tipp ein Feld und nenn einen Spieler, der für den Verein gespielt hat <b>und</b> aus dem Land kommt. ${esc(names[1 - S.turn])} entscheidet, ob's stimmt.</p>
+    ${S.over ? `<button class="go" onclick="tikiStart()">Neues Brett</button><button class="alt" onclick="tikiSetup()">Kategorien wechseln</button>` : `<p class="note">Tipp ein Feld und nenn ${tikiTheme() ? "etwas, das zu Zeile <b>und</b> Spalte passt" : "einen Spieler, der zu Zeile <b>und</b> Spalte passt"}. ${esc(names[1 - S.turn])} entscheidet, ob's stimmt.</p>
       <button class="alt" onclick="S.turn=1-S.turn;tikiView()">Mir fällt keiner ein – weitergeben</button><button class="alt" onclick="tikiStart()">🔀 Brett neu mischen</button>`}</div>`);
 }
 function tikiPick(i) {
-  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage"><div class="turn p${S.turn}">${esc(names[S.turn])}, nenn einen Spieler:</div>
+  view(`${bar("⚽ Tiki-Taka-Toe")}<div class="stage"><div class="turn p${S.turn}">${esc(names[S.turn])}, nenn ${tikiTheme() ? "etwas Passendes" : "einen Spieler"}:</div>
     <div class="card" style="background:linear-gradient(135deg,#16a34a,#14532d)"><div class="t" style="font-size:26px">${esc(S.rows[Math.floor(i / 3)])}<br>✕<br>${esc(S.cols[i % 3])}</div></div>
     <input id="pn" placeholder="Name eintippen (optional)" maxlength="30" autocomplete="off">
     <p class="note">${nm(1 - S.turn)}: Stimmt die Antwort?</p>

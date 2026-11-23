@@ -74,3 +74,25 @@ const KENN = [
   "Welches Haustier hätte ich am liebsten?", "Wen aus der Klasse würde ich auf eine einsame Insel mitnehmen?", "Was ist mein Lieblingssport?", "Pizza oder Burger?",
   "Welche Serie habe ich zuletzt gesuchtet?", "Was ist meine Lieblings-Süßigkeit?", "Was würde ich nie essen?", "Welchen Spitznamen mag ich am meisten?",
 ];
+
+// Tiki-Taka-Toe ohne Fußball: Zeile × Spalte, man nennt etwas, das zu beidem passt
+const TTT_THEMES = [
+  { id: "woerter", e: "🔤", n: "Wörter-Mix", d: "Z. B. Tier × K oder Beruf × M – nenn ein passendes Wort.",
+    rows: ["🐾 Tier", "🍕 Essen", "🌍 Land", "👷 Beruf", "🧸 Gegenstand", "🏙️ Stadt", "🙋 Vorname", "🏷️ Marke", "⚽ Sportart", "💪 Körperteil"],
+    cols: ["A", "B", "D", "F", "G", "H", "K", "L", "M", "P", "R", "S", "T", "W"].map(l => "Beginnt mit " + l) },
+  { id: "tiere", e: "🐾", n: "Tiere", d: "Z. B. lebt in Afrika × hat Streifen oder Flecken.",
+    rows: ["🌊 Lebt im Wasser", "🦁 Lebt in Afrika", "🐄 Lebt auf dem Bauernhof", "🌲 Lebt im Wald", "🏠 Ist ein Haustier", "🕊️ Kann fliegen", "🦘 Lebt in Australien", "🌴 Lebt im Dschungel"],
+    cols: ["🦓 Hat Streifen oder Flecken", "🥩 Frisst Fleisch", "📏 Größer als ein Mensch", "🐭 Kleiner als eine Katze", "🍼 Ist ein Säugetier", "⚠️ Kann gefährlich sein", "🔤 Name hat 4 Buchstaben oder weniger"] },
+  { id: "laender", e: "🌍", n: "Länder", d: "Z. B. Afrika × Flagge mit Grün.",
+    rows: ["🇪🇺 Liegt in Europa", "🌏 Liegt in Asien", "🌍 Liegt in Afrika", "🌎 Liegt in Amerika"],
+    cols: ["🔴 Flagge mit Rot", "🟢 Flagge mit Grün", "⭐ Flagge mit Stern", "🌊 Grenzt ans Meer", "⛰️ Kein Meerzugang", "👥 Über 50 Mio. Einwohner", "⚽ War schon WM-Gastgeber", "🔤 Beginnt mit S", "🔤 Beginnt mit B", "🔤 Name mit 5 Buchstaben oder weniger"] },
+  { id: "filme", e: "🎬", n: "Filme", d: "Z. B. Animationsfilm × Titel mit einer Zahl.",
+    rows: ["🎨 Animationsfilm", "🦸 Superheldenfilm", "🧙 Fantasyfilm", "😂 Komödie", "💥 Actionfilm", "🚀 Science-Fiction"],
+    cols: ["🔢 Titel mit einer Zahl", "📼 Erschienen vor 2005", "🆕 Erschienen ab 2019", "🔁 Hat eine Fortsetzung", "🐶 Ein Tier spielt eine Hauptrolle", "1️⃣ Titel mit nur einem Wort", "🏰 Von Disney oder Pixar", "🇺🇸 Spielt in New York"] },
+  { id: "stars", e: "🎤", n: "Stars & Musik", d: "Z. B. Rapper:in × aus Deutschland oder Österreich.",
+    rows: ["🎤 Rapper:in", "👩‍🎤 Sängerin", "🧑‍🎤 Sänger", "🎭 Schauspieler:in", "📱 YouTuber:in oder Influencer:in"],
+    cols: ["🇺🇸 Aus den USA", "🇩🇪 Aus Deutschland oder Österreich", "🇬🇧 Aus Großbritannien", "🔤 Vorname beginnt mit J", "🎬 War schon in einem Film", "🎂 Über 40 Jahre alt", "🏆 Hat einen Grammy oder Oscar"] },
+  { id: "essen", e: "🍕", n: "Essen & Trinken", d: "Z. B. Obst × ist gelb oder Süßigkeit × aus Österreich.",
+    rows: ["🍎 Obst", "🥕 Gemüse", "🍫 Süßigkeit", "🍔 Fast Food", "🥤 Getränk", "🥐 Frühstück"],
+    cols: ["🔴 Ist rot", "🟡 Ist gelb", "🟢 Ist grün", "🔤 Beginnt mit B", "🔤 Beginnt mit K", "🇮🇹 Kommt aus Italien", "🇦🇹 Typisch österreichisch", "🧊 Isst oder trinkt man kalt"] },
+];

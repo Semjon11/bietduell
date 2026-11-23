@@ -1,0 +1,66 @@
+/* Gemeinsames Design für alle Seiten – wird zuletzt geladen und verfeinert die Grundstile */
+:root{--bg:#0c0a1d;--card:rgba(30,26,60,.72);--card2:rgba(255,255,255,.08);--line:rgba(255,255,255,.10);--txt:#f5f3ff;--mut:#b3acd9;--gold:#ffd23f;
+  --font:"Outfit",system-ui,"Segoe UI",Roboto,sans-serif;--shadow:0 10px 30px rgba(0,0,0,.35)}
+html,body{background:var(--bg)}
+body{font-family:var(--font);letter-spacing:.1px;background:var(--bg);overflow-x:hidden}
+/* weiche, langsam wandernde Farbflächen im Hintergrund */
+body::before,body::after{content:"";position:fixed;z-index:-1;width:70vmax;height:70vmax;border-radius:50%;filter:blur(90px);opacity:.45;pointer-events:none;animation:drift 22s ease-in-out infinite alternate}
+body::before{background:radial-gradient(circle,#7c3aed,transparent 65%);top:-30vmax;left:-25vmax}
+body::after{background:radial-gradient(circle,#ec4899,transparent 65%);bottom:-35vmax;right:-30vmax;animation-delay:-11s;opacity:.32}
+@keyframes drift{to{transform:translate(8vmax,6vmax) scale(1.12)}}
+button,input,select{font-family:inherit}
+button{border-radius:14px;font-weight:700;letter-spacing:.2px}
+input,select{background:rgba(10,8,28,.6);border:1px solid var(--line);border-radius:14px}
+input:focus,select:focus{outline:none;border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.25)}
+h1,h2,.big,.t,.hand b,.turn,.timer,.ans,.letter{font-family:var(--font)}
+h1 span{background:linear-gradient(90deg,#ffd23f,#ff8a3d,#ff5d8f);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* Glas-Karten */
+.box{background:var(--card);border:1px solid var(--line);border-radius:22px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+.back,.icon{min-width:42px;height:42px;padding:0 14px;display:inline-grid;place-items:center;border-radius:999px;white-space:nowrap;background:var(--card2);border:1px solid var(--line);font-size:16px}
+a.back{width:auto;padding:0 14px;border-radius:999px;color:var(--mut);text-decoration:none}
+.top h1{font-weight:800;letter-spacing:-.3px}
+/* große Hauptknöpfe mit Glanz */
+.go{position:relative;overflow:hidden;border-radius:18px;font-weight:800;box-shadow:0 10px 26px rgba(255,170,40,.28)}
+.go::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.alt{background:var(--card2);border:1px solid var(--line)}
+/* Spiel-Kacheln */
+.games{gap:14px}
+.tile{position:relative;overflow:hidden;border-radius:24px;border:1px solid rgba(255,255,255,.16);min-height:150px;padding:14px;
+  box-shadow:0 12px 28px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);animation:rise .45s both}
+.tile::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 0% 0%,rgba(255,255,255,.28),transparent 55%);pointer-events:none}
+.tile::after{content:"";position:absolute;right:-30px;bottom:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.10);pointer-events:none}
+.tile .e{width:54px;height:54px;display:grid;place-items:center;font-size:30px;border-radius:16px;background:rgba(255,255,255,.2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 14px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.tile b{font-size:17px;font-weight:800;letter-spacing:-.2px;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.tile small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;opacity:.92}
+.tile .free{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18)}
+.tile:active{transform:scale(.97)}
+.games .tile:nth-child(2){animation-delay:.04s}.games .tile:nth-child(3){animation-delay:.08s}.games .tile:nth-child(4){animation-delay:.12s}
+.games .tile:nth-child(5){animation-delay:.16s}.games .tile:nth-child(6){animation-delay:.2s}.games .tile:nth-child(n+7){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.sec{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.2px}
+.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+/* Spielerliste, Kategorien, Auswahl */
+.pchip{background:var(--card2);border:1px solid var(--line)}
+.pack{background:var(--card2);border:1px solid var(--line)}
+.pack.sel{background:linear-gradient(135deg,rgba(255,210,63,.22),rgba(255,138,61,.18));border-color:var(--gold)}
+.seg button{background:var(--card2);border:1px solid var(--line)}
+.seg .on{background:linear-gradient(135deg,#ffd23f,#ff9f1c);border-color:transparent}
+/* Karten im Spiel */
+.card{border-radius:28px;border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 44px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);position:relative;overflow:hidden;animation:pop .35s ease-out}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 10% 0%,rgba(255,255,255,.22),transparent 55%);pointer-events:none}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+.score li{background:var(--card2);border:1px solid var(--line);border-radius:14px}
+.score li.win{background:linear-gradient(135deg,rgba(255,210,63,.2),rgba(255,93,143,.15));outline:none;border-color:var(--gold)}
+.hand b{background:linear-gradient(90deg,#ffd23f,#ff8a3d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stage>*{animation:rise .35s both}
+.grid2 button,.chips button,.pick button,.opts button,.two button{border:1px solid var(--line)}
+.shot{border:1px solid var(--line)}
+/* Bietduell */
+.cat{background:var(--card2);border:1px solid var(--line);border-radius:18px}
+.cat.sel{background:linear-gradient(135deg,rgba(255,210,63,.22),rgba(255,93,143,.18));border-color:var(--gold)}
+.pl{border-radius:22px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.pl{border-top:5px solid var(--p1)}.pl.p2{border-top-color:var(--p2)}
+.install{border:1px solid var(--gold)}

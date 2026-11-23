@@ -75,6 +75,12 @@ h1 span{color:var(--gold)}
 .hidden{display:none!important}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .step{text-align:left;line-height:1.55}
+.shot{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#0d0b1a;box-shadow:0 10px 30px #0008}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.spin2{position:absolute;inset:0;margin:auto;width:36px;height:36px;border:4px solid #3c3766;border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.turn{font-size:18px;font-weight:700}
+.grid2 button{min-height:62px;font-size:15px}
 .ans{font-size:46px;font-weight:900;color:var(--gold)}
 </style>
 </head>
@@ -82,6 +88,7 @@ h1 span{color:var(--gold)}
 <div class="wrap" id="app"></div>
 <script src="words.js"></script>
 <script src="cards.js"></script>
+<script src="films.js"></script>
 <script>
 "use strict";
 /* ====== Grundlagen ====== */
@@ -124,6 +131,7 @@ const GAMES = [
   { id: "wop", name: "Wahrheit oder Pflicht", emoji: "🎭", col: "#fbbf24,#b45309", desc: "Der Klassiker – mit Hunderten Fragen und Aufgaben.", min: 2,
     packs: () => [...WAHRHEIT.map(p => ({ ...p, kind: "w", name: "Wahrheit: " + p.name })), ...PFLICHT.map(p => ({ ...p, kind: "p", name: "Pflicht: " + p.name }))] },
   { id: "tenten", name: "10/10, aber …", emoji: "💯", col: "#22d3ee,#0e7490", desc: "Die perfekte Person – mit einem Haken. Würdest du trotzdem?", min: 2, packs: () => TENTEN },
+  { id: "film", name: "Filmszene", emoji: "🎬", col: "#f43f5e,#581c87", desc: "Ein Foto aus einem Film – welcher ist es? Vier Antworten zur Wahl.", min: 2, packs: null },
   { id: "werwolf", name: "Werwolf", emoji: "🐺", col: "#64748b,#1e293b", desc: "Rollen geheim verteilen, mit Spielleitungs-Skript.", min: 6, packs: null },
 ];
 const game = id => GAMES.find(g => g.id === id);
@@ -171,6 +179,7 @@ function setup(id) {
       + seg("time", "Diskussionszeit", [[0, "Ohne"], [120, "2 min"], [180, "3 min"], [300, "5 min"]], 180);
     if (S.opts.imp > maxImp) S.opts.imp = maxImp;
   }
+  if (id === "film") extra = seg("rounds", "Runden (jede:r ist pro Runde einmal dran)", [[3, "3"], [5, "5"], [8, "8"]], 5);
   if (id === "schaetz") extra = seg("rounds", "Fragen pro Spiel", [[5, "5"], [10, "10"], [15, "15"], [20, "20"]], 10);
   if (id === "bombe") extra = seg("len", "Zündschnur", [["kurz", "Kurz"], ["mittel", "Mittel"], ["lang", "Lang"]], "mittel");
   if (id === "erklaeren") extra = seg("sec", "Zeit pro Runde", [[45, "45 s"], [60, "60 s"], [90, "90 s"]], 60) + seg("goal", "Ziel", [[20, "20 Punkte"], [30, "30"], [50, "50"]], 30)
@@ -202,6 +211,7 @@ const HOWTO = {
   nie: "Lies die Karte vor. Alle, die das schon einmal gemacht haben, stehen auf (oder heben die Hand) – und erzählen vielleicht die Geschichte dazu.",
   wop: "Die App sucht aus, wer dran ist. Die Person wählt Wahrheit oder Pflicht – und muss dann ehrlich antworten oder die Aufgabe erledigen.",
   tenten: "Stell dir die perfekte Person vor – aber mit einem Haken. Auf drei zeigen alle Daumen hoch (würde ich trotzdem) oder runter (No-Go). Wer anders entschieden hat, muss sich erklären.",
+  film: "Reihum bekommt jede:r ein Szenenfoto aus einem bekannten Film und tippt auf eine von vier Antworten. Richtig = 2 Punkte. Wer den Tipp (Laufzeit und Genre) nimmt, bekommt nur 1 Punkt.",
   werwolf: "Die Werwölfe fressen nachts heimlich Dorfbewohner, tagsüber stimmt das Dorf ab, wen es verdächtigt. Das Dorf gewinnt, wenn alle Werwölfe weg sind – die Werwölfe, wenn sie in der Überzahl sind.",
 };
 
@@ -213,7 +223,7 @@ function startGame() {
   const g = game(S.id);
   if (g.packs && !S.sel.size) { alert("Wähl mindestens eine Kategorie aus."); return; }
   store.set("opt_" + S.id, S.opts); if (g.packs) store.set("sel_" + S.id, [...S.sel]);
-  ({ imposter: impStart, schaetz: schStart, bombe: bombStart, erklaeren: erkStart, eher: cardStart, nie: cardStart, tenten: cardStart, wop: wopStart, werwolf: wwStart })[S.id]();
+  ({ imposter: impStart, schaetz: schStart, bombe: bombStart, erklaeren: erkStart, eher: cardStart, nie: cardStart, tenten: cardStart, wop: wopStart, film: filmStart, werwolf: wwStart })[S.id]();
 }
 const topBar = (title, back = "quit()") => `<div class="top"><button class="back" onclick="${back}">✕</button><h1>${title}</h1></div>`;
 function quit() { stopTimers(); if (!S.done && !confirm("Spiel beenden?")) return; home(); }
@@ -430,6 +440,41 @@ function wopCard(k) {
   view(`${topBar("🎭 Wahrheit oder Pflicht", "home()")}<div class="stage"><div class="hand"><b>${esc(players[S.cur])}</b></div>
     <div class="card" style="background:linear-gradient(135deg,${k === "w" ? "#38c6ff,#1d4ed8" : "#ff5d8f,#be123c"})"><div class="k">${k === "w" ? "Wahrheit" : "Pflicht"}</div><div class="t">${esc(t)}</div></div>
     <button class="go" onclick="wopTurn()">Nächste Person</button><button class="alt" onclick="wopCard('${k}')">Andere Karte ↻</button></div>`);
+}
+
+/* ====== Filmszene erraten ====== */
+const IMG = f => "https://image.tmdb.org/t/p/w780/" + f + ".jpg";
+function filmStart() {
+  S.deck = makeDeck(FILMS); S.pts = players.map(() => 0); S.r = 0; S.n = S.opts.rounds * players.length; filmTurn();
+}
+function filmTurn() {
+  if (S.r >= S.n) { S.done = true; return scoreBoard("🎬 Endstand", S.pts, "Punkte", "filmStart()"); }
+  const p = S.r % players.length;
+  handTo(players[p], "Szene zeigen 🎬", "filmShow()", `<p class="cnt">Runde ${Math.floor(S.r / players.length) + 1} von ${S.opts.rounds}</p>`);
+}
+function filmShow() {
+  const f = S.deck(), pool = FILMS.filter(x => x !== f);
+  const same = shuffle(pool.filter(x => x.g.some(g => f.g.includes(g)))), rest = shuffle(pool.filter(x => !same.includes(x)));
+  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(f.img); S.ii = 0;
+  S.opt = shuffle([f, ...[...same, ...rest].slice(0, 3)]);
+  const p = S.r % players.length;
+  view(`${topBar("🎬 Filmszene")}<div class="stage" style="justify-content:flex-start">
+    <div class="turn">${esc(players[p])}: Aus welchem Film ist diese Szene?</div>
+    <div class="shot"><img id="shot" src="${IMG(S.imgs[0])}" alt="Szene aus einem Film" onerror="filmNextImg()"><div class="spin2" id="sl"></div></div>
+    <div class="grid2" id="opts">${S.opt.map((o, i) => `<button onclick="filmPick(${i},this)">${esc(o.t)}</button>`).join("")}</div>
+    <div id="tipbox"><button class="alt" onclick="filmTip()">💡 Tipp: Laufzeit & Genre zeigen (nur 1 Punkt statt 2)</button></div>
+    <p class="cnt">Szenenfotos: The Movie Database (TMDB)</p></div>`);
+  $("#shot").onload = () => { const s = $("#sl"); s && s.remove(); };
+}
+function filmNextImg() { S.ii++; if (S.ii < S.imgs.length) $("#shot").src = IMG(S.imgs[S.ii]); else { const s = $("#sl"); if (s) s.outerHTML = `<div class="note">Bild lädt nicht – bist du online?</div>`; } }
+function filmTip() { if (S.ans) return; S.tip = true; $("#tipbox").innerHTML = `<p class="note">⏱️ Laufzeit: <b>${esc(S.film.rt || "unbekannt")}</b> · 🎭 ${esc(S.film.g.slice(0, 2).join(", "))}</p>`; }
+function filmPick(i, el) {
+  if (S.ans) return; S.ans = true;
+  const p = S.r % players.length, ok = S.opt[i] === S.film;
+  document.querySelectorAll("#opts button").forEach((b, k) => { b.disabled = true; b.style.opacity = 1; if (S.opt[k] === S.film) b.style.background = "#15803d"; });
+  if (ok) { S.pts[p] += S.tip ? 1 : 2; beep(1200, .1); later(() => beep(1600, .15), 120); } else { el.style.background = "#b91c1c"; beep(220, .3); vib(150); }
+  $("#tipbox").innerHTML = `<div class="hand" style="font-size:18px">${ok ? "✅ Richtig! +" + (S.tip ? 1 : 2) : "❌ Leider falsch"}<b style="font-size:22px">${esc(S.film.t)} (${S.film.y})</b></div>
+    <button class="go" onclick="S.r++;filmTurn()">${S.r + 1 < S.n ? "Weiter" : "Endstand"}</button>`;
 }
 
 /* ====== Werwolf ====== */

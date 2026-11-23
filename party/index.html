@@ -103,6 +103,7 @@ h1 span{color:var(--gold)}
 <script src="words.js"></script>
 <script src="cards.js"></script>
 <script src="films.js"></script>
+<script src="decoys.js"></script>
 <script src="spicy.js"></script>
 <script src="more.js"></script>
 <script>
@@ -490,9 +491,8 @@ function filmTurn() {
 }
 function filmShow() {
   const f = S.deck(), pool = S.pool.filter(x => x !== f), lv = S.opts.level;
-  const same = shuffle(pool.filter(x => x.g.some(g => f.g.includes(g)))), rest = shuffle(pool.filter(x => !same.includes(x)));
-  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(lv === 1 ? f.img.slice(0, 3) : lv === 2 ? f.img.slice(0, 6) : f.img.slice(2)); S.ii = 0;
-  S.opt = shuffle([f, ...(lv === 1 ? shuffle(pool) : [...same, ...rest]).slice(0, 3)]);
+  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(lv === 1 ? f.img.slice(0, 3) : lv === 2 ? f.img.slice(0, 6) : (f.h && f.h.length >= 3 ? f.h : f.img.slice(2))); S.ii = 0;
+  S.opt = shuffle([f, ...(lv === 1 ? shuffle(pool).slice(0, 3) : filmSimilar(f, pool, lv))]);
   const p = S.r % players.length;
   view(`${topBar("🎬 Filmszene")}<div class="stage" style="justify-content:flex-start">
     <div class="turn">${esc(players[p])}: Aus welchem Film ist diese Szene? <span class="cnt">${["", "😊 Leicht", "😎 Mittel", "🔥 Schwer", "💀 Extrem"][lv]}</span></div>
@@ -503,6 +503,16 @@ function filmShow() {
   $("#shot").onload = () => { const s = $("#sl"); s && s.remove();
     if (lv === 4 && !S.tstart) { S.tstart = 1; let left = 10; every(() => { if (S.ans) return; left--; const t = $("#ftm"); if (t) { t.textContent = left; t.classList.toggle("low", left <= 3); } if (left <= 3 && left > 0) beep(700); if (left <= 0) filmPick(-1); }, 1000); } };
   S.tstart = 0;
+}
+// Ähnliche falsche Antworten: gleiches Genre, ähnliches Jahr, gleiche Filmreihe – auch aus Filmen, die nie als Lösung kommen
+const FRANCH = t => (t.toLowerCase().replace(/^(der|die|das|the|ein|a)s+/, "").match(/[a-zäöüß0-9-]+/) || [""])[0];
+function filmSimilar(f, pool, lv) {
+  const cands = [...pool, ...DECOYS.map(([t, y, g]) => ({ t, y, g }))].filter(c => c.t !== f.t);
+  const seen = new Set(), fr = FRANCH(f.t);
+  const scored = cands.map(c => ({ c, s: 2 * c.g.filter(g => f.g.includes(g)).length + (Math.abs(c.y - f.y) <= 5 ? 2 : Math.abs(c.y - f.y) <= 12 ? 1 : 0)
+    + (fr.length > 2 && FRANCH(c.t) === fr ? (lv >= 3 ? 4 : 2) : 0) + Math.random() * 2 })).sort((a, b) => b.s - a.s);
+  const top = shuffle(scored.slice(0, lv >= 3 ? 8 : 12).map(x => x.c)).filter(c => !seen.has(c.t) && seen.add(c.t));
+  return top.slice(0, 3);
 }
 function filmNextImg() { S.ii++; if (S.ii < S.imgs.length) $("#shot").src = IMG(S.imgs[S.ii]); else { const s = $("#sl"); if (s) s.outerHTML = `<div class="note">Bild lädt nicht – bist du online?</div>`; } }
 function filmTip() { if (S.ans) return; S.tip = true; $("#tipbox").innerHTML = `<p class="note">⏱️ Laufzeit: <b>${esc(S.film.rt || "unbekannt")}</b> · 🎭 ${esc(S.film.g.slice(0, 2).join(", "))}</p>`; }

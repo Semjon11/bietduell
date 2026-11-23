@@ -89,6 +89,7 @@ h1 span{color:var(--gold)}
 <script src="words.js"></script>
 <script src="cards.js"></script>
 <script src="films.js"></script>
+<script src="spicy.js"></script>
 <script>
 "use strict";
 /* ====== Grundlagen ====== */
@@ -179,8 +180,8 @@ function setup(id) {
       + seg("time", "Diskussionszeit", [[0, "Ohne"], [120, "2 min"], [180, "3 min"], [300, "5 min"]], 180);
     if (S.opts.imp > maxImp) S.opts.imp = maxImp;
   }
-  if (id === "film") extra = seg("level", "Schwierigkeit", [[1, "😊 Leicht"], [2, "😎 Mittel"], [3, "🔥 Schwer"]], 1)
-    + `<p class="note" style="margin:6px 0 0">Leicht: Filme, die jede:r kennt, mit den bekanntesten Szenen. Mittel: mehr Filme, ähnliche Antworten. Schwer: auch Klassiker und seltenere Szenen.</p>`
+  if (id === "film") extra = seg("level", "Schwierigkeit", [[1, "😊 Leicht"], [2, "😎 Mittel"], [3, "🔥 Schwer"], [4, "💀 Extrem"]], 1)
+    + `<p class="note" style="margin:6px 0 0">Leicht: Filme, die jede:r kennt, mit den bekanntesten Szenen. Mittel: mehr Filme, ähnliche Antworten. Schwer: auch Klassiker und seltenere Szenen. Extrem: nur ein stark vergrößerter Ausschnitt, 10 Sekunden Zeit, kein Tipp.</p>`
     + seg("rounds", "Runden (jede:r ist pro Runde einmal dran)", [[3, "3"], [5, "5"], [8, "8"]], 5);
   if (id === "schaetz") extra = seg("rounds", "Fragen pro Spiel", [[5, "5"], [10, "10"], [15, "15"], [20, "20"]], 10);
   if (id === "bombe") extra = seg("len", "Zündschnur", [["kurz", "Kurz"], ["mittel", "Mittel"], ["lang", "Lang"]], "mittel");
@@ -447,7 +448,7 @@ function wopCard(k) {
 /* ====== Filmszene erraten ====== */
 const IMG = f => "https://image.tmdb.org/t/p/w780/" + f + ".jpg";
 function filmStart() {
-  S.pool = FILMS.filter(f => S.opts.level === 1 ? f.d === 1 : S.opts.level === 2 ? f.d <= 2 : f.d >= 2);
+  S.pool = FILMS.filter(f => S.opts.level === 1 ? f.d === 1 : S.opts.level === 2 ? f.d <= 2 : f.d >= 2); stopTimers();
   S.deck = makeDeck(S.pool); S.pts = players.map(() => 0); S.r = 0; S.n = S.opts.rounds * players.length; filmTurn();
 }
 function filmTurn() {
@@ -458,25 +459,28 @@ function filmTurn() {
 function filmShow() {
   const f = S.deck(), pool = S.pool.filter(x => x !== f), lv = S.opts.level;
   const same = shuffle(pool.filter(x => x.g.some(g => f.g.includes(g)))), rest = shuffle(pool.filter(x => !same.includes(x)));
-  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(lv === 1 ? f.img.slice(0, 3) : lv === 2 ? f.img.slice(0, 6) : f.img.slice(3)); S.ii = 0;
+  S.film = f; S.tip = false; S.ans = false; S.imgs = shuffle(lv === 1 ? f.img.slice(0, 3) : lv === 2 ? f.img.slice(0, 6) : f.img.slice(2)); S.ii = 0;
   S.opt = shuffle([f, ...(lv === 1 ? shuffle(pool) : [...same, ...rest]).slice(0, 3)]);
   const p = S.r % players.length;
   view(`${topBar("🎬 Filmszene")}<div class="stage" style="justify-content:flex-start">
-    <div class="turn">${esc(players[p])}: Aus welchem Film ist diese Szene? <span class="cnt">${["", "😊 Leicht", "😎 Mittel", "🔥 Schwer"][lv]}</span></div>
-    <div class="shot"><img id="shot" src="${IMG(S.imgs[0])}" alt="Szene aus einem Film" onerror="filmNextImg()"><div class="spin2" id="sl"></div></div>
+    <div class="turn">${esc(players[p])}: Aus welchem Film ist diese Szene? <span class="cnt">${["", "😊 Leicht", "😎 Mittel", "🔥 Schwer", "💀 Extrem"][lv]}</span></div>
+    <div class="shot"><img id="shot" src="${IMG(S.imgs[0])}" ${lv === 4 ? `style="transform:scale(2.8);transform-origin:${20 + Math.random() * 60}% ${25 + Math.random() * 50}%"` : ""} alt="Szene aus einem Film" onerror="filmNextImg()"><div class="spin2" id="sl"></div></div>
     <div class="grid2" id="opts">${S.opt.map((o, i) => `<button onclick="filmPick(${i},this)">${esc(o.t)}</button>`).join("")}</div>
-    <div id="tipbox"><button class="alt" onclick="filmTip()">💡 Tipp: Laufzeit & Genre zeigen (nur 1 Punkt statt 2)</button></div>
+    <div id="tipbox">${lv === 4 ? `<div class="timer" id="ftm">10</div>` : `<button class="alt" onclick="filmTip()">💡 Tipp: Laufzeit & Genre zeigen (nur 1 Punkt statt 2)</button>`}</div>
     <p class="cnt">Szenenfotos: The Movie Database (TMDB)</p></div>`);
-  $("#shot").onload = () => { const s = $("#sl"); s && s.remove(); };
+  $("#shot").onload = () => { const s = $("#sl"); s && s.remove();
+    if (lv === 4 && !S.tstart) { S.tstart = 1; let left = 10; every(() => { if (S.ans) return; left--; const t = $("#ftm"); if (t) { t.textContent = left; t.classList.toggle("low", left <= 3); } if (left <= 3 && left > 0) beep(700); if (left <= 0) filmPick(-1); }, 1000); } };
+  S.tstart = 0;
 }
 function filmNextImg() { S.ii++; if (S.ii < S.imgs.length) $("#shot").src = IMG(S.imgs[S.ii]); else { const s = $("#sl"); if (s) s.outerHTML = `<div class="note">Bild lädt nicht – bist du online?</div>`; } }
 function filmTip() { if (S.ans) return; S.tip = true; $("#tipbox").innerHTML = `<p class="note">⏱️ Laufzeit: <b>${esc(S.film.rt || "unbekannt")}</b> · 🎭 ${esc(S.film.g.slice(0, 2).join(", "))}</p>`; }
 function filmPick(i, el) {
   if (S.ans) return; S.ans = true;
-  const p = S.r % players.length, ok = S.opt[i] === S.film;
+  stopTimers(); const p = S.r % players.length, ok = i >= 0 && S.opt[i] === S.film;
+  if (S.opts.level === 4) { const im = $("#shot"); if (im) im.style.transform = "none"; }
   document.querySelectorAll("#opts button").forEach((b, k) => { b.disabled = true; b.style.opacity = 1; if (S.opt[k] === S.film) b.style.background = "#15803d"; });
-  if (ok) { S.pts[p] += S.tip ? 1 : 2; beep(1200, .1); later(() => beep(1600, .15), 120); } else { el.style.background = "#b91c1c"; beep(220, .3); vib(150); }
-  $("#tipbox").innerHTML = `<div class="hand" style="font-size:18px">${ok ? "✅ Richtig! +" + (S.tip ? 1 : 2) : "❌ Leider falsch"}<b style="font-size:22px">${esc(S.film.t)} (${S.film.y})</b></div>
+  if (ok) { S.pts[p] += S.tip ? 1 : 2; beep(1200, .1); later(() => beep(1600, .15), 120); } else { if (el) el.style.background = "#b91c1c"; beep(220, .3); vib(150); }
+  $("#tipbox").innerHTML = `<div class="hand" style="font-size:18px">${ok ? "✅ Richtig! +" + (S.tip ? 1 : 2) : i < 0 ? "⏰ Zeit um!" : "❌ Leider falsch"}<b style="font-size:22px">${esc(S.film.t)} (${S.film.y})</b></div>
     <button class="go" onclick="S.r++;filmTurn()">${S.r + 1 < S.n ? "Weiter" : "Endstand"}</button>`;
 }
 

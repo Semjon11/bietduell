@@ -14,6 +14,8 @@ const BLIND = [
   { e: "🏎️", n: "Automarken", items: ["Ferrari", "Lamborghini", "Porsche", "BMW", "Mercedes", "Audi", "Tesla", "VW", "Bugatti", "McLaren", "Toyota", "Škoda", "Rolls-Royce", "Aston Martin"] },
   { e: "🏅", n: "Sportarten", items: ["Fußball", "Basketball", "Tennis", "Skifahren", "Schwimmen", "Formel 1", "Eishockey", "Volleyball", "Boxen", "Tischtennis", "Handball", "Golf", "Klettern", "Radfahren", "Snowboarden"] },
   { e: "🐼", n: "Tiere", items: ["Hund", "Katze", "Pferd", "Delfin", "Pinguin", "Löwe", "Panda", "Faultier", "Koala", "Hai", "Adler", "Fuchs", "Otter", "Elefant", "Giraffe"] },
+  { e: "🌶️", n: "Spicy: Date-Ideen", items: ["Kino", "Picknick", "Eislaufen", "Essen gehen", "Bowling", "Escape Room", "Spaziergang im Park", "Konzert", "Freizeitpark", "Zusammen kochen", "Minigolf", "Sonnenuntergang schauen", "Shoppen", "Zoo", "Prater"] },
+  { e: "🚩", n: "Spicy: Red Flags", items: ["Antwortet nie", "Redet nur über den Ex", "Liest deine Nachrichten", "Ist unhöflich zur Bedienung", "Kommt immer zu spät", "Postet alles über euch", "Lügt bei Kleinigkeiten", "Ist extrem eifersüchtig", "Hat keine Freunde", "Vergisst deinen Geburtstag", "Schaut beim Date nur aufs Handy", "Mag keine Tiere", "Lacht nie über deine Witze", "Ghostet nach dem Date"] },
   { e: "🥤", n: "Getränke", items: ["Cola", "Fanta", "Sprite", "Red Bull", "Almdudler", "Eistee", "Apfelsaft", "Wasser", "Kakao", "Milchshake", "Bubble Tea", "Orangensaft", "Spezi", "Holundersaft"] },
 ];
 
